@@ -1,0 +1,8 @@
+## intermediates
+/grammar.c
+/grammar.h
+/lex.c
+## build files
+/*.o
+/asm6809
+/asm6809.exe

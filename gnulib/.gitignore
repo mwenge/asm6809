@@ -1,0 +1,10 @@
+## autoconf built files
+/arg-nonnull.h
+/c++defs.h
+/getopt.h
+/libgnu.a
+/sys/types.h
+/unistd.h
+/warn-on-use.h
+## build files
+/*.o

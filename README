@@ -1,0 +1,398 @@
+asm6809
+=======
+
+*asm6809* is a multiple pass 6809 assembler.  Text is read in and parsed, then
+as many passes are made over the parsed source as necessary (up to a limit),
+until symbols are resolved and addresses are stable.
+
+This is a prerelease version.  It is not complete and may well have bugs
+(although reasonable diligence has been observed during development using
+valgrind).
+
+[asm6809-2.0pre1.tar.gz][dl]
+
+[dl]: http://www.6809.org.uk/dragon/asm6809-2.0pre1.tar.gz
+
+
+Licence
+-------
+
+*asm6809* is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 2 of the License, or (at your option) any later
+version.
+
+*asm6809* is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+*asm6809*.  If not, see <[http://www.gnu.org/licenses/][gpl2]>.
+
+[gpl2]: http://www.gnu.org/licenses/
+
+
+Summary
+-------
+
+Pros:
+
+ * Always tries to use most efficient indexed mode.
+ * Output to DragonDOS binary, CoCo RS-DOS binary, Motorola SREC, Intel HEX or
+   raw binary.
+ * Multiple passes used to resolve phasing errors.
+
+Cons:
+
+ * No support for fancy relocatable modules.
+ * Assembly syntax may seem idiosyncratic (see the section on differences to
+   other assemblers below).
+
+
+Running
+-------
+
+<pre>
+Usage: asm6809 [OPTION]... SOURCE-FILE...
+Assembles 6809 source code.
+
+  -B, --bin         output to binary file (default)
+  -D, --dragondos   output to DragonDOS binary file
+  -C, --coco        output to CoCo segmented binary file
+  -S, --srec        output to Motorola SREC file
+  -H, --hex         output to Intel hex record file
+  -e, --exec=ADDR   EXEC address (for output formats that support one)
+
+  -o, --output=FILE    set output filename
+  -l, --listing=FILE   create listing file
+  -s, --symbols=FILE   create symbol table
+
+      --help      show this help and exit
+
+If more than one SOURCE-FILE is specified, they are assembled as though
+they were all in one file.
+</pre>
+
+
+Differences to other assemblers
+-------------------------------
+
+Motorola syntax is very rigid in some places (no spaces in expressions), and
+flexible in others (arbitrary delimiters for strings in **FCC**, some strings
+don't need delimiting).  This assembler tries to be that hobgoblin of little
+minds: consistent.
+
+End of line comments must be introduced with a ";" character.  Motorola syntax
+allows comments to immediately follow any operands, but this does not easily
+permit whitespace to occur within expressions, a feature I personally
+appreciate.  An asterisk ("\*") can introduce whole line comments.
+
+A symbol may be forward referenced; any time a reference is unresolvable,
+another pass is triggered, up to some defined maximum.
+
+In 6809 indexed addressing, the offset size should default to the fastest
+possible form.  If an instruction changes size due to new knowledge gained
+since a previous pass, this will likely flag an inconsistency later and trigger
+another pass.
+
+This project follows on from its Perl script predecessor (hence the version
+number), however many of its features are not yet supported.  An important
+difference in accepted syntax is the pasting of macro parameters to form symbol
+names.  Any parameter passed for this purpose must be quoted.  The method of
+coercing the width of an offset has changed to be more sensible, too.
+
+If you want a fast, capable assembler that follows the official syntax, see
+William Astle's *[LWTOOLS][]*.  It also supports OS-9 modules, linking, etc.
+
+[LWTOOLS]: http://lwtools.projects.l-w.ca/
+
+
+Program syntax
+--------------
+
+Program files are considered line by line.  Each line contains up to three
+fields, separated by whitespace: label, instruction and arguments.  At any
+point in a line outside a string, a semicolon (";") indicates that the rest of
+the line is to be considered a comment.  Whole line comments may be introduced
+with an asterisk ("\*").
+
+Any label must appear at the very beginning of the line.  If a label is
+omitted, whitespace must appear before the operator field.  Certain pseudo-ops
+affect a label's meaning, but their usual purpose is to define a symbol
+referring to the current position in the code (Program Counter, or PC).  The
+next most common use is with the **EQU** psuedo-op, which assigns a particular
+value to a symbol.
+
+The instruction field contains either instruction op-codes (mnemonics),
+pseudo-ops (assembler directives) or macro names for expansion.
+
+Arguments are a comma-separated list, either instruction operands or arguments
+to a pseudo-op or macro.  Permitted arguments are specific to the instruction
+or pseudo-op, but in general they may be:
+
+ * An expression.
+ * A register name, with optional pre-decrement or post-increment.
+ * A string delimited either by double quotes or "/".
+ * A nested list surrounded by "[" and "]".  This is generally only used to
+   indicate indirect indexed addressing.
+
+In addition, any argument may be preceeded by:
+
+ * "#", indicate immediate value.
+ * "<<", force 5-bit index offset.
+ * "<", force direct addressing, 8-bit value or 8-bit index offset.
+ * ">", force extended addressing, 16-bit value or 16-bit index offset.
+
+
+Expressions
+-----------
+
+Expressions are formed of:
+
+ * A decimal number.
+ * An octal number preceeded by "@".
+ * A binary number preceeded by "%" or "0b".
+ * A hexadecimal number preceeded by "$" or "0x".
+ * A floating point number (decimal digits surrounding exactly one ".").
+ * A single quote followed by any ASCII character (yielding the ASCII value of
+   that character).
+ * A symbol name, local forward reference or local back reference.
+ * A combination of any of the above with arithmetic or bitwise operators.
+ * Any of the above prefixed with a unary minus ("-") or plus ("+").
+ * Parenthesis to specify precedence.
+
+### Arithmetic & bitwise operators
+
+The following operators are available, listed in descending order of precedence
+(where operators share a precedence, left-to-right evaluation is performed):
+
+<pre>
++       unary plus
+-       unary minus
+~       bitwise NOT
+---------------------------
+*       multiplication
+/       division
+%       modulo
+---------------------------
++       addition
+-       subtraction
+---------------------------
+<<      bitwise shift left
+>>      bitwise shift right
+---------------------------
+&       bitwise AND
+---------------------------
+^       bitwise XOR
+---------------------------
+|       bitwise OR
+</pre>
+
+Division always results in a floating point result.  Other arithmetic operators
+result in integers if both operands are integers, otherwise floating point.
+Bitwise operators and modulo all cast their operands to integers and result in
+an integer.  Integer calculations are performed using the platform's *long*
+type, floating point use *double*.
+
+
+Assembly passes
+---------------
+
+The assembler uses multiple passes to resolve expressions.  If an expression
+refers to a symbol that cannot currently be resolved, an extra pass is
+triggered.  Similarly, if a symbol is assigned a value (e.g., by an **EQU**
+pseudo-operation) that differs to its value on the previous pass, another is
+triggered until it becomes stable.
+
+As local labels can be repeated, their position is used to distinguish them.
+For this reason, all file inclusions and macro expansion must occur during the
+first pass so that the absolute line count at which each local label is
+encountered remains the same between passes.
+
+
+Sections
+--------
+
+Code can be placed into named sections with the **SECTION** pseudo-op.  This
+can make breaking source into multiple input files more comfortable.  Without
+**ORG** or **PUT** directives, sections will follow each other in memory in the
+order they are first defined.
+
+Within each section, there may exist multiple spans of discontiguous data.
+Certain output formats are able to represent this, for the others (e.g.,
+DragonDOS), the spans are combined first, with the gaps between them padded
+with zero bytes.
+
+
+Local labels
+------------
+
+Local labels are considered local to the current *section*.  A local label is
+any decimal number used in the label field.  An exclamation mark ("!") is
+considered the same as decimal zero.  Identical numerical labels may occur more
+than once, other labels may not.
+
+As an operand, a decimal number followed by "B" or "F" is considered to be a
+back or forward reference to the previous or next occurence of that numerical
+local label in the section.  Operands of "<" and ">" are considered equivalent
+to "0B" and "0F" respectively, and can therefore be used to refer to the  "!"
+local label, as in some other assemblers.
+
+Example:
+
+<pre>
+0000  8E0400          scroll          ldx     #$0400
+0003  EC8820          1               ldd     32,x
+0006  ED81                            std     ,x++
+0008  8C05E0                          cmpx    #$05e0
+000B  25F6                            blo     1B
+000D  CC6060                          ldd     #$6060
+0010  ED81            1               std     ,x++
+0012  8C0600                          cmpx    #$0600
+0015  25F9                            blo     1B
+0017  39                              rts
+</pre>
+
+The "1" label occurs twice, but each reference to "1B" refers to the
+closest one searching backwards.
+
+
+Macros
+------
+
+Start a macro definition by specifying a name for it in the label field, and
+**MACRO** in the instruction field.  Finish the definition with **ENDM** in the
+instruction field.
+
+Use a macro by specifying its name in the instruction field.  Any arguments
+given will be available during expansion as a positional variable.  The first
+argument will be called *&1*, the second *&2*, etc.
+
+Positional variables can be used within strings, or pasted to form symbol
+names.  In either case, they must be quoted or they will be passed by value
+(and an error will occur if they do not correspond to valid symbols by
+themselves).
+
+Here's a silly example demonstrating positional variables and symbol pasting.
+Consider the following macro definition and utilising code:
+
+<pre>
+direction_left  equ     -1
+direction_right equ     +1
+
+move            macro
+                lda     x_position
+                adda    #direction_&1
+                sta     x_position
+                endm
+
+do_something
+                move    "right"
+                rts
+
+x_position      rmb     1
+</pre>
+
+The main code generated is as follows:
+
+<pre>
+0000                  do_something
+0000                                  move    "left"
+0000  B60009                          lda     x_position
+0003  8BFF                            adda    #direction_&1
+0005  B70009                          sta     x_position
+0008  39                              rts
+</pre>
+
+
+Pseudo-ops
+----------
+
+### **ENDM**
+
+Finish a macro definition started with **MACRO**.
+
+### **EQU** *value*
+
+Short for "equate", this must be used with a label, and defines a symbol with
+the specified *value*.  This may be any single valid argument (e.g., an
+expression or a string) .
+
+### **EXPORT** *name*[, *name*]...
+
+Each *name*, either the name of a macro or a symbol, is flagged to be exported.
+Exported macros and symbols will be listed in the symbols output file, if
+specified.
+
+### **FCB** *value*[, *value*]...
+### **FCC** *value*[, *value*]...
+
+Form Constant Byte.  Each *value* is evaluated either to a number or a string.
+Numbers are truncated to 8 bits and stored directly as bytes.  For strings, the
+ASCII value of each character is stored in sequential bytes.
+
+Historically, **FCB** handled bytes and **FCC** (Form Constant Character
+string) handled strings.  *asm6809* treats them as synonymous, but is rather
+more strict about what is allowed as a string delimiter.
+
+### **FDB** *value*[, *value*]...
+
+Form Double Byte.  Each *value* is evaluated to a number, which is truncated to
+16 bits and stored as two successive bytes (big-endian, of course).
+
+### **INCLUDE** *filename*
+
+Includes the contents of another file at this point in assembly.  The
+*filename* argument must be a string, i.e., delimited by quotes or "/"
+characters.
+
+### **INCLUDEBIN** *filename*
+
+Includes the binary data from *filename* (which, as with **INCLUDE** must be a
+delimited string) directly.
+
+### **MACRO**
+
+Start defining a macro with a name specified by the line's label.  Subsequent
+lines up to the enclosing **ENDM** pseudo-op will not be assembled until the
+macro is expanded.  Macro definitions may be nested, that is a macro may define
+another macro.
+
+### **ORG** *address*
+
+Origin.  Sets the Program Counter - the base address assumed for the next
+assembled instruction.  Unless followed by a **PUT** pseudo-op, this will also
+be the instruction's actual address in memory.  A label on the same line will
+define a symbol with a value of the specified address.
+
+### **RMB** *count*
+
+Reserve Memory Bytes.  The Program Counter is advanced *count* bytes.  In some
+output formats this region may be padded with zeroes, in others a new loadable
+section may be created.
+
+### **RZB** *count*
+
+Reserve Zeroed Bytes.  A sequence of *count* bytes of zero are inserted.
+
+### **SETDP** *page*
+
+Set the assumed value of the Direct Page (**DP**) register to *page* for
+subsequent instructions.  Any non-negative *page* is truncated to 8 bits, or
+specify a negative number to disable automatic direct addressing.
+
+See the section on Direct Page addressing for more information.
+
+
+Addressing modes
+----------------
+
+### Direct Page
+
+The 6809 extends the zero page concept by allowing fast accesses to whichever
+page is selected by the Direct Page register (**DP**).  An assembler is not
+able to keep track of what the code has set this register to, but the
+information is useful when deciding which addressing mode to use for an
+instruction.  The **SETDP** pseudo-op informs the assembler that the supplied
+value is to be assumed for **DP**.  Set this to a negative number to undefine
+it, and disable automatic use of direct addressing (this is the default).
