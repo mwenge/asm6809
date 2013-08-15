@@ -33,7 +33,7 @@ struct reg_info {
 	enum reg_id id;
 };
 
-struct reg_info registers_6809[] = {
+static struct reg_info registers_6809[] = {
 	{ .name = "cc", .id = REG_CC },
 	{ .name = "a",  .id = REG_A },
 	{ .name = "b",  .id = REG_B },
@@ -48,7 +48,7 @@ struct reg_info registers_6809[] = {
 	{ .name = "pcr", .id = REG_PCR },
 };
 
-struct reg_info registers_6309[] = {
+static struct reg_info registers_6309[] = {
 	{ .name = "e",  .id = REG_E },
 	{ .name = "f",  .id = REG_F },
 	{ .name = "w",  .id = REG_W },
