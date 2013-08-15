@@ -60,7 +60,7 @@ void listing_print(FILE *f) {
 			col += 6;
 		}
 		if (l->nbytes > 0 && l->span && l->span->data) {
-			int offset = l->pc - l->span->put;
+			int offset = l->pc - l->span->org;
 			for (int i = 0; i < l->nbytes; i++) {
 				fprintf(f, "%02X", l->span->data[i+offset] & 0xff);
 				col += 2;
