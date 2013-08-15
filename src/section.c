@@ -42,7 +42,7 @@ struct section *cur_section = NULL;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-static struct section_span *sect_span_new(void) {
+static struct section_span *section_span_new(void) {
 	assert(cur_section != NULL);
 	struct section_span *new = g_malloc(sizeof(*new));
 	new->ref = 1;
@@ -55,18 +55,18 @@ static struct section_span *sect_span_new(void) {
 	return new;
 }
 
-static struct section_span *sect_span_ref(struct section_span *span) {
+static struct section_span *section_span_ref(struct section_span *span) {
 	if (!span)
 		return NULL;
 	span->ref++;
 	return span;
 }
 
-static void sect_span_free(struct section_span *span) {
+static void section_span_free(struct section_span *span) {
 	if (!span)
 		return;
 	if (span->ref == 0) {
-		error_abort("internal: attempt to free sect_span with ref=0");
+		error_abort("internal: attempt to free section_span with ref=0");
 	}
 	span->ref--;
 	if (span->ref > 0)
@@ -95,7 +95,7 @@ void section_free(struct section *sect) {
 	if (!sect)
 		return;
 	g_hash_table_destroy(sect->local_labels);
-	g_slist_free_full(sect->spans, (GDestroyNotify)sect_span_free);
+	g_slist_free_full(sect->spans, (GDestroyNotify)section_span_free);
 	g_free(sect);
 }
 
@@ -121,7 +121,7 @@ void section_set(const char *name, unsigned pass) {
 
 	if (next_section->pass != pass) {
 		if (next_section->spans) {
-			g_slist_free_full(next_section->spans, (GDestroyNotify)sect_span_free);
+			g_slist_free_full(next_section->spans, (GDestroyNotify)section_span_free);
 			next_section->spans = NULL;
 			next_section->span = NULL;
 		}
@@ -203,7 +203,7 @@ void section_coalesce(struct section *sect, _Bool sort, _Bool pad) {
 				memcpy(span->data + span->size, nspan->data, nspan->size);
 				span->size += nspan->size;
 				l->next = l->next->next;
-				sect_span_free(nspan);
+				section_span_free(nspan);
 				g_slist_free_1(ln);
 				ln = l->next;
 				span = l->data;
@@ -221,12 +221,12 @@ void section_coalesce(struct section *sect, _Bool sort, _Bool pad) {
 struct section *section_coalesce_all(_Bool pad) {
 	struct section *sect = section_new();
 
-	GList *sect_list = g_hash_table_get_values(sections);
-	for (GList *l = sect_list; l; l = l->next) {
+	GList *section_list = g_hash_table_get_values(sections);
+	for (GList *l = section_list; l; l = l->next) {
 		struct section *s = l->data;
-		sect->spans = g_slist_concat(sect->spans, g_slist_copy_deep(s->spans, (GCopyFunc)sect_span_ref, NULL));
+		sect->spans = g_slist_concat(sect->spans, g_slist_copy_deep(s->spans, (GCopyFunc)section_span_ref, NULL));
 	}
-	g_list_free(sect_list);
+	g_list_free(section_list);
 
 	section_coalesce(sect, 1, pad);
 	return sect;
@@ -246,14 +246,14 @@ static int op_size(unsigned short op) {
 #define next_put(s) ((s)->put + (s)->size)
 #define next_pc(s) ((int)((s)->org + (s)->size))
 
-void sect_emit(enum sect_emit_type type, ...) {
+void section_emit(enum section_emit_type type, ...) {
 	assert(cur_section != NULL);
 	struct section_span *span = cur_section->span;
 
 	if (!span || (cur_section->put != next_put(span)) ||
 	    (cur_section->pc != next_pc(span))) {
 		if (!span || span->size != 0) {
-			span = sect_span_new();
+			span = section_span_new();
 			cur_section->spans = g_slist_append(cur_section->spans, span);
 		}
 		span->put = cur_section->put;
@@ -269,37 +269,37 @@ void sect_emit(enum sect_emit_type type, ...) {
 	_Bool pad = 0;
 
 	switch (type) {
-	case sect_emit_type_pad:
+	case section_emit_type_pad:
 		nbytes = va_arg(ap, int);
 		pad = 1;
 		break;
-	case sect_emit_type_op_immediate:
+	case section_emit_type_op_immediate:
 		op = va_arg(ap, struct opcode *);
 		output = op->immediate;
 		nbytes = op_size(output);
 		break;
-	case sect_emit_type_op_direct:
+	case section_emit_type_op_direct:
 		op = va_arg(ap, struct opcode *);
 		output = op->direct;
 		nbytes = op_size(output);
 		break;
-	case sect_emit_type_op_indexed:
+	case section_emit_type_op_indexed:
 		op = va_arg(ap, struct opcode *);
 		output = op->indexed;
 		nbytes = op_size(output);
 		break;
-	case sect_emit_type_op_extended:
+	case section_emit_type_op_extended:
 		op = va_arg(ap, struct opcode *);
 		output = op->extended;
 		nbytes = op_size(output);
 		break;
-	case sect_emit_type_imm8:
-	case sect_emit_type_rel8:
+	case section_emit_type_imm8:
+	case section_emit_type_rel8:
 		output = va_arg(ap, int);
 		nbytes = 1;
 		break;
-	case sect_emit_type_imm16:
-	case sect_emit_type_rel16:
+	case section_emit_type_imm16:
+	case section_emit_type_rel16:
 		output = va_arg(ap, int);
 		nbytes = 2;
 		break;
@@ -314,9 +314,9 @@ void sect_emit(enum sect_emit_type type, ...) {
 
 	cur_section->put += nbytes;
 	cur_section->pc += nbytes;
-	if (type == sect_emit_type_rel8 || type == sect_emit_type_rel16)
+	if (type == section_emit_type_rel8 || type == section_emit_type_rel16)
 		output -= cur_section->pc;
-	if (type == sect_emit_type_rel8) {
+	if (type == section_emit_type_rel8) {
 		if (output < -128 || output > 127)
 			error(error_type_out_of_range, "8-bit relative value out of range");
 	}

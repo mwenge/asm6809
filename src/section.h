@@ -15,16 +15,16 @@
 /* Types of data that assembly instructions and pseudo-ops can pass to
  * section_emit() */
 
-enum sect_emit_type {
-	sect_emit_type_pad,
-	sect_emit_type_op_immediate,
-	sect_emit_type_op_direct,
-	sect_emit_type_op_indexed,
-	sect_emit_type_op_extended,
-	sect_emit_type_imm8,
-	sect_emit_type_imm16,
-	sect_emit_type_rel8,
-	sect_emit_type_rel16
+enum section_emit_type {
+	section_emit_type_pad,
+	section_emit_type_op_immediate,
+	section_emit_type_op_direct,
+	section_emit_type_op_indexed,
+	section_emit_type_op_extended,
+	section_emit_type_imm8,
+	section_emit_type_imm16,
+	section_emit_type_rel8,
+	section_emit_type_rel16
 };
 
 /*
@@ -38,7 +38,7 @@ enum sect_emit_type {
  *
  * - put: Address in memory to locate span.
  *
- * - size: Amount of consecutive bytes in span.  Increased by sect_emit().
+ * - size: Amount of consecutive bytes in span.  Increased by section_emit().
  */
 
 struct section_span {
@@ -115,7 +115,7 @@ void section_finish_pass(unsigned pass);
 /* Add data to the current section.  Additional arguments depend on the value
  * of type. */
 
-void sect_emit(enum sect_emit_type type, ...);
+void section_emit(enum section_emit_type type, ...);
 
 /* Coalesce all the spans in a section.  Adjacent sequential spans are joined
  * together into one.  If sort is 1, spans are sorted first.  If pad is 1, all

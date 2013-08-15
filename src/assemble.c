@@ -483,17 +483,17 @@ static void pseudo_fcc(struct prog_line *line) {
 			error(error_type_syntax, "invalid argument to FCB/FCC");
 			break;
 		case node_type_undef:
-			sect_emit(sect_emit_type_pad, 1);
+			section_emit(section_emit_type_pad, 1);
 			break;
 		case node_type_empty:
-			sect_emit(sect_emit_type_imm8, 0);
+			section_emit(section_emit_type_imm8, 0);
 			break;
 		case node_type_int:
-			sect_emit(sect_emit_type_imm8, arga[i]->data.as_int);
+			section_emit(section_emit_type_imm8, arga[i]->data.as_int);
 			break;
 		case node_type_string:
 			for (int j = 0; arga[i]->data.as_string[j]; j++) {
-				sect_emit(sect_emit_type_imm8, arga[i]->data.as_string[j]);
+				section_emit(section_emit_type_imm8, arga[i]->data.as_string[j]);
 			}
 			break;
 		}
@@ -514,13 +514,13 @@ static void pseudo_fdb(struct prog_line *line) {
 			error(error_type_syntax, "invalid argument to FDB");
 			break;
 		case node_type_undef:
-			sect_emit(sect_emit_type_pad, 2);
+			section_emit(section_emit_type_pad, 2);
 			break;
 		case node_type_empty:
-			sect_emit(sect_emit_type_imm16, 0);
+			section_emit(section_emit_type_imm16, 0);
 			break;
 		case node_type_int:
-			sect_emit(sect_emit_type_imm16, arga[i]->data.as_int);
+			section_emit(section_emit_type_imm16, arga[i]->data.as_int);
 			break;
 		}
 	}
@@ -548,7 +548,7 @@ static void pseudo_rzb(struct prog_line *line) {
 			error(error_type_out_of_range, "negative argument to RZB");
 		} else {
 			for (int i = 0; i < arga[0]->data.as_int; i++)
-				sect_emit(sect_emit_type_imm8, 0);
+				section_emit(section_emit_type_imm8, 0);
 		}
 		break;
 	}
@@ -623,7 +623,7 @@ static void pseudo_includebin(struct prog_line *line) {
 	}
 	int c;
 	while ((c = fgetc(f)) != EOF) {
-		sect_emit(sect_emit_type_imm8, c);
+		section_emit(section_emit_type_imm8, c);
 	}
 	fclose(f);
 }
