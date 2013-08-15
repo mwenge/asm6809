@@ -31,7 +31,7 @@
 #include "eval.h"
 #include "node.h"
 #include "program.h"
-#include "registers.h"
+#include "register.h"
 #include "symbol.h"
 
 #include "grammar.h"

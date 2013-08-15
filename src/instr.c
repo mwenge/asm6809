@@ -29,8 +29,8 @@
 #include "eval.h"
 #include "instr.h"
 #include "node.h"
-#include "opcodes.h"
-#include "registers.h"
+#include "opcode.h"
+#include "register.h"
 #include "section.h"
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

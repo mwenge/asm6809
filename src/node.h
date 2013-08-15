@@ -12,7 +12,7 @@
 
 #include <glib.h>
 
-#include "registers.h"
+#include "register.h"
 
 /*
  * Abstract syntax trees are used to represent expressions to be evaluated.

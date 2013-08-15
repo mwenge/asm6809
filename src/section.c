@@ -31,7 +31,7 @@
 #include <glib.h>
 
 #include "error.h"
-#include "opcodes.h"
+#include "opcode.h"
 #include "section.h"
 #include "symbol.h"
 

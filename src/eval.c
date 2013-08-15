@@ -31,7 +31,7 @@
 #include "eval.h"
 #include "interp.h"
 #include "node.h"
-#include "registers.h"
+#include "register.h"
 #include "section.h"
 #include "symbol.h"
 

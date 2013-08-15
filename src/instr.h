@@ -13,7 +13,7 @@
  * machine code bytes and emits them to the current section.
  */
 
-#include "registers.h"
+#include "register.h"
 
 struct node;
 struct opcode;

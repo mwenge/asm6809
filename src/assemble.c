@@ -37,9 +37,9 @@
 #include "interp.h"
 #include "listing.h"
 #include "node.h"
-#include "opcodes.h"
+#include "opcode.h"
 #include "program.h"
-#include "registers.h"
+#include "register.h"
 #include "section.h"
 #include "symbol.h"
 

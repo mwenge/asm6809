@@ -24,7 +24,7 @@
 #include <glib.h>
 
 #include "asm6809.h"
-#include "opcodes.h"
+#include "opcode.h"
 
 /* Shorten these macros for a more readable table: */
 

@@ -21,9 +21,9 @@ asm6809_SOURCES = \
 	lex.l \
 	listing.c listing.h \
 	node.c node.h \
-	opcodes.c opcodes.h \
+	opcode.c opcode.h \
 	output.c output.h \
 	program.c program.h \
-	registers.c registers.h \
+	register.c register.h \
 	section.c section.h \
 	symbol.c symbol.h

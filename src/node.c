@@ -30,7 +30,7 @@
 
 #include "error.h"
 #include "node.h"
-#include "registers.h"
+#include "register.h"
 
 #include "grammar.h"
 

@@ -8,7 +8,7 @@
 #include <glib.h>
 
 #include "error.h"
-#include "registers.h"
+#include "register.h"
 
 #include "grammar.h"
 

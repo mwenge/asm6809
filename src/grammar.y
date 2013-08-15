@@ -11,7 +11,7 @@
 #include "error.h"
 #include "node.h"
 #include "program.h"
-#include "registers.h"
+#include "register.h"
 
 static void yyerror(char *);
 void yylex_destroy(void);

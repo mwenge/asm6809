@@ -26,7 +26,7 @@
 #include <glib.h>
 
 #include "asm6809.h"
-#include "registers.h"
+#include "register.h"
 
 struct reg_info {
 	const char *name;
