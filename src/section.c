@@ -237,8 +237,6 @@ struct section *section_coalesce_all(_Bool pad) {
 /*
  * Emit data.  Adds bytes to the current span, or creates a new span if
  * appropriate.
- *
- * XXX: doesn't actually do that yet, just prints out the data.
  */
 
 static int op_size(unsigned short op) {
