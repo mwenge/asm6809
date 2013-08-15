@@ -6,7 +6,7 @@ test -n "$srcdir" && cd "$srcdir"
 
 echo "Updating build configuration files, please wait...."
 
-aclocal -I /usr/local/share/aclocal -I m4
+aclocal $ACLOCAL_FLAGS -I m4
 autoheader
 automake --foreign --add-missing -c
 autoconf
