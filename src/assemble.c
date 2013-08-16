@@ -56,20 +56,23 @@ static void args_float_to_int(struct node *args);
 
 static void pseudo_macro(struct prog_line *);
 static void pseudo_endm(struct prog_line *);
+static void pseudo_export(struct prog_line *);
 
 static void pseudo_equ(struct prog_line *);
 static void pseudo_org(struct prog_line *);
 static void pseudo_section(struct prog_line *);
+static void pseudo_section_name(struct prog_line *line);
 
-static void pseudo_put(struct prog_line *);
-static void pseudo_setdp(struct prog_line *);
-static void pseudo_export(struct prog_line *);
 static void pseudo_fcc(struct prog_line *);
 static void pseudo_fdb(struct prog_line *);
 static void pseudo_rzb(struct prog_line *);
 static void pseudo_rmb(struct prog_line *);
+
+static void pseudo_put(struct prog_line *);
+static void pseudo_setdp(struct prog_line *);
 static void pseudo_include(struct prog_line *);
 static void pseudo_includebin(struct prog_line *);
+static void pseudo_nop(struct prog_line *);
 
 struct pseudo_op {
 	const char *name;
@@ -82,15 +85,23 @@ static struct pseudo_op label_ops[] = {
 	{ .name = "equ", .handler = &pseudo_equ },
 	{ .name = "org", .handler = &pseudo_org },
 	{ .name = "section", .handler = &pseudo_section },
+	{ .name = "code", .handler = &pseudo_section_name },
+	{ .name = "data", .handler = &pseudo_section_name },
+	{ .name = "bss", .handler = &pseudo_section_name },
+	{ .name = "ram", .handler = &pseudo_section_name },
+	{ .name = "auto", .handler = &pseudo_section_name },
 };
 
 /* Pseudo-ops that emit data */
 
 static struct pseudo_op pseudo_data_ops[] = {
 	{ .name = "fcc", .handler = &pseudo_fcc },
-	{ .name = "fcb", .handler = &pseudo_fcc },
+	{ .name = "fcb", .handler = &pseudo_fcc },  // treat the same
 	{ .name = "fdb", .handler = &pseudo_fdb },
 	{ .name = "rzb", .handler = &pseudo_rzb },
+	{ .name = "zmb", .handler = &pseudo_rzb },  // alias
+	{ .name = "bsz", .handler = &pseudo_rzb },  // alias
+	{ .name = "fill", .handler = &pseudo_nop },  // TODO: arg swapped rzb
 	{ .name = "rmb", .handler = &pseudo_rmb },
 };
 
@@ -101,6 +112,12 @@ static struct pseudo_op pseudo_ops[] = {
 	{ .name = "setdp", .handler = &pseudo_setdp },
 	{ .name = "include", .handler = &pseudo_include },
 	{ .name = "includebin", .handler = &pseudo_includebin },
+	{ .name = "page", .handler = &pseudo_nop },
+	{ .name = "opt", .handler = &pseudo_nop },
+	{ .name = "spc", .handler = &pseudo_nop },
+	{ .name = "ttl", .handler = &pseudo_nop },
+	{ .name = "nam", .handler = &pseudo_nop },
+	{ .name = "name", .handler = &pseudo_nop },
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -400,6 +417,14 @@ static void pseudo_section(struct prog_line *line) {
 	node_free(n);
 }
 
+/*
+ * Switch to section with opcode field as name.
+ */
+
+static void pseudo_section_name(struct prog_line *line) {
+	section_set(line->opcode->data.as_string, asm_pass);
+}
+
 /* PUT.  Following instructions will be located at this address.  Allows
  * assembling as if at one address while locating them elsewhere. */
 
@@ -675,4 +700,10 @@ static void pseudo_endm(struct prog_line *line) {
 		return;
 	prog_ctx_free(defining_macro_ctx);
 	defining_macro_ctx = NULL;
+}
+
+/* Ignore certain historical pseudo-ops */
+
+static void pseudo_nop(struct prog_line *line) {
+	(void)line;
 }
