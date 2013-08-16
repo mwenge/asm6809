@@ -86,6 +86,7 @@ struct section {
 	unsigned pass;
 	unsigned line_number;
 	int pc;
+	unsigned put;
 	unsigned dp;
 	int last_pc;
 };

@@ -243,18 +243,20 @@ static int op_size(unsigned short op) {
 	return (op & 0xff00) ? 2 : 1;
 }
 
+#define next_put(s) ((s)->put + (s)->size)
 #define next_pc(s) ((int)((s)->org + (s)->size))
 
 void sect_emit(enum sect_emit_type type, ...) {
 	assert(cur_section != NULL);
 	struct section_span *span = cur_section->span;
 
-	if (!span || (cur_section->pc != next_pc(span))) {
+	if (!span || (cur_section->put != next_put(span)) ||
+	    (cur_section->pc != next_pc(span))) {
 		if (!span || span->size != 0) {
 			span = sect_span_new();
-			span->put = cur_section->pc;
 			cur_section->spans = g_slist_append(cur_section->spans, span);
 		}
+		span->put = cur_section->put;
 		span->org = cur_section->pc;
 	}
 	cur_section->span = span;
@@ -310,6 +312,7 @@ void sect_emit(enum sect_emit_type type, ...) {
 		error(error_type_out_of_range, "assembling to negative address");
 	}
 
+	cur_section->put += nbytes;
 	cur_section->pc += nbytes;
 	if (type == sect_emit_type_rel8 || type == sect_emit_type_rel16)
 		output -= cur_section->pc;

@@ -403,11 +403,6 @@ static void pseudo_section(struct prog_line *line) {
 /* PUT.  Following instructions will be located at this address.  Allows
  * assembling as if at one address while locating them elsewhere. */
 
-/* TODO: not written at all yet! */
-
-// NOTE: if the current span has no data, it is safe to simply alter its put
-// address, otherwise a new span must be created.
-
 static void pseudo_put(struct prog_line *line) {
 	int nargs = node_array_count(line->args);
 	if (nargs != 1) {
@@ -423,7 +418,7 @@ static void pseudo_put(struct prog_line *line) {
 	case node_type_undef:
 		break;
 	case node_type_int:
-		error(error_type_fatal, "TODO: PUT");
+		cur_section->put = arga[0]->data.as_int;  // & 0xffff;
 		break;
 	}
 }
