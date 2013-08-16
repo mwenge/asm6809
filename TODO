@@ -8,7 +8,6 @@ to remember things that need doing.
 ### Medium priority
 
  * Conditional assembly pseudo-ops.
- * **PUT** not implemented - think about how.
  * **RZB** should support a fill value other than zero.
  * **ENDM** argument should match the opening MACRO if specified.
  * Check all symbols are valid.  After variable substitution (e.g., in macros),
