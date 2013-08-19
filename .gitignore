@@ -19,3 +19,5 @@ Makefile.in
 /missing
 /stamp-h1
 /ylwrap
+## build files
+/README

@@ -43,5 +43,5 @@ AC_CHECK_FUNCS([memset strerror strtol])
 
 PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.32.0])
 
-AC_CONFIG_FILES([Makefile gnulib/Makefile src/Makefile])
+AC_CONFIG_FILES([README Makefile gnulib/Makefile src/Makefile])
 AC_OUTPUT
