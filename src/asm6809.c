@@ -69,12 +69,14 @@ static struct option long_options[] = {
 	{ "listing", required_argument, NULL, 'l' },
 	{ "symbols", required_argument, NULL, 's' },
 	{ "help", no_argument, NULL, 'h' },
+	{ "version", no_argument, NULL, 'V' },
 	{ NULL, 0, NULL, 0 }
 };
 
 static GSList *files = NULL;
 
 static void helptext(void);
+static void versiontext(void);
 static void tidy_up(void);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -116,6 +118,9 @@ int main(int argc, char **argv) {
 			break;
 		case 'h':
 			helptext();
+			exit(EXIT_SUCCESS);
+		case 'V':
+			versiontext();
 			exit(EXIT_SUCCESS);
 		default:
 			exit(EXIT_FAILURE);
@@ -245,11 +250,16 @@ static void helptext(void) {
 "  -l, --listing=FILE   create listing file\n"
 "  -s, --symbols=FILE   create symbol table\n"
 "\n"
-"      --help      show this help and exit\n"
+"      --help      show this help\n"
+"      --version   show program version\n"
 "\n"
 "If more than one SOURCE-FILE is specified, they are assembled as though\n"
-"they were all in one file.\n"
+"they were all in one file."
 	    );
+}
+
+static void versiontext(void) {
+	puts("asm6809 " PACKAGE_VERSION);
 }
 
 /* Call the various free_all routines to tidy up memory.  Allows us to see
