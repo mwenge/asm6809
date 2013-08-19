@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([asm6809], [2.0pre2])
+AC_INIT([asm6809], [2.0pre3])
 AM_INIT_AUTOMAKE
 
 AC_CONFIG_SRCDIR([src/asm6809.c])
