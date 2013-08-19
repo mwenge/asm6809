@@ -86,8 +86,10 @@ static struct section *section_new(void) {
 	sect->pass = (unsigned)-1;
 	sect->line_number = 0;
 	sect->pc = 0;
+	sect->put = 0;
 	sect->dp = -1;
 	sect->last_pc = 0;
+	sect->last_put = 0;
 	return sect;
 }
 
@@ -127,8 +129,10 @@ void section_set(const char *name, unsigned pass) {
 		}
 		if (cur_section && cur_section->pass == pass) {
 			next_section->pc = cur_section->last_pc;
+			next_section->put = cur_section->last_put;
 		} else {
 			next_section->pc = 0;
+			next_section->put = 0;
 		}
 		next_section->pass = pass;
 		next_section->dp = -1;
@@ -146,6 +150,7 @@ static void verify_section(gpointer key, gpointer value, gpointer user_data) {
 		if (pass == 0 || sect->pass != pass) {
 			if (sect->last_pc != sect->pc) {
 				sect->last_pc = sect->pc;
+				sect->last_put = sect->put;
 				error(error_type_inconsistent, NULL);
 			}
 		}
@@ -179,7 +184,6 @@ void section_coalesce(struct section *sect, _Bool sort, _Bool pad) {
 			struct section_span *span = l->data;
 			struct section_span *nspan = ln->data;
 			unsigned span_end = span->put + span->size;
-			printf("put=%04x size=%04x    next put=%04x size=%04x\n", span->put, span->size, nspan->put, nspan->size);
 
 			if (span_end > nspan->put) {
 				error(error_type_data, "data at $%04X overlaps data at $%04X", span->put, nspan->put);

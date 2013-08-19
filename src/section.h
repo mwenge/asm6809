@@ -71,12 +71,14 @@ struct section_span {
  *   by ORG or RMB), so if found not to match the current span's org + size, a
  *   new span needs to be created.
  *
+ * - put: Actual put address.  ORG sets both, but PUT can override this one.
+ *
  * - dp: Direct Page.  Each section gets its own idea of what the direct page
  *   is, as specified by SETDP.
  *
- * - last_pc: Maintained across passes, when switching sections the new one
- *   will default to coming after the last address in the previous.  Obviously
- *   this can be overridden with ORG.
+ * - last_pc, last_put: Maintained across passes, when switching sections the
+ *   new one will default to coming after the last address in the previous.
+ *   Obviously these can be overridden with ORG or PUT.
  */
 
 struct section {
@@ -89,6 +91,7 @@ struct section {
 	unsigned put;
 	unsigned dp;
 	int last_pc;
+	unsigned last_put;
 };
 
 /* Current section made available */

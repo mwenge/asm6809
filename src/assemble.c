@@ -390,7 +390,8 @@ static void pseudo_org(struct prog_line *line) {
 	case node_type_undef:
 		break;
 	case node_type_int:
-		cur_section->pc = arga[0]->data.as_int;  // & 0xffff;
+		cur_section->pc = arga[0]->data.as_int;
+		cur_section->put = arga[0]->data.as_int;
 		set_label(line->label, node_ref(arga[0]));
 		listing_add_line(cur_section->pc & 0xffff, 0, NULL, line->text);
 		break;
