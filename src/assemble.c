@@ -51,6 +51,9 @@ static unsigned prog_depth = 0;
 
 static void set_label(struct node *label, struct node *value);
 static void args_float_to_int(struct node *args);
+static int verify_num_args(struct node *args, int min, int max, const char *op);
+static _Bool have_int_optional(struct node *args, int aindex, long *out, const char *op);
+static _Bool have_int_required(struct node *args, int aindex, long *out, const char *op);
 
 /* Pseudo-operations */
 
@@ -142,6 +145,71 @@ static void args_float_to_int(struct node *args) {
 			arga[i] = eval_int_free(arga[i]);
 	}
 }
+
+/* Verify size of an array is allowed for op.  Returns actual number of args if
+ * in range, or -1 if not.  Specify negative max for no upper bound.  */
+
+static int verify_num_args(struct node *args, int min, int max, const char *op) {
+	int nargs = node_array_count(args);
+	if (max < 0) {
+		if (nargs >= min)
+			return nargs;
+		error(error_type_syntax, "'%s' requires at least %d argument%s",
+		      op, min, (min == 1) ? "" : "s");
+		return -1;
+	}
+	if (nargs >= min && nargs <= max)
+		return nargs;
+	if (min == max) {
+		error(error_type_syntax, "'%s' requires exactly %d argument%s",
+		      op, min, (min == 1) ? "" : "s");
+	} else {
+		error(error_type_syntax, "'%s' requires between %d and %d arguments",
+		      op, min, max);
+	}
+	return -1;
+}
+
+/* Get integer value from array.  Returns 0 (failure) if bad type. */
+
+static _Bool have_int_optional(struct node *args, int aindex, long *out, const char *op) {
+	int nargs = node_array_count(args);
+	struct node **arga = node_array_of(args);
+	if (aindex < 0 || aindex >= nargs)
+		return 1;
+	switch (node_type_of(arga[aindex])) {
+	default:
+		error(error_type_syntax,
+		      "argument %d of '%s' invalid: expected integer value", aindex+1, op);
+		return 0;
+	case node_type_undef:
+		break;
+	case node_type_empty:
+		*out = 0;
+		break;
+	case node_type_int:
+		*out = arga[aindex]->data.as_int;
+		break;
+	case node_type_float:
+		*out = arga[aindex]->data.as_float;
+		break;
+	}
+	return 1;
+}
+
+/* Same, but fail if arg index out of bounds. */
+
+static _Bool have_int_required(struct node *args, int aindex, long *out, const char *op) {
+	int nargs = node_array_count(args);
+	if (aindex < 0 || aindex >= nargs) {
+		error(error_type_syntax,
+		      "required argument %d of '%s' missing", aindex+1, op);
+		return 0;
+	}
+	return have_int_optional(args, aindex, out, op);
+}
+
+/* Perform an assembly pass on a program. */
 
 void assemble_prog(struct prog *prog, unsigned pass) {
 	if (prog_depth >= asm6809_options.max_program_depth) {
@@ -357,11 +425,8 @@ static void set_label(struct node *label, struct node *value) {
 /* TODO: would be nice to support EQU arrays */
 
 static void pseudo_equ(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	if (nargs != 1) {
-		error(error_type_syntax, "EQU requires exactly one argument");
+	if (verify_num_args(line->args, 1, 1, "EQU") < 0)
 		return;
-	}
 	struct node **arga = node_array_of(line->args);
 	set_label(line->label, node_ref(arga[0]));
 	struct node *n = eval_int(arga[0]);
@@ -376,36 +441,23 @@ static void pseudo_equ(struct prog_line *line) {
 /* ORG.  Following instructions will be assembled to this address. */
 
 static void pseudo_org(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	if (nargs != 1) {
-		error(error_type_syntax, "ORG requires exactly one argument");
+	if (verify_num_args(line->args, 1, 1, "ORG") < 0)
 		return;
-	}
-	struct node **arga = node_array_of(line->args);
-	args_float_to_int(line->args);
-	switch (node_type_of(arga[0])) {
-	default:
-		error(error_type_syntax, "invalid argument to ORG");
-		break;
-	case node_type_undef:
-		break;
-	case node_type_int:
-		cur_section->pc = arga[0]->data.as_int;
-		cur_section->put = arga[0]->data.as_int;
-		set_label(line->label, node_ref(arga[0]));
-		listing_add_line(cur_section->pc & 0xffff, 0, NULL, line->text);
-		break;
+	long new_pc = cur_section->pc;
+	if (have_int_required(line->args, 0, &new_pc, "ORG")) {
+		cur_section->pc = new_pc;
+		if (new_pc >= 0)
+			cur_section->put = new_pc;
+		set_label(line->label, node_new_int(new_pc));
+		listing_add_line(new_pc & 0xffff, 0, NULL, line->text);
 	}
 }
 
 /* SECTION.  Switch sections. */
 
 static void pseudo_section(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	if (nargs != 1) {
-		error(error_type_syntax, "SECTION requires exactly one argument");
+	if (verify_num_args(line->args, 1, 1, "SECTION") < 0)
 		return;
-	}
 	struct node **arga = node_array_of(line->args);
 	if (node_type_of(arga[0]) == node_type_undef)
 		return;
@@ -430,22 +482,15 @@ static void pseudo_section_name(struct prog_line *line) {
  * assembling as if at one address while locating them elsewhere. */
 
 static void pseudo_put(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	if (nargs != 1) {
-		error(error_type_syntax, "PUT requires exactly one argument");
+	if (verify_num_args(line->args, 1, 1, "PUT") < 0)
 		return;
-	}
-	struct node **arga = node_array_of(line->args);
-	args_float_to_int(line->args);
-	switch (node_type_of(arga[0])) {
-	default:
-		error(error_type_syntax, "invalid argument to PUT");
-		break;
-	case node_type_undef:
-		break;
-	case node_type_int:
-		cur_section->put = arga[0]->data.as_int;  // & 0xffff;
-		break;
+	long new_put = cur_section->put;
+	if (have_int_required(line->args, 0, &new_put, "PUT")) {
+		if (new_put < 0) {
+			error(error_type_out_of_range, "invalid negative address for PUT");
+			return;
+		}
+		cur_section->put = new_put;
 	}
 }
 
@@ -454,37 +499,24 @@ static void pseudo_put(struct prog_line *line) {
  * possible. */
 
 static void pseudo_setdp(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	if (nargs != 1) {
-		error(error_type_syntax, "SETDP requires exactly one argument");
+	if (verify_num_args(line->args, 1, 1, "SETDP") < 0)
 		return;
-	}
-	args_float_to_int(line->args);
-	struct node **arga = node_array_of(line->args);
-	switch (node_type_of(arga[0])) {
-	default:
-		error(error_type_syntax, "invalid argument to SETDP");
-		break;
-	case node_type_undef:
-		cur_section->dp = -1;
-		break;
-	case node_type_int:
-		cur_section->dp = arga[0]->data.as_int;
-		// negative numbers imply no valid DP
-		if (arga[0]->data.as_int >= 0)
-			cur_section->dp &= 0xff;
-		break;
+	long new_dp = -1;
+	if (have_int_required(line->args, 0, &new_dp, "SETDP")) {
+		// negative number implies no valid DP
+		if (new_dp >= 0)
+			cur_section->dp = new_dp & 0xff;
+		else
+			cur_section->dp = -1;
 	}
 }
 
 /* EXPORT.  Flag a symbol or macro for exporting in the symbols file. */
 
 static void pseudo_export(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	if (nargs < 1) {
-		error(error_type_syntax, "EXPORT requires one or more arguments");
+	int nargs = verify_num_args(line->args, 1, -1, "EXPORT");
+	if (nargs < 0)
 		return;
-	}
 	struct node **arga = node_array_of(line->args);
 	for (int i = 0; i < nargs; i++) {
 		struct node *n = eval_string(arga[i]);
@@ -498,15 +530,17 @@ static void pseudo_export(struct prog_line *line) {
 /* FCC, FCB.  Embed string and byte constants. */
 
 static void pseudo_fcc(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	if (nargs < 1)
+	int nargs = verify_num_args(line->args, 1, -1, "FCC");
+	if (nargs < 0)
 		return;
-	args_float_to_int(line->args);
 	struct node **arga = node_array_of(line->args);
 	for (int i = 0; i < nargs; i++) {
-		switch (node_type_of(arga[i])) {
+		struct node *arg = arga[i];
+		switch (node_type_of(arg)) {
 		default:
-			error(error_type_syntax, "invalid argument to FCB/FCC");
+			error(error_type_syntax,
+			      "argument %d of 'FCC' invalid: expected string or integer value",
+			      i+1);
 			break;
 		case node_type_undef:
 			section_emit(section_emit_type_pad, 1);
@@ -515,11 +549,14 @@ static void pseudo_fcc(struct prog_line *line) {
 			section_emit(section_emit_type_imm8, 0);
 			break;
 		case node_type_int:
-			section_emit(section_emit_type_imm8, arga[i]->data.as_int);
+			section_emit(section_emit_type_imm8, arg->data.as_int);
+			break;
+		case node_type_float:
+			section_emit(section_emit_type_imm8, (int)arg->data.as_float);
 			break;
 		case node_type_string:
-			for (int j = 0; arga[i]->data.as_string[j]; j++) {
-				section_emit(section_emit_type_imm8, arga[i]->data.as_string[j]);
+			for (int j = 0; arg->data.as_string[j]; j++) {
+				section_emit(section_emit_type_imm8, arg->data.as_string[j]);
 			}
 			break;
 		}
@@ -529,81 +566,47 @@ static void pseudo_fcc(struct prog_line *line) {
 /* FDB.  Embed 16-bit constants. */
 
 static void pseudo_fdb(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	if (nargs < 1)
+	int nargs = verify_num_args(line->args, 1, -1, "FDB");
+	if (nargs < 0)
 		return;
-	args_float_to_int(line->args);
-	struct node **arga = node_array_of(line->args);
 	for (int i = 0; i < nargs; i++) {
-		switch (node_type_of(arga[i])) {
-		default:
-			error(error_type_syntax, "invalid argument to FDB");
-			break;
-		case node_type_undef:
-			section_emit(section_emit_type_pad, 2);
-			break;
-		case node_type_empty:
-			section_emit(section_emit_type_imm16, 0);
-			break;
-		case node_type_int:
-			section_emit(section_emit_type_imm16, arga[i]->data.as_int);
-			break;
-		}
+		long word = 0;
+		have_int_optional(line->args, i, &word, "FDB");
+		section_emit(section_emit_type_imm16, word);
 	}
 }
 
-/* RZB.  Reserve zero bytes. */
+/* RZB.  Reserve zero bytes.  Additional argument specifies a non-zero fill
+ * value. */
 
 static void pseudo_rzb(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	if (nargs != 1) {
-		// TODO: support a fill value
-		error(error_type_syntax, "RZB requires exactly one argument");
+	if (verify_num_args(line->args, 1, 2, "RZB") < 0)
 		return;
+	long count = 0, fill = 0;
+	if (!have_int_required(line->args, 0, &count, "RZB"))
+		return;
+	if (!have_int_optional(line->args, 1, &fill, "RZB"))
+		return;
+	if (count < 0) {
+		error(error_type_out_of_range, "negative count for RZB");
 	}
-	args_float_to_int(line->args);
-	struct node **arga = node_array_of(line->args);
-	switch (node_type_of(arga[0])) {
-	default:
-		error(error_type_syntax, "invalid argument to RZB");
-		break;
-	case node_type_undef:
-		break;
-	case node_type_int:
-		if (arga[0]->data.as_int < 0) {
-			error(error_type_out_of_range, "negative argument to RZB");
-		} else {
-			for (int i = 0; i < arga[0]->data.as_int; i++)
-				section_emit(section_emit_type_imm8, 0);
-		}
-		break;
-	}
+	for (long i = 0; i < count; i++)
+		section_emit(section_emit_type_imm8, fill);
 }
 
 /* RMB.  Reserve memory. */
 
 static void pseudo_rmb(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	if (nargs != 1) {
-		error(error_type_syntax, "RMB requires exactly one argument");
+	if (verify_num_args(line->args, 1, 1, "RMB") < 0)
+		return;
+	long count;
+	if (!have_int_required(line->args, 0, &count, "RMB"))
+		return;
+	if (count < 0) {
+		error(error_type_out_of_range, "negative argument to RMB");
 		return;
 	}
-	args_float_to_int(line->args);
-	struct node **arga = node_array_of(line->args);
-	switch (node_type_of(arga[0])) {
-	default:
-		error(error_type_syntax, "invalid argument to RMB");
-		break;
-	case node_type_undef:
-		break;
-	case node_type_int:
-		if (arga[0]->data.as_int < 0) {
-			error(error_type_out_of_range, "negative argument to RMB");
-		} else {
-			cur_section->pc += arga[0]->data.as_int;
-		}
-		break;
-	}
+	cur_section->pc += count;
 }
 
 /* INCLUDE.  Nested inclusion of source files. */
@@ -611,11 +614,9 @@ static void pseudo_rmb(struct prog_line *line) {
 /* TODO: extra arguments should become available as positional variables. */
 
 static void pseudo_include(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	if (nargs < 1) {
-		error(error_type_syntax, "INCLUDE requires a filename");
+	int nargs = verify_num_args(line->args, 1, -1, "INCLUDE");
+	if (nargs < 0)
 		return;
-	}
 	struct node **arga = node_array_of(line->args);
 	if (node_type_of(arga[0]) != node_type_string) {
 		error(error_type_syntax, "invalid argument to INCLUDE");
@@ -632,11 +633,8 @@ static void pseudo_include(struct prog_line *line) {
  * labels. */
 
 static void pseudo_includebin(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	if (nargs < 1) {
-		error(error_type_syntax, "INCLUDEBIN requires a filename");
+	if (verify_num_args(line->args, 1, 1, "INCLUDE") < 0)
 		return;
-	}
 	struct node **arga = node_array_of(line->args);
 	if (node_type_of(arga[0]) != node_type_string) {
 		error(error_type_syntax, "invalid argument to INCLUDEBIN");
