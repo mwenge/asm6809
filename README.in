@@ -67,7 +67,8 @@ Assembles 6809 source code.
   -l, --listing=FILE   create listing file
   -s, --symbols=FILE   create symbol table
 
-      --help      show this help and exit
+      --help      show this help
+      --version   show program version
 
 If more than one SOURCE-FILE is specified, they are assembled as though
 they were all in one file.
@@ -340,6 +341,11 @@ more strict about what is allowed as a string delimiter.
 Form Double Byte.  Each *value* is evaluated to a number, which is truncated to
 16 bits and stored as two successive bytes (big-endian, of course).
 
+### **FILL** *value*, *count*
+
+Insert *count* bytes of *value*.  This is effectively the same as the
+two-argument form of **RZB** with its arguments swapped.
+
 ### **INCLUDE** *filename*
 
 Includes the contents of another file at this point in assembly.  The
@@ -378,9 +384,31 @@ Reserve Memory Bytes.  The Program Counter is advanced *count* bytes.  In some
 output formats this region may be padded with zeroes, in others a new loadable
 section may be created.
 
-### **RZB** *count*
+### **RZB** *count*[, *value*]
+### **ZMB** *count*[, *value*]
+### **BSZ** *count*[, *value*]
 
-Reserve Zeroed Bytes.  A sequence of *count* bytes of zero are inserted.
+Reserve Zeroed Bytes.  Inserts a sequence of *count* bytes of zero, or *value*
+if specified.  The two-argument form is effectively the same as **FILL** with
+its arguments swapped.
+
+**ZMB** and **BSZ** are alternate forms recognised for compatibility with other
+assemblers.
+
+### **SECTION** *name*
+### **CODE**
+### **DATA**
+### **BSS**
+### **RAM**
+### **AUTO**
+
+Switch to the named section.  The Program Counter will continue from the last
+value it had while assembling this section, or follow the previous section if
+had not previously been seen.
+
+Each of **CODE**, **DATA**, **BSS**, **RAM** and **AUTO** switches to a section
+named after the pseudo-op.  They are recognised for compatibility with other
+assemblers.
 
 ### **SETDP** *page*
 
