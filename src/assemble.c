@@ -69,6 +69,7 @@ static void pseudo_section_name(struct prog_line *line);
 static void pseudo_fcc(struct prog_line *);
 static void pseudo_fdb(struct prog_line *);
 static void pseudo_rzb(struct prog_line *);
+static void pseudo_fill(struct prog_line *);
 static void pseudo_rmb(struct prog_line *);
 
 static void pseudo_put(struct prog_line *);
@@ -104,7 +105,7 @@ static struct pseudo_op pseudo_data_ops[] = {
 	{ .name = "rzb", .handler = &pseudo_rzb },
 	{ .name = "zmb", .handler = &pseudo_rzb },  // alias
 	{ .name = "bsz", .handler = &pseudo_rzb },  // alias
-	{ .name = "fill", .handler = &pseudo_nop },  // TODO: arg swapped rzb
+	{ .name = "fill", .handler = &pseudo_fill },
 	{ .name = "rmb", .handler = &pseudo_rmb },
 };
 
@@ -589,6 +590,23 @@ static void pseudo_rzb(struct prog_line *line) {
 		return;
 	if (count < 0) {
 		error(error_type_out_of_range, "negative count for RZB");
+	}
+	for (long i = 0; i < count; i++)
+		section_emit(section_emit_type_imm8, fill);
+}
+
+/* FILL.  Effectively an arg-swapped version of the two-arg form of RZB. */
+
+static void pseudo_fill(struct prog_line *line) {
+	if (verify_num_args(line->args, 2, 2, "FILL") < 0)
+		return;
+	long count = 0, fill = 0;
+	if (!have_int_required(line->args, 0, &fill, "FILL"))
+		return;
+	if (!have_int_required(line->args, 1, &count, "FILL"))
+		return;
+	if (count < 0) {
+		error(error_type_out_of_range, "negative count for FILL");
 	}
 	for (long i = 0; i < count; i++)
 		section_emit(section_emit_type_imm8, fill);
