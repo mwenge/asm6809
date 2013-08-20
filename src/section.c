@@ -144,6 +144,7 @@ void section_set(const char *name, unsigned pass) {
 }
 
 static void verify_section(gpointer key, gpointer value, gpointer user_data) {
+	(void)key;
 	struct section *sect = value;
 	unsigned pass = GPOINTER_TO_INT(user_data);
 	if (sect) {
