@@ -46,7 +46,7 @@ static struct node *eval_node_oper_2(struct node *n);
  * the same rules. */
 
 struct node *eval_node(struct node *n) {
-	struct node *tmp1, *tmp2;
+	struct node *tmp1;
 
 	if (!n)
 		return NULL;
@@ -88,7 +88,7 @@ struct node *eval_node(struct node *n) {
 				return node_set_attr_if(eval_node(arg), attr);
 		}
 		if ((tmp1 = eval_string(n))) {
-			tmp2 = symbol_get(tmp1->data.as_string);
+			struct node *tmp2 = symbol_get(tmp1->data.as_string);
 			node_free(tmp1);
 			tmp1 = eval_node(tmp2);
 			node_free(tmp2);
