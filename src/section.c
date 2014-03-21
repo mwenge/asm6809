@@ -345,3 +345,9 @@ void section_emit(enum section_emit_type type, ...) {
 
 	va_end(ap);
 }
+
+void section_skip(int nbytes) {
+	assert(cur_section != NULL);
+	cur_section->put += nbytes;
+	cur_section->pc += nbytes;
+}

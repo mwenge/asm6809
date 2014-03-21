@@ -624,7 +624,7 @@ static void pseudo_rmb(struct prog_line *line) {
 		error(error_type_out_of_range, "negative argument to RMB");
 		return;
 	}
-	cur_section->pc += count;
+	section_skip(count);
 }
 
 /* INCLUDE.  Nested inclusion of source files. */

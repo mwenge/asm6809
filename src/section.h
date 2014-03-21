@@ -115,11 +115,6 @@ void section_set(const char *name, unsigned pass);
 
 void section_finish_pass(unsigned pass);
 
-/* Add data to the current section.  Additional arguments depend on the value
- * of type. */
-
-void section_emit(enum section_emit_type type, ...);
-
 /* Coalesce all the spans in a section.  Adjacent sequential spans are joined
  * together into one.  If sort is 1, spans are sorted first.  If pad is 1, all
  * spans are coalesced into one large span with zero padding between them. */
@@ -131,5 +126,14 @@ void section_coalesce(struct section *, _Bool sort, _Bool pad);
  * section is involved, all spans will be sorted before coalescing. */
 
 struct section *section_coalesce_all(_Bool pad);
+
+/* Add data to the current section.  Additional arguments depend on the value
+ * of type. */
+
+void section_emit(enum section_emit_type type, ...);
+
+/* Skip a number of bytes in the current section - used by RMB. */
+
+void section_skip(int nbytes);
 
 #endif  /* ASM6809_SECTION_H_ */
