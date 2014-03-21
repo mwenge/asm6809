@@ -26,18 +26,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <glib.h>
+#include "xalloc.h"
 
 #include "error.h"
 #include "node.h"
 #include "register.h"
+#include "slist.h"
 
 #include "grammar.h"
 
 static struct node *node_new_oper_n(int oper, int nargs);
 
 struct node *node_new(int type) {
-	struct node *n = g_malloc(sizeof(*n));
+	struct node *n = xmalloc(sizeof(*n));
 	n->ref = 1;
 	n->type = type;
 	n->attr = node_attr_none;
@@ -59,33 +60,33 @@ void node_free(struct node *n) {
 	/* Nodes containing string data: */
 	case node_type_string:
 	case node_type_interp:
-		g_free(n->data.as_string);
+		free(n->data.as_string);
 		break;
 
 	/* Node array */
 	case node_type_array:
 		for (int i = 0; i < n->data.as_array.nargs; i++)
 			node_free(n->data.as_array.args[i]);
-		g_free(n->data.as_array.args);
+		free(n->data.as_array.args);
 		break;
 
 	/* Nodes containing linked lists of other nodes: */
 	case node_type_id:
 	case node_type_text:
-		g_slist_free_full(n->data.as_list, (GDestroyNotify)node_free);
+		slist_free_full(n->data.as_list, (slist_free_func)node_free);
 		break;
 
 	/* Operator node (operator type plus array of nodes): */
 	case node_type_oper:
 		for (int i = 0; i < n->data.as_oper.nargs; i++)
 			node_free(n->data.as_oper.args[i]);
-		g_free(n->data.as_oper.args);
+		free(n->data.as_oper.args);
 		break;
 
 	default:
 		break;
 	}
-	g_free(n);
+	free(n);
 }
 
 struct node *node_ref(struct node *n) {
@@ -118,7 +119,7 @@ struct node *node_copy(struct node *n) {
 		break;
 	case node_type_interp:
 	case node_type_string:
-		new = node_new_string(g_strdup(n->data.as_string));
+		new = node_new_string(xstrdup(n->data.as_string));
 		new->type = n->type;
 		break;
 	case node_type_oper:
@@ -131,8 +132,8 @@ struct node *node_copy(struct node *n) {
 	case node_type_text:
 		new = node_new_id(NULL);
 		new->type = n->type;
-		for (GSList *l = new->data.as_list; l; l = l->next) {
-			new->data.as_list = g_slist_append(new->data.as_list, node_ref(l->data));
+		for (struct slist *l = new->data.as_list; l; l = l->next) {
+			new->data.as_list = slist_append(new->data.as_list, node_ref(l->data));
 		}
 		break;
 	default:
@@ -290,13 +291,13 @@ struct node *node_new_interp(char *v) {
 
 /* Operator types */
 
-struct node *node_new_id(GSList *v) {
+struct node *node_new_id(struct slist *v) {
 	struct node *n = node_new(node_type_id);
 	n->data.as_list = v;
 	return n;
 }
 
-struct node *node_new_text(GSList *v) {
+struct node *node_new_text(struct slist *v) {
 	struct node *n = node_new(node_type_text);
 	n->data.as_list = v;
 	return n;
@@ -304,7 +305,7 @@ struct node *node_new_text(GSList *v) {
 
 static struct node *node_new_oper_n(int oper, int nargs) {
 	struct node *n = node_new(node_type_oper);
-	struct node **arga = g_malloc(nargs * sizeof(*arga));
+	struct node **arga = xmalloc(nargs * sizeof(*arga));
 	n->data.as_oper.oper = oper;
 	n->data.as_oper.nargs = nargs;
 	n->data.as_oper.args = arga;
@@ -337,7 +338,7 @@ struct node *node_array_push(struct node *a, struct node *n) {
 	struct node *ret = a ? a : node_new_array();
 	struct node **arga = ret->data.as_array.args;
 	int nargs = ++ret->data.as_array.nargs;
-	arga = g_realloc(arga, nargs * sizeof(*arga));
+	arga = xrealloc(arga, nargs * sizeof(*arga));
 	arga[nargs-1] = n;
 	ret->data.as_array.args = arga;
 	return ret;
@@ -360,7 +361,7 @@ static const char *opstr(int op) {
 }
 
 void node_print(FILE *f, struct node *n) {
-	GSList *l;
+	struct slist *l;
 	if (!n) {
 		return;
 	}

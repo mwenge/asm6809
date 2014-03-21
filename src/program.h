@@ -28,9 +28,8 @@
 
 #include <stdio.h>
 
-#include <glib.h>
-
 struct node;
+struct slist;
 
 enum prog_type {
 	prog_type_file,
@@ -49,18 +48,18 @@ struct prog {
 	enum prog_type type;
 	char *name;
 	unsigned pass;  // only used to detect macro redefinitions
-	GSList *lines;
-	GSList **next_new_line;
+	struct slist *lines;
+	struct slist **next_new_line;
 };
 
 struct prog_ctx {
 	struct prog *prog;
-	GSList *line;
+	struct slist *line;
 	unsigned line_number;
 };
 
 /* The first element on this stack is the current context. */
-extern GSList *prog_ctx_stack;
+extern struct slist *prog_ctx_stack;
 
 struct prog *prog_new(enum prog_type type, const char *name);
 struct prog *prog_new_file(const char *filename);

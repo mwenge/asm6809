@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include <glib.h>
+#include "dict.h"
 
 /* Types of data that assembly instructions and pseudo-ops can pass to
  * section_emit() */
@@ -82,9 +82,9 @@ struct section_span {
  */
 
 struct section {
-	GSList *spans;
+	struct slist *spans;
 	struct section_span *span;
-	GHashTable *local_labels;
+	struct dict *local_labels;
 	unsigned pass;
 	unsigned line_number;
 	int pc;

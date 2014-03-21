@@ -27,11 +27,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <glib.h>
+#include "xalloc.h"
 
 #include "listing.h"
 #include "program.h"
 #include "section.h"
+#include "slist.h"
 
 struct listing_line {
 	int pc;
@@ -40,19 +41,19 @@ struct listing_line {
 	char *text;
 };
 
-static GSList *listing_lines = NULL;
+static struct slist *listing_lines = NULL;
 
 void listing_add_line(int pc, int nbytes, struct section_span *span, char *text) {
-	struct listing_line *l = g_malloc(sizeof(*l));
+	struct listing_line *l = xmalloc(sizeof(*l));
 	l->pc = pc;
 	l->nbytes = nbytes;
 	l->span = span;
 	l->text = text;
-	listing_lines = g_slist_append(listing_lines, l);
+	listing_lines = slist_append(listing_lines, l);
 }
 
 void listing_print(FILE *f) {
-	for (GSList *ll = listing_lines; ll; ll = ll->next) {
+	for (struct slist *ll = listing_lines; ll; ll = ll->next) {
 		struct listing_line *l = ll->data;
 		int col = 0;
 		if (l->pc >= 0) {
@@ -89,7 +90,7 @@ void listing_print(FILE *f) {
 void listing_free_all(void) {
 	while (listing_lines) {
 		struct listing_line *l = listing_lines->data;
-		listing_lines = g_slist_remove(listing_lines, l);
-		g_free(l);
+		listing_lines = slist_remove(listing_lines, l);
+		free(l);
 	}
 }

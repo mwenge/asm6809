@@ -28,14 +28,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <glib.h>
+#include "xalloc.h"
 
+#include "dict.h"
 #include "error.h"
 #include "opcode.h"
 #include "section.h"
+#include "slist.h"
 #include "symbol.h"
 
-static GHashTable *sections = NULL;
+static struct dict *sections = NULL;
 static unsigned span_sequence = 0;
 
 struct section *cur_section = NULL;
@@ -44,7 +46,7 @@ struct section *cur_section = NULL;
 
 static struct section_span *section_span_new(void) {
 	assert(cur_section != NULL);
-	struct section_span *new = g_malloc(sizeof(*new));
+	struct section_span *new = xmalloc(sizeof(*new));
 	new->ref = 1;
 	new->sequence = span_sequence++;
 	new->org = 0;
@@ -72,14 +74,14 @@ static void section_span_free(struct section_span *span) {
 	if (span->ref > 0)
 		return;
 	if (span->data)
-		g_free(span->data);
-	g_free(span);
+		free(span->data);
+	free(span);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 static struct section *section_new(void) {
-	struct section *sect = g_malloc(sizeof(*sect));
+	struct section *sect = xmalloc(sizeof(*sect));
 	sect->spans = NULL;
 	sect->span = NULL;
 	sect->local_labels = symbol_local_table_new();
@@ -96,14 +98,14 @@ static struct section *section_new(void) {
 void section_free(struct section *sect) {
 	if (!sect)
 		return;
-	g_hash_table_destroy(sect->local_labels);
-	g_slist_free_full(sect->spans, (GDestroyNotify)section_span_free);
-	g_free(sect);
+	dict_destroy(sect->local_labels);
+	slist_free_full(sect->spans, (slist_free_func)section_span_free);
+	free(sect);
 }
 
 void section_free_all(void) {
 	if (sections)
-		g_hash_table_destroy(sections);
+		dict_destroy(sections);
 	sections = NULL;
 	cur_section = NULL;
 }
@@ -112,18 +114,18 @@ void section_free_all(void) {
 
 void section_set(const char *name, unsigned pass) {
 	if (!sections)
-		sections = g_hash_table_new_full(g_str_hash, g_str_equal, (GDestroyNotify)g_free, (GDestroyNotify)section_free);
+		sections = dict_new_full(dict_str_hash, dict_str_equal, free, (Hash_data_freer)section_free);
 
-	struct section *next_section = g_hash_table_lookup(sections, name);
+	struct section *next_section = dict_lookup(sections, name);
 	if (!next_section) {
 		next_section = section_new();
-		char *key = g_strdup(name);
-		g_hash_table_insert(sections, key, next_section);
+		char *key = xstrdup(name);
+		dict_insert(sections, key, next_section);
 	}
 
 	if (next_section->pass != pass) {
 		if (next_section->spans) {
-			g_slist_free_full(next_section->spans, (GDestroyNotify)section_span_free);
+			slist_free_full(next_section->spans, (slist_free_func)section_span_free);
 			next_section->spans = NULL;
 			next_section->span = NULL;
 		}
@@ -143,10 +145,10 @@ void section_set(const char *name, unsigned pass) {
 	return;
 }
 
-static void verify_section(gpointer key, gpointer value, gpointer user_data) {
+static void verify_section(void *key, void *value, void *data) {
 	(void)key;
 	struct section *sect = value;
-	unsigned pass = GPOINTER_TO_INT(user_data);
+	unsigned pass = (unsigned)data;
 	if (sect) {
 		if (pass == 0 || sect->pass != pass) {
 			if (sect->last_pc != sect->pc) {
@@ -159,7 +161,7 @@ static void verify_section(gpointer key, gpointer value, gpointer user_data) {
 }
 
 void section_finish_pass(unsigned pass) {
-	g_hash_table_foreach(sections, verify_section, GINT_TO_POINTER(pass + 1));
+	dict_foreach(sections, verify_section, (void *)(pass + 1));
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -176,12 +178,12 @@ static int span_cmp(struct section_span *a, struct section_span *b) {
 
 void section_coalesce(struct section *sect, _Bool sort, _Bool pad) {
 
-	GSList *spans = sect->spans;
+	struct slist *spans = slist_copy(sect->spans);
 	if (sort)
-		spans = g_slist_sort(spans, (GCompareFunc)span_cmp);
-	for (GSList *l = spans; l && l->next; l = l->next) {
+		spans = slist_sort(spans, (slist_cmp_func)span_cmp);
+	for (struct slist *l = spans; l && l->next; l = l->next) {
 		do {
-			GSList *ln = l->next;
+			struct slist *ln = l->next;
 			struct section_span *span = l->data;
 			struct section_span *nspan = ln->data;
 			unsigned span_end = span->put + span->size;
@@ -194,7 +196,7 @@ void section_coalesce(struct section *sect, _Bool sort, _Bool pad) {
 				unsigned npad = nspan->put - span_end;
 				if ((span->size + npad) > span->allocated) {
 					span->allocated = span->size + npad;
-					span->data = g_realloc(span->data, span->allocated);
+					span->data = xrealloc(span->data, span->allocated);
 				}
 				memset(span->data + span->size, 0, npad);
 				span->size = span->size + npad;
@@ -203,13 +205,13 @@ void section_coalesce(struct section *sect, _Bool sort, _Bool pad) {
 			if (span_end == nspan->put) {
 				if ((span->size + nspan->size) > span->allocated) {
 					span->allocated = span->size + nspan->size;
-					span->data = g_realloc(span->data, span->allocated);
+					span->data = xrealloc(span->data, span->allocated);
 				}
 				memcpy(span->data + span->size, nspan->data, nspan->size);
 				span->size += nspan->size;
 				l->next = l->next->next;
 				section_span_free(nspan);
-				g_slist_free_1(ln);
+				slist_free_1(ln);
 				ln = l->next;
 				span = l->data;
 				nspan = ln->data;
@@ -219,19 +221,19 @@ void section_coalesce(struct section *sect, _Bool sort, _Bool pad) {
 			}
 		} while (l->next);
 	}
-
+	slist_free(sect->spans);
 	sect->spans = spans;
 }
 
 struct section *section_coalesce_all(_Bool pad) {
 	struct section *sect = section_new();
 
-	GList *section_list = g_hash_table_get_values(sections);
-	for (GList *l = section_list; l; l = l->next) {
+	struct slist *section_list = dict_get_values(sections);
+	for (struct slist *l = section_list; l; l = l->next) {
 		struct section *s = l->data;
-		sect->spans = g_slist_concat(sect->spans, g_slist_copy_deep(s->spans, (GCopyFunc)section_span_ref, NULL));
+		sect->spans = slist_concat(sect->spans, slist_copy_deep(s->spans, (slist_copy_func)section_span_ref, NULL));
 	}
-	g_list_free(section_list);
+	slist_free(section_list);
 
 	section_coalesce(sect, 1, pad);
 	return sect;
@@ -259,7 +261,7 @@ void section_emit(enum section_emit_type type, ...) {
 	    (cur_section->pc != next_pc(span))) {
 		if (!span || span->size != 0) {
 			span = section_span_new();
-			cur_section->spans = g_slist_append(cur_section->spans, span);
+			cur_section->spans = slist_append(cur_section->spans, span);
 		}
 		span->put = cur_section->put;
 		span->org = cur_section->pc;
@@ -328,7 +330,7 @@ void section_emit(enum section_emit_type type, ...) {
 
 	if (cur_section->pc >= (int)(span->org + span->allocated)) {
 		span->allocated += 128;
-		span->data = g_realloc(span->data, span->allocated);
+		span->data = xrealloc(span->data, span->allocated);
 	}
 
 	if (pad) {

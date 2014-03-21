@@ -26,13 +26,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <glib.h>
-
 #include "error.h"
 #include "eval.h"
 #include "node.h"
 #include "output.h"
 #include "section.h"
+#include "slist.h"
 #include "symbol.h"
 
 /* Helper that dumps a single binary blob to file. */
@@ -143,7 +142,7 @@ void output_coco(const char *filename, const char *exec) {
 
 	struct section *sect = section_coalesce_all(0);
 
-	for (GSList *l = sect->spans; l; l = l->next) {
+	for (struct slist *l = sect->spans; l; l = l->next) {
 		struct section_span *span = l->data;
 		unsigned put = span->put;
 		unsigned size = span->size;
@@ -178,7 +177,7 @@ void output_motorola_srec(const char *filename, const char *exec) {
 
 	struct section *sect = section_coalesce_all(0);
 
-	for (GSList *l = sect->spans; l; l = l->next) {
+	for (struct slist *l = sect->spans; l; l = l->next) {
 		struct section_span *span = l->data;
 		unsigned put = span->put;
 		unsigned size = span->size;
@@ -219,7 +218,7 @@ void output_intel_hex(const char *filename, const char *exec) {
 
 	struct section *sect = section_coalesce_all(0);
 
-	for (GSList *l = sect->spans; l; l = l->next) {
+	for (struct slist *l = sect->spans; l; l = l->next) {
 		struct section_span *span = l->data;
 		unsigned put = span->put;
 		unsigned size = span->size;

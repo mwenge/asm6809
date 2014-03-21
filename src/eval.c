@@ -25,7 +25,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <glib.h>
+#include "xalloc.h"
+#include "xvasprintf.h"
 
 #include "error.h"
 #include "eval.h"
@@ -33,6 +34,7 @@
 #include "node.h"
 #include "register.h"
 #include "section.h"
+#include "slist.h"
 #include "symbol.h"
 
 #include "grammar.h"
@@ -148,7 +150,7 @@ struct node *eval_string(struct node *n) {
 	enum node_attr attr = node_attr_of(n);
 	struct node *out = node_new_string(NULL);
 	int size = 0;
-	for (GSList *l = n->data.as_list; l; l = l->next) {
+	for (struct slist *l = n->data.as_list; l; l = l->next) {
 		struct node *elem = l->data;
 		struct node *tmp;
 		if (!(tmp = eval_node(elem))) {
@@ -158,10 +160,10 @@ struct node *eval_string(struct node *n) {
 		char *addtext;
 		switch (tmp->type) {
 		case node_type_string:
-			addtext = g_strdup(tmp->data.as_string);
+			addtext = xstrdup(tmp->data.as_string);
 			break;
 		case node_type_int:
-			addtext = g_strdup_printf("%ld", tmp->data.as_int);
+			addtext = xasprintf("%ld", tmp->data.as_int);
 			break;
 		case node_type_reg:
 			if (tmp->attr != node_attr_none) {
@@ -169,7 +171,7 @@ struct node *eval_string(struct node *n) {
 				node_free(out);
 				return NULL;
 			}
-			addtext = g_strdup(reg_id_to_name(tmp->data.as_reg));
+			addtext = xstrdup(reg_id_to_name(tmp->data.as_reg));
 			break;
 		default:
 			node_free(tmp);
@@ -177,11 +179,11 @@ struct node *eval_string(struct node *n) {
 			return NULL;
 		}
 		int add = strlen(addtext);
-		out->data.as_string = g_realloc(out->data.as_string, size + add + 1);
+		out->data.as_string = xrealloc(out->data.as_string, size + add + 1);
 		out->data.as_string[size] = 0;
 		size += add;
 		strcat(out->data.as_string, addtext);
-		g_free(addtext);
+		free(addtext);
 		node_free(tmp);
 	}
 	return node_set_attr(out, attr);

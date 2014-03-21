@@ -5,10 +5,11 @@
 
 #include <stdio.h>
 
-#include <glib.h>
+#include "xalloc.h"
 
 #include "error.h"
 #include "register.h"
+#include "slist.h"
 
 #include "grammar.h"
 
@@ -58,8 +59,8 @@ ${hexdigit}+	{ yylval.as_int = strtol(yytext+1, NULL, 16); return INTEGER; }
 \!		{ yylval.as_int = 0; return INTEGER; }
 
 {word}		{ return id_or_reg(); }
-&{decimal}	{ yylval.as_string = g_strndup(yytext+1, yyleng-1); return INTERP; }
-&\{{decimal}\}	{ yylval.as_string = g_strndup(yytext+2, yyleng-3); return INTERP; }
+&{decimal}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+&\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
 \r		/* skip CR */
 {ws}*[;\*].*	/* skip comment */
@@ -72,8 +73,8 @@ ${hexdigit}+	{ yylval.as_int = strtol(yytext+1, NULL, 16); return INTEGER; }
 <opcode>{
 
 {word}		{ return id_or_reg(); }
-&{decimal}	{ yylval.as_string = g_strndup(yytext+1, yyleng-1); return INTERP; }
-&\{{decimal}\}	{ yylval.as_string = g_strndup(yytext+2, yyleng-3); return INTERP; }
+&{decimal}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+&\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
 
 \r		/* skip CR */
@@ -116,8 +117,8 @@ ${hexdigit}+	{ BEGIN(argnonum); yylval.as_int = strtol(yytext+1, NULL, 16); retu
 <arg,argnonum,argnostr>{
 
 {word}		{ BEGIN(argnonum); return id_or_reg(); }
-&{decimal}	{ BEGIN(argnonum); yylval.as_string = g_strndup(yytext+1, yyleng-1); return INTERP; }
-&\{{decimal}\}	{ BEGIN(argnonum); yylval.as_string = g_strndup(yytext+2, yyleng-3); return INTERP; }
+&{decimal}	{ BEGIN(argnonum); yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+&\{{decimal}\}	{ BEGIN(argnonum); yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
 \+\+		{ BEGIN(argnonum); return INC2; }
 \-\-		{ BEGIN(argnonum); return DEC2; }
@@ -147,17 +148,17 @@ ${hexdigit}+	{ BEGIN(argnonum); yylval.as_int = strtol(yytext+1, NULL, 16); retu
 				BEGIN(arg);
 				return DELIM;
 			} else {
-				yylval.as_string = g_strndup(yytext, yyleng);
+				yylval.as_string = strndup(yytext, yyleng);
 				return TEXT;
 			}
 		}
 
-&{decimal}	{ yylval.as_string = g_strndup(yytext+1, yyleng-1); return INTERP; }
-&\{{decimal}\}	{ yylval.as_string = g_strndup(yytext+2, yyleng-3); return INTERP; }
+&{decimal}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+&\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 &&		|
-&		{ yylval.as_string = g_strndup("&", 1); return TEXT; }
+&		{ yylval.as_string = strndup("&", 1); return TEXT; }
 
-[^&/"\n\r]+	{ yylval.as_string = g_strndup(yytext, yyleng); return TEXT; }
+[^&/"\n\r]+	{ yylval.as_string = strndup(yytext, yyleng); return TEXT; }
 
 \r		/* skip CR */
 \n		{ BEGIN(INITIAL); return '\n'; }
@@ -172,7 +173,7 @@ static int id_or_reg(void) {
 		yylval.as_reg = r;
 		return REGISTER;
 	}
-	yylval.as_string = g_strndup(yytext, yyleng);
+	yylval.as_string = strndup(yytext, yyleng);
 	return ID;
 }
 
@@ -182,7 +183,7 @@ static int id_or_reg(void) {
  * data.
  */
 
-static GSList *lines = NULL;
+static struct slist *lines = NULL;
 static char *line = NULL;
 static int line_length = 0;
 
@@ -190,7 +191,7 @@ static int read_line(char *buf, int max_size) {
 	char *r = fgets(buf, max_size, yyin);
 	if (!r) {
 		if (line) {
-			g_free(line);
+			free(line);
 			line = NULL;
 			line_length = 0;
 		}
@@ -201,13 +202,13 @@ static int read_line(char *buf, int max_size) {
 	}
 
 	int len = strlen(buf);
-	line = g_realloc(line, line_length + len + 1);
+	line = xrealloc(line, line_length + len + 1);
 	memcpy(line + line_length, buf, len + 1);
 	line_length = line_length + len;
 
 	if (line_length > 0 && line[line_length-1] == '\n') {
 		line[line_length-1] = 0;
-		lines = g_slist_append(lines, line);
+		lines = slist_append(lines, line);
 		line = NULL;
 		line_length = 0;
 	}
@@ -221,15 +222,15 @@ char *lex_fetch_line(void) {
 		return NULL;
 	}
 	char *l = lines->data;
-	lines = g_slist_remove(lines, l);
+	lines = slist_remove(lines, l);
 	return l;
 }
 
 void lex_free_all(void) {
 	while (lines) {
 		char *l = lines->data;
-		lines = g_slist_remove(lines, l);
-		g_free(l);
+		lines = slist_remove(lines, l);
+		free(l);
 	}
 	yylex_destroy();
 }

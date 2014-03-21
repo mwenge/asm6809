@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "array.h"
 #include "assemble.h"
 #include "error.h"
 #include "eval.h"
@@ -254,7 +255,7 @@ static void instr_indexed2(_Bool indirect, struct node *arg0, struct node *arg1)
 	int pbyte_xyus = 0;
 	int idx_flags = -1;
 
-	for (unsigned i = 0; i < G_N_ELEMENTS(idx_regs); i++) {
+	for (unsigned i = 0; i < ARRAY_N_ELEMENTS(idx_regs); i++) {
 		if (idx_regs[i].reg_id == REG_INVALID) {
 			error(error_type_syntax, "invalid index register");
 			return;
@@ -266,7 +267,7 @@ static void instr_indexed2(_Bool indirect, struct node *arg0, struct node *arg1)
 		}
 	}
 
-	for (unsigned i = 0; i < G_N_ELEMENTS(indexed_modes); i++) {
+	for (unsigned i = 0; i < ARRAY_N_ELEMENTS(indexed_modes); i++) {
 		int flags_type = indexed_modes[i].flags & FLAG_TYPE;
 		int flags_size = indexed_modes[i].flags & FLAG_SIZE;
 		_Bool flags_rel = (flags_type == FLAG_PCR);

@@ -23,8 +23,9 @@
 
 #include <stdlib.h>
 
-#include <glib.h>
+#include "c-strcase.h"
 
+#include "array.h"
 #include "asm6809.h"
 #include "register.h"
 
@@ -60,14 +61,14 @@ static struct reg_info registers_6309[] = {
 enum reg_id reg_name_to_id(const char *name) {
 	switch (asm6809_options.isa) {
 	case asm6809_isa_6309:
-		for (unsigned i = 0; i < G_N_ELEMENTS(registers_6309); i++) {
-			if (0 == g_ascii_strcasecmp(name, registers_6309[i].name))
+		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(registers_6309); i++) {
+			if (0 == c_strcasecmp(name, registers_6309[i].name))
 				return registers_6309[i].id;
 		}
 		/* fall through */
 	case asm6809_isa_6809:
-		for (unsigned i = 0; i < G_N_ELEMENTS(registers_6809); i++) {
-			if (0 == g_ascii_strcasecmp(name, registers_6809[i].name))
+		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(registers_6809); i++) {
+			if (0 == c_strcasecmp(name, registers_6809[i].name))
 				return registers_6809[i].id;
 		}
 		break;
@@ -80,13 +81,13 @@ enum reg_id reg_name_to_id(const char *name) {
 const char *reg_id_to_name(enum reg_id id) {
 	switch (asm6809_options.isa) {
 	case asm6809_isa_6309:
-		for (unsigned i = 0; i < G_N_ELEMENTS(registers_6309); i++) {
+		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(registers_6309); i++) {
 			if (id == registers_6309[i].id)
 				return registers_6309[i].name;
 		}
 		/* fall through */
 	case asm6809_isa_6809:
-		for (unsigned i = 0; i < G_N_ELEMENTS(registers_6809); i++) {
+		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(registers_6809); i++) {
 			if (id == registers_6809[i].id)
 				return registers_6809[i].name;
 		}

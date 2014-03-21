@@ -8,8 +8,7 @@
 #ifndef ASM6809_SYMBOL_H_
 #define ASM6809_SYMBOL_H_
 
-#include <glib.h>
-
+struct dict;
 struct node;
 
 /*
@@ -28,10 +27,10 @@ struct node *symbol_get(const char *key);
 
 void symbol_free_all(void);
 
-GHashTable *symbol_local_table_new(void);
-struct node *symbol_local_backref(GHashTable *table, long key, unsigned line_number);
-struct node *symbol_local_fwdref(GHashTable *table, long key, unsigned line_number);
-void symbol_local_set(GHashTable *table, long key, unsigned line_number, struct node *value,
+struct dict *symbol_local_table_new(void);
+struct node *symbol_local_backref(struct dict *table, long key, unsigned line_number);
+struct node *symbol_local_fwdref(struct dict *table, long key, unsigned line_number);
+void symbol_local_set(struct dict *table, long key, unsigned line_number, struct node *value,
 		      unsigned pass);
 
 #endif  /* ASM6809_SYMBOL_H_ */

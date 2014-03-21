@@ -23,14 +23,18 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include <glib.h>
+#include "xalloc.h"
 
 #include "assemble.h"
+#include "dict.h"
 #include "error.h"
 #include "eval.h"
 #include "node.h"
 #include "section.h"
+#include "slist.h"
 #include "symbol.h"
 
 /*
@@ -50,38 +54,38 @@ struct symbol_local {
 	struct node *node;
 };
 
-static GHashTable *symbols = NULL;
+static struct dict *symbols = NULL;
 
 static void symbol_free(struct symbol *s) {
 	node_free(s->node);
-	g_free(s);
+	free(s);
 }
 
 static void init_table(void) {
-	symbols = g_hash_table_new_full(g_str_hash, g_str_equal, (GDestroyNotify)g_free, (GDestroyNotify)symbol_free);
+	symbols = dict_new_full(dict_str_hash, dict_str_equal, free, (Hash_data_freer)symbol_free);
 }
 
 void symbol_set(const char *key, struct node *value, unsigned pass) {
 	if (!symbols)
 		init_table();
-	struct symbol *olds = g_hash_table_lookup(symbols, key);
+	struct symbol *olds = dict_lookup(symbols, key);
 	if (olds && olds->pass == pass) {
 		error(error_type_syntax, "symbol '%s' redefined", key);
 		return;
 	}
-	struct symbol *news = g_malloc(sizeof(*news));
+	struct symbol *news = xmalloc(sizeof(*news));
 	news->pass = pass;
 	news->node = eval_node(value);
 	if (olds && !node_equal(olds->node, news->node))
 		error(error_type_inconsistent, "value of '%s' unstable", key);
-	char *key_copy = g_strdup(key);
-	g_hash_table_insert(symbols, key_copy, news);
+	char *key_copy = xstrdup(key);
+	dict_insert(symbols, key_copy, news);
 }
 
 struct node *symbol_get(const char *key) {
 	if (!symbols)
 		init_table();
-	struct symbol *s = g_hash_table_lookup(symbols, key);
+	struct symbol *s = dict_lookup(symbols, key);
 	if (!s) {
 		error(error_type_inconsistent, "symbol '%s' not defined", key);
 		return NULL;
@@ -92,7 +96,7 @@ struct node *symbol_get(const char *key) {
 void symbol_free_all(void) {
 	if (!symbols)
 		return;
-	g_hash_table_destroy(symbols);
+	dict_destroy(symbols);
 	symbols = NULL;
 }
 
@@ -100,22 +104,22 @@ void symbol_free_all(void) {
 
 static void symbol_local_free(struct symbol_local *sym) {
 	node_free(sym->node);
-	g_free(sym);
+	free(sym);
 }
 
-static void symbol_local_list_free(GSList *sym_list) {
-	g_slist_free_full(sym_list, (GDestroyNotify)symbol_local_free);
+static void symbol_local_list_free(struct slist *sym_list) {
+	slist_free_full(sym_list, (slist_free_func)symbol_local_free);
 }
 
-GHashTable *symbol_local_table_new(void) {
-	return g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)symbol_local_list_free);
+struct dict *symbol_local_table_new(void) {
+	return dict_new_full(dict_direct_hash, dict_direct_equal, NULL, (slist_free_func)symbol_local_list_free);
 }
 
-struct node *symbol_local_backref(GHashTable *table, long key, unsigned line_number) {
-	GSList *sym_list = g_hash_table_lookup(table, GINT_TO_POINTER(key));
+struct node *symbol_local_backref(struct dict *table, long key, unsigned line_number) {
+	struct slist *sym_list = dict_lookup(table, (void *)key);
 	if (sym_list) {
 		struct symbol_local *sym = NULL;
-		for (GSList *l = sym_list; l; l = l->next) {
+		for (struct slist *l = sym_list; l; l = l->next) {
 			struct symbol_local *ls = l->data;
 			if (ls->line_number <= line_number &&
 			    (!sym || ls->line_number > sym->line_number)) {
@@ -130,11 +134,11 @@ struct node *symbol_local_backref(GHashTable *table, long key, unsigned line_num
 	return NULL;
 }
 
-struct node *symbol_local_fwdref(GHashTable *table, long key, unsigned line_number) {
-	GSList *sym_list = g_hash_table_lookup(table, GINT_TO_POINTER(key));
+struct node *symbol_local_fwdref(struct dict *table, long key, unsigned line_number) {
+	struct slist *sym_list = dict_lookup(table, (void *)key);
 	if (sym_list) {
 		struct symbol_local *sym = NULL;
-		for (GSList *l = sym_list; l; l = l->next) {
+		for (struct slist *l = sym_list; l; l = l->next) {
 			struct symbol_local *ls = l->data;
 			if (ls->line_number > line_number &&
 			    (!sym || ls->line_number < sym->line_number)) {
@@ -149,12 +153,12 @@ struct node *symbol_local_fwdref(GHashTable *table, long key, unsigned line_numb
 	return NULL;
 }
 
-void symbol_local_set(GHashTable *table, long key, unsigned line_number, struct node *value,
+void symbol_local_set(struct dict *table, long key, unsigned line_number, struct node *value,
 		      unsigned pass) {
-	GSList *sym_list = g_hash_table_lookup(table, GINT_TO_POINTER(key));
-	g_hash_table_steal(table, GINT_TO_POINTER(key));
+	struct slist *sym_list = dict_lookup(table, (void *)key);
+	dict_steal(table, (void *)key);
 	struct symbol_local *sym = NULL;
-	for (GSList *l = sym_list; l; l = l->next) {
+	for (struct slist *l = sym_list; l; l = l->next) {
 		struct symbol_local *ls = l->data;
 		if (ls->line_number == line_number) {
 			sym = ls;
@@ -166,14 +170,14 @@ void symbol_local_set(GHashTable *table, long key, unsigned line_number, struct 
 		if (!node_equal(sym->node, newn))
 			error(error_type_inconsistent,
 			      "value of local label '%ld' unstable", key);
-		sym_list = g_slist_remove(sym_list, sym);
+		sym_list = slist_remove(sym_list, sym);
 		node_free(sym->node);
 	} else {
-		sym = g_malloc(sizeof(*sym));
+		sym = xmalloc(sizeof(*sym));
 		sym->line_number = line_number;
 	}
 	sym->node = newn;
 	sym->pass = pass;
-	sym_list = g_slist_prepend(sym_list, sym);
-	g_hash_table_insert(table, GINT_TO_POINTER(key), sym_list);
+	sym_list = slist_prepend(sym_list, sym);
+	dict_insert(table, (void *)key, sym_list);
 }

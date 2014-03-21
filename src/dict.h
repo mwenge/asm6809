@@ -14,6 +14,7 @@
 #include "hash-pjw.h"
 
 struct dict;
+struct slist;
 
 typedef void (*dict_iter_func)(void *k, void *v, void *data);
 
@@ -34,6 +35,8 @@ void dict_add(struct dict *d, const void *k);
 bool dict_remove(struct dict *, const void *k);
 bool dict_steal(struct dict *, const void *k);
 void dict_foreach(struct dict *, dict_iter_func, void *);
+struct slist *dict_get_keys(struct dict *);
+struct slist *dict_get_values(struct dict *);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

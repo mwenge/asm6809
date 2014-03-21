@@ -10,8 +10,6 @@
 
 #include <stdio.h>
 
-#include <glib.h>
-
 #include "register.h"
 
 /*
@@ -102,7 +100,7 @@ struct node {
 		double as_float;
 		char *as_string;
 		enum reg_id as_reg;
-		GSList *as_list;
+		struct slist *as_list;
 		struct node_array as_array;
 	} data;
 };
@@ -174,8 +172,8 @@ struct node *node_new_interp(char *v);
 
 /* Operator types */
 
-struct node *node_new_id(GSList *v);
-struct node *node_new_text(GSList *v);
+struct node *node_new_id(struct slist *v);
+struct node *node_new_text(struct slist *v);
 struct node *node_new_oper_1(int oper, struct node *a1);
 struct node *node_new_oper_2(int oper, struct node *a1, struct node *a2);
 

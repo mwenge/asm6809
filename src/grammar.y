@@ -6,12 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <glib.h>
-
 #include "error.h"
 #include "node.h"
 #include "program.h"
 #include "register.h"
+#include "slist.h"
 
 static void yyerror(char *);
 void yylex_destroy(void);
@@ -33,7 +32,7 @@ struct prog *grammar_parse_file(const char *filename);
 	enum reg_id as_reg;
 	struct node *as_node;
 	struct prog_line *as_line;
-	GSList *as_list;
+	struct slist *as_list;
 	}
 
 %token WS
@@ -89,8 +88,8 @@ args	:			{ $$ = NULL; }
 id	: idlist		{ $$ = node_new_id($1); }
 	;
 
-idlist	: idpart		{ $$ = g_slist_append(NULL, $1); }
-	| idlist idpart		{ $$ = g_slist_append($1, $2); }
+idlist	: idpart		{ $$ = slist_append(NULL, $1); }
+	| idlist idpart		{ $$ = slist_append($1, $2); }
 	;
 
 idpart	: ID			{ $$ = node_new_string($1); }
@@ -147,8 +146,8 @@ expr	: '(' expr ')'		{ $$ = $2; }
 string	: DELIM strlist DELIM	{ $$ = node_new_text($2); }
 	;
 
-strlist	: strpart		{ $$ = g_slist_append(NULL, $1); }
-	| strlist strpart	{ $$ = g_slist_append($1, $2); }
+strlist	: strpart		{ $$ = slist_append(NULL, $1); }
+	| strlist strpart	{ $$ = slist_append($1, $2); }
 	;
 
 strpart	: TEXT			{ $$ = node_new_string($1); }
@@ -160,7 +159,7 @@ strpart	: TEXT			{ $$ = node_new_string($1); }
 static void yyerror(char *s) {
 	// discard line with error - going to fail anyway
 	char *l = lex_fetch_line();
-	g_free(l);
+	free(l);
 	cur_ctx->line_number++;
 	error(error_type_syntax, "%s", s);
 }

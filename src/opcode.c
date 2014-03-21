@@ -21,8 +21,11 @@
 #include "config.h"
 #endif
 
-#include <glib.h>
+#include <stdlib.h>
 
+#include "c-strcase.h"
+
+#include "array.h"
 #include "asm6809.h"
 #include "opcode.h"
 
@@ -313,14 +316,14 @@ static struct opcode opcodes_6309[] = {
 struct opcode *opcode_by_name(const char *name) {
 	switch (asm6809_options.isa) {
 	case asm6809_isa_6309:
-		for (unsigned i = 0; i < G_N_ELEMENTS(opcodes_6309); i++) {
-			if (0 == g_ascii_strcasecmp(name, opcodes_6309[i].op))
+		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(opcodes_6309); i++) {
+			if (0 == c_strcasecmp(name, opcodes_6309[i].op))
 				return &opcodes_6309[i];
 		}
 		/* fall through */
 	case asm6809_isa_6809:
-		for (unsigned i = 0; i < G_N_ELEMENTS(opcodes_6809); i++) {
-			if (0 == g_ascii_strcasecmp(name, opcodes_6809[i].op))
+		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(opcodes_6809); i++) {
+			if (0 == c_strcasecmp(name, opcodes_6809[i].op))
 				return &opcodes_6809[i];
 		}
 		break;

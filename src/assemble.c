@@ -27,8 +27,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <glib.h>
+#include "c-strcase.h"
 
+#include "array.h"
 #include "asm6809.h"
 #include "assemble.h"
 #include "error.h"
@@ -247,7 +248,7 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 
 		/* Macro handling */
 
-		if (n_line.opcode && 0 == g_ascii_strcasecmp("macro", n_line.opcode->data.as_string)) {
+		if (n_line.opcode && 0 == c_strcasecmp("macro", n_line.opcode->data.as_string)) {
 			defining_macro_level++;
 			if (defining_macro_level == 1) {
 				n_line.label = eval_string(l->label);
@@ -258,7 +259,7 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 			}
 		}
 
-		if (n_line.opcode && 0 == g_ascii_strcasecmp("endm", n_line.opcode->data.as_string)) {
+		if (n_line.opcode && 0 == c_strcasecmp("endm", n_line.opcode->data.as_string)) {
 			if (defining_macro_level == 0) {
 				error(error_type_syntax, "ENDM without beginning MACRO");
 				goto next_line;
@@ -286,7 +287,7 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 			n_line.label = eval_string(l->label);
 
 		/* EXPORT only needs symbol names, not their values */
-		if (n_line.opcode && 0 == g_ascii_strcasecmp("export", n_line.opcode->data.as_string)) {
+		if (n_line.opcode && 0 == c_strcasecmp("export", n_line.opcode->data.as_string)) {
 			n_line.args = node_ref(l->args);
 			pseudo_export(&n_line);
 			listing_add_line(-1, 0, NULL, l->text);
@@ -298,8 +299,8 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 
 		/* Pseudo-ops which determine a label's value */
 		if (n_line.opcode) {
-			for (unsigned i = 0; i < G_N_ELEMENTS(label_ops); i++) {
-				if (0 == g_ascii_strcasecmp(label_ops[i].name, n_line.opcode->data.as_string)) {
+			for (unsigned i = 0; i < ARRAY_N_ELEMENTS(label_ops); i++) {
+				if (0 == c_strcasecmp(label_ops[i].name, n_line.opcode->data.as_string)) {
 					label_ops[i].handler(&n_line);
 					goto next_line;
 				}
@@ -319,8 +320,8 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 		}
 
 		/* Pseudo-ops that emit or reserve data */
-		for (unsigned i = 0; i < G_N_ELEMENTS(pseudo_data_ops); i++) {
-			if (0 == g_ascii_strcasecmp(pseudo_data_ops[i].name, n_line.opcode->data.as_string)) {
+		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(pseudo_data_ops); i++) {
+			if (0 == c_strcasecmp(pseudo_data_ops[i].name, n_line.opcode->data.as_string)) {
 				int old_pc = cur_section->pc;
 				pseudo_data_ops[i].handler(&n_line);
 				int nbytes = cur_section->pc - old_pc;
@@ -333,8 +334,8 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 		}
 
 		/* Other pseudo-ops */
-		for (unsigned i = 0; i < G_N_ELEMENTS(pseudo_ops); i++) {
-			if (0 == g_ascii_strcasecmp(pseudo_ops[i].name, n_line.opcode->data.as_string)) {
+		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(pseudo_ops); i++) {
+			if (0 == c_strcasecmp(pseudo_ops[i].name, n_line.opcode->data.as_string)) {
 				listing_add_line(-1, 0, NULL, l->text);
 				pseudo_ops[i].handler(&n_line);
 				goto next_line;

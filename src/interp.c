@@ -25,13 +25,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <glib.h>
-
 #include "error.h"
 #include "interp.h"
 #include "node.h"
+#include "slist.h"
 
-static GSList *interp_stack = NULL;
+static struct slist *interp_stack = NULL;
 
 void interp_push(struct node *n) {
 	switch (node_type_of(n)) {
@@ -42,7 +41,7 @@ void interp_push(struct node *n) {
 		error(error_type_fatal, "internal: pushing non-array onto interp stack");
 		return;
 	}
-	interp_stack = g_slist_prepend(interp_stack, node_ref(n));
+	interp_stack = slist_prepend(interp_stack, node_ref(n));
 }
 
 void interp_pop(void) {
@@ -51,7 +50,7 @@ void interp_pop(void) {
 		return;
 	}
 	struct node *n = interp_stack->data;
-	interp_stack = g_slist_remove(interp_stack, n);
+	interp_stack = slist_remove(interp_stack, n);
 	node_free(n);
 }
 

@@ -30,8 +30,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <glib.h>
-
 #include "asm6809.h"
 #include "assemble.h"
 #include "error.h"
@@ -39,6 +37,7 @@
 #include "output.h"
 #include "program.h"
 #include "section.h"
+#include "slist.h"
 #include "symbol.h"
 
 struct asm6809_options asm6809_options = {
@@ -73,7 +72,7 @@ static struct option long_options[] = {
 	{ NULL, 0, NULL, 0 }
 };
 
-static GSList *files = NULL;
+static struct slist *files = NULL;
 
 static void helptext(void);
 static void versiontext(void);
@@ -136,7 +135,7 @@ int main(int argc, char **argv) {
 	/* Read in each file */
 	for (int i = optind; i < argc; i++) {
 		struct prog *f = prog_new_file(argv[i]);
-		files = g_slist_append(files, f);
+		files = slist_append(files, f);
 	}
 
 	/* Fatal errors? */
@@ -151,7 +150,7 @@ int main(int argc, char **argv) {
 		error_clear_all();
 		listing_free_all();
 		section_set("", pass);
-		for (GSList *l = files; l; l = l->next) {
+		for (struct slist *l = files; l; l = l->next) {
 			struct prog *f = l->data;
 			assemble_prog(f, pass);
 		}
@@ -267,7 +266,7 @@ static void versiontext(void) {
 
 static void tidy_up(void) {
 	if (files) {
-		g_slist_free(files);
+		slist_free(files);
 		files = NULL;
 	}
 	listing_free_all();

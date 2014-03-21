@@ -31,6 +31,7 @@
 #include "xalloc.h"
 
 #include "dict.h"
+#include "slist.h"
 
 struct dict {
 	Hash_hasher hash_func;
@@ -194,6 +195,26 @@ void dict_foreach(struct dict *d, dict_iter_func func, void *data) {
 		.data = data
 	};
 	hash_do_for_each(d->ht, dict_foreach_processor, &fd);
+}
+
+static void add_key(void *k, void *v, struct slist **lp) {
+	*lp = slist_prepend(*lp, k);
+}
+
+static void add_value(void *k, void *v, struct slist **lp) {
+	*lp = slist_prepend(*lp, v);
+}
+
+struct slist *dict_get_keys(struct dict *d) {
+	struct slist *l = NULL;
+	dict_foreach(d, (dict_iter_func)add_key, &l);
+	return l;
+}
+
+struct slist *dict_get_values(struct dict *d) {
+	struct slist *l = NULL;
+	dict_foreach(d, (dict_iter_func)add_value, &l);
+	return l;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

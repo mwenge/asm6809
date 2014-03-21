@@ -26,11 +26,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <glib.h>
-#include <glib/gprintf.h>
+#include "xalloc.h"
+#include "xvasprintf.h"
 
 #include "error.h"
 #include "program.h"
+#include "slist.h"
 
 /* Highest error level encountered */
 enum error_type error_level = error_type_none;
@@ -42,7 +43,7 @@ struct error {
 	unsigned line_number;
 	char *message;
 };
-static GSList *error_list = NULL;
+static struct slist *error_list = NULL;
 
 /*
  * Report an error.
@@ -57,7 +58,7 @@ static void verror(enum error_type type, const char *fmt, va_list ap) {
 	    error_level == error_type_out_of_range)
 		error_level = error_type_inconsistent;
 	if (fmt) {
-		err = g_malloc0(sizeof(*err));
+		err = xzalloc(sizeof(*err));
 		err->type = type;
 		if (prog_ctx_stack) {
 			struct prog_ctx *ctx = prog_ctx_stack->data;
@@ -67,10 +68,10 @@ static void verror(enum error_type type, const char *fmt, va_list ap) {
 			err->filename = prog->name;
 			err->line_number = ctx->line_number;
 		}
-		g_vasprintf(&err->message, fmt, ap);
+		err->message = xvasprintf(fmt, ap);
 	}
 	if (err) {
-		error_list = g_slist_append(error_list, err);
+		error_list = slist_append(error_list, err);
 	}
 }
 
@@ -102,9 +103,9 @@ void error_abort(const char *fmt, ...) {
 void error_clear_all(void) {
 	while (error_list) {
 		struct error *err = error_list->data;
-		error_list = g_slist_remove(error_list, err);
-		g_free(err->message);
-		g_free(err);
+		error_list = slist_remove(error_list, err);
+		free(err->message);
+		free(err);
 	}
 	error_level = error_type_none;
 }
@@ -121,7 +122,7 @@ void error_print_list(void) {
 		min_error = error_level;
 	while (error_list) {
 		struct error *err = error_list->data;
-		error_list = g_slist_remove(error_list, err);
+		error_list = slist_remove(error_list, err);
 		if (err->type >= min_error) {
 			switch (err->type) {
 			case error_type_none:
@@ -148,8 +149,8 @@ void error_print_list(void) {
 			}
 		}
 		if (err->message)
-			g_free(err->message);
-		g_free(err);
+			free(err->message);
+		free(err);
 	}
 	error_level = error_type_none;
 }
