@@ -1,10 +1,15 @@
 ## autoconf built files
+/alloca.h
 /arg-nonnull.h
 /c++defs.h
 /getopt.h
 /libgnu.a
+/stdio.h
+/stdlib.h
+/string.h
 /sys/types.h
 /unistd.h
 /warn-on-use.h
+/wchar.h
 ## build files
 /*.o

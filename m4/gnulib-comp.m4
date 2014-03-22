@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2002-2013 Free Software Foundation, Inc.
+# Copyright (C) 2002-2014 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,22 +38,63 @@ AC_DEFUN([gl_EARLY],
   m4_pattern_allow([^gl_LIBOBJS$])dnl a variable
   m4_pattern_allow([^gl_LTLIBOBJS$])dnl a variable
   AC_REQUIRE([gl_PROG_AR_RANLIB])
+  # Code from module absolute-header:
+  # Code from module alloca-opt:
+  # Code from module bitrotate:
+  # Code from module c-ctype:
+  # Code from module c-strcase:
+  # Code from module errno:
+  # Code from module error:
+  # Code from module exitfail:
   # Code from module extensions:
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
   # Code from module extern-inline:
-  # Code from module getopt:
+  # Code from module float:
   # Code from module getopt-gnu:
   # Code from module getopt-posix:
   # Code from module gettext-h:
+  # Code from module hash:
+  # Code from module hash-pjw:
   # Code from module include_next:
+  # Code from module intprops:
+  # Code from module memchr:
+  # Code from module msvc-inval:
+  # Code from module msvc-nothrow:
+  # Code from module multiarch:
   # Code from module nocrash:
+  # Code from module size_max:
+  # Code from module snippet/_Noreturn:
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
   # Code from module snippet/warn-on-use:
   # Code from module ssize_t:
+  # Code from module stdarg:
+  dnl Some compilers (e.g., AIX 5.3 cc) need to be in c99 mode
+  dnl for the builtin va_copy to work.  With Autoconf 2.60 or later,
+  dnl gl_PROG_CC_C99 arranges for this.  With older Autoconf gl_PROG_CC_C99
+  dnl shouldn't hurt, though installers are on their own to set c99 mode.
+  gl_PROG_CC_C99
+  # Code from module stdbool:
   # Code from module stddef:
+  # Code from module stdint:
+  # Code from module stdio:
+  # Code from module stdlib:
+  # Code from module strerror:
+  # Code from module strerror-override:
+  # Code from module string:
+  # Code from module strndup:
+  # Code from module strnlen:
   # Code from module sys_types:
   # Code from module unistd:
+  # Code from module vasnprintf:
+  # Code from module vasprintf:
+  # Code from module verify:
+  # Code from module wchar:
+  # Code from module xalloc:
+  # Code from module xalloc-die:
+  # Code from module xalloc-oversized:
+  # Code from module xsize:
+  # Code from module xvasprintf:
 ])
 
 # This macro should be invoked from ./configure.ac, in the section
@@ -72,7 +113,24 @@ AC_DEFUN([gl_INIT],
   m4_pushdef([gl_LIBSOURCES_DIR], [])
   gl_COMMON
   gl_source_base='gnulib'
+  gl_FUNC_ALLOCA
+  gl_HEADER_ERRNO_H
+  gl_ERROR
+  if test $ac_cv_lib_error_at_line = no; then
+    AC_LIBOBJ([error])
+    gl_PREREQ_ERROR
+  fi
+  m4_ifdef([AM_XGETTEXT_OPTION],
+    [AM_][XGETTEXT_OPTION([--flag=error:3:c-format])
+     AM_][XGETTEXT_OPTION([--flag=error_at_line:5:c-format])])
   AC_REQUIRE([gl_EXTERN_INLINE])
+  gl_FLOAT_H
+  if test $REPLACE_FLOAT_LDBL = 1; then
+    AC_LIBOBJ([float])
+  fi
+  if test $REPLACE_ITOLD = 1; then
+    AC_LIBOBJ([itold])
+  fi
   gl_FUNC_GETOPT_GNU
   if test $REPLACE_GETOPT = 1; then
     AC_LIBOBJ([getopt])
@@ -94,11 +152,68 @@ AC_DEFUN([gl_INIT],
   AC_SUBST([GNULIB_GL_UNISTD_H_GETOPT])
   AC_SUBST([LIBINTL])
   AC_SUBST([LTLIBINTL])
+  gl_FUNC_MEMCHR
+  if test $HAVE_MEMCHR = 0 || test $REPLACE_MEMCHR = 1; then
+    AC_LIBOBJ([memchr])
+    gl_PREREQ_MEMCHR
+  fi
+  gl_STRING_MODULE_INDICATOR([memchr])
+  gl_MSVC_INVAL
+  if test $HAVE_MSVC_INVALID_PARAMETER_HANDLER = 1; then
+    AC_LIBOBJ([msvc-inval])
+  fi
+  gl_MSVC_NOTHROW
+  if test $HAVE_MSVC_INVALID_PARAMETER_HANDLER = 1; then
+    AC_LIBOBJ([msvc-nothrow])
+  fi
+  gl_MULTIARCH
+  gl_SIZE_MAX
   gt_TYPE_SSIZE_T
+  gl_STDARG_H
+  AM_STDBOOL_H
   gl_STDDEF_H
+  gl_STDINT_H
+  gl_STDIO_H
+  gl_STDLIB_H
+  gl_FUNC_STRERROR
+  if test $REPLACE_STRERROR = 1; then
+    AC_LIBOBJ([strerror])
+  fi
+  gl_MODULE_INDICATOR([strerror])
+  gl_STRING_MODULE_INDICATOR([strerror])
+  AC_REQUIRE([gl_HEADER_ERRNO_H])
+  AC_REQUIRE([gl_FUNC_STRERROR_0])
+  if test -n "$ERRNO_H" || test $REPLACE_STRERROR_0 = 1; then
+    AC_LIBOBJ([strerror-override])
+    gl_PREREQ_SYS_H_WINSOCK2
+  fi
+  gl_HEADER_STRING_H
+  gl_FUNC_STRNDUP
+  if test $HAVE_STRNDUP = 0 || test $REPLACE_STRNDUP = 1; then
+    AC_LIBOBJ([strndup])
+  fi
+  gl_STRING_MODULE_INDICATOR([strndup])
+  gl_FUNC_STRNLEN
+  if test $HAVE_DECL_STRNLEN = 0 || test $REPLACE_STRNLEN = 1; then
+    AC_LIBOBJ([strnlen])
+    gl_PREREQ_STRNLEN
+  fi
+  gl_STRING_MODULE_INDICATOR([strnlen])
   gl_SYS_TYPES_H
   AC_PROG_MKDIR_P
   gl_UNISTD_H
+  gl_FUNC_VASNPRINTF
+  gl_FUNC_VASPRINTF
+  gl_STDIO_MODULE_INDICATOR([vasprintf])
+  m4_ifdef([AM_XGETTEXT_OPTION],
+    [AM_][XGETTEXT_OPTION([--flag=asprintf:2:c-format])
+     AM_][XGETTEXT_OPTION([--flag=vasprintf:2:c-format])])
+  gl_WCHAR_H
+  gl_XALLOC
+  gl_XSIZE
+  gl_XVASPRINTF
+  m4_ifdef([AM_XGETTEXT_OPTION],
+    [AM_][XGETTEXT_OPTION([--flag=xasprintf:1:c-format])])
   # End of code from modules
   m4_ifval(gl_LIBSOURCES_LIST, [
     m4_syscmd([test ! -d ]m4_defn([gl_LIBSOURCES_DIR])[ ||
@@ -239,30 +354,126 @@ AC_DEFUN([gltests_LIBSOURCES], [
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
+  build-aux/snippet/_Noreturn.h
   build-aux/snippet/arg-nonnull.h
   build-aux/snippet/c++defs.h
   build-aux/snippet/warn-on-use.h
+  lib/alloca.in.h
+  lib/asnprintf.c
+  lib/asprintf.c
+  lib/bitrotate.c
+  lib/bitrotate.h
+  lib/c-ctype.c
+  lib/c-ctype.h
+  lib/c-strcase.h
+  lib/c-strcasecmp.c
+  lib/c-strncasecmp.c
+  lib/errno.in.h
+  lib/error.c
+  lib/error.h
+  lib/exitfail.c
+  lib/exitfail.h
+  lib/float+.h
+  lib/float.c
+  lib/float.in.h
   lib/getopt.c
   lib/getopt.in.h
   lib/getopt1.c
   lib/getopt_int.h
   lib/gettext.h
+  lib/hash-pjw.c
+  lib/hash-pjw.h
+  lib/hash.c
+  lib/hash.h
+  lib/intprops.h
+  lib/itold.c
+  lib/memchr.c
+  lib/memchr.valgrind
+  lib/msvc-inval.c
+  lib/msvc-inval.h
+  lib/msvc-nothrow.c
+  lib/msvc-nothrow.h
+  lib/printf-args.c
+  lib/printf-args.h
+  lib/printf-parse.c
+  lib/printf-parse.h
+  lib/size_max.h
+  lib/stdarg.in.h
+  lib/stdbool.in.h
   lib/stddef.in.h
+  lib/stdint.in.h
+  lib/stdio.in.h
+  lib/stdlib.in.h
+  lib/strerror-override.c
+  lib/strerror-override.h
+  lib/strerror.c
+  lib/string.in.h
+  lib/strndup.c
+  lib/strnlen.c
   lib/sys_types.in.h
   lib/unistd.c
   lib/unistd.in.h
+  lib/vasnprintf.c
+  lib/vasnprintf.h
+  lib/vasprintf.c
+  lib/verify.h
+  lib/wchar.in.h
+  lib/xalloc-die.c
+  lib/xalloc-oversized.h
+  lib/xalloc.h
+  lib/xasprintf.c
+  lib/xmalloc.c
+  lib/xsize.c
+  lib/xsize.h
+  lib/xvasprintf.c
+  lib/xvasprintf.h
   m4/00gnulib.m4
+  m4/absolute-header.m4
+  m4/alloca.m4
+  m4/errno_h.m4
+  m4/error.m4
+  m4/exponentd.m4
   m4/extensions.m4
   m4/extern-inline.m4
+  m4/float_h.m4
   m4/getopt.m4
   m4/gnulib-common.m4
   m4/include_next.m4
+  m4/intmax_t.m4
+  m4/inttypes_h.m4
+  m4/longlong.m4
+  m4/math_h.m4
+  m4/memchr.m4
+  m4/mmap-anon.m4
+  m4/msvc-inval.m4
+  m4/msvc-nothrow.m4
+  m4/multiarch.m4
   m4/nocrash.m4
   m4/off_t.m4
+  m4/printf.m4
+  m4/size_max.m4
   m4/ssize_t.m4
+  m4/stdarg.m4
+  m4/stdbool.m4
   m4/stddef_h.m4
+  m4/stdint.m4
+  m4/stdint_h.m4
+  m4/stdio_h.m4
+  m4/stdlib_h.m4
+  m4/strerror.m4
+  m4/string_h.m4
+  m4/strndup.m4
+  m4/strnlen.m4
+  m4/sys_socket_h.m4
   m4/sys_types_h.m4
   m4/unistd_h.m4
+  m4/vasnprintf.m4
+  m4/vasprintf.m4
   m4/warn-on-use.m4
+  m4/wchar_h.m4
   m4/wchar_t.m4
+  m4/wint_t.m4
+  m4/xalloc.m4
+  m4/xsize.m4
+  m4/xvasprintf.m4
 ])
