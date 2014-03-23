@@ -28,4 +28,5 @@ asm6809_SOURCES = \
 	program.c program.h \
 	register.c register.h \
 	section.c section.h \
+	slist.c slist.h \
 	symbol.c symbol.h
