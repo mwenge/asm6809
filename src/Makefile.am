@@ -14,6 +14,7 @@ asm6809_SOURCES = \
 	array.h \
 	asm6809.c asm6809.h \
 	assemble.c assemble.h \
+	dict.c dict.h \
 	error.c error.h \
 	eval.c eval.h \
 	grammar.y \
