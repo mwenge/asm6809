@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Ciaran Anscomb
+ * Copyright 2013-2014 Ciaran Anscomb
  *
  * This file is part of asm6809.
  *

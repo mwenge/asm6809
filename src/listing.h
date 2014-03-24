@@ -1,6 +1,6 @@
 /*
  * asm6809 - a 6809 assembler
- * Copyright 2013 Ciaran Anscomb
+ * Copyright 2013-2014 Ciaran Anscomb
  *
  * See COPYING.GPL for redistribution conditions.
  */
