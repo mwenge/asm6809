@@ -146,6 +146,8 @@ void output_coco(const char *filename, const char *exec) {
 		struct section_span *span = l->data;
 		unsigned put = span->put;
 		unsigned size = span->size;
+		if (!exec_addr)
+			exec_addr = put;
 		fputc(0x00, f);
 		fputc((size >> 8) & 0xff, f);
 		fputc(size & 0xff, f);
@@ -154,13 +156,11 @@ void output_coco(const char *filename, const char *exec) {
 		fwrite(span->data, 1, size, f);
 	}
 
-	if (exec) {
-		fputc(0xff, f);
-		fputc(0x00, f);
-		fputc(0x00, f);
-		fputc((exec_addr >> 8) & 0xff, f);
-		fputc(exec_addr  & 0xff, f);
-	}
+	fputc(0xff, f);
+	fputc(0x00, f);
+	fputc(0x00, f);
+	fputc((exec_addr >> 8) & 0xff, f);
+	fputc(exec_addr  & 0xff, f);
 
 	section_free(sect);
 	fclose(f);
