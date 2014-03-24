@@ -11,6 +11,7 @@ BUILT_SOURCES = \
 asm6809_CFLAGS = $(GLIB_CFLAGS)
 asm6809_LDADD = $(top_builddir)/gnulib/libgnu.a $(GLIB_LIBS)
 asm6809_SOURCES = \
+	array.h \
 	asm6809.c asm6809.h \
 	assemble.c assemble.h \
 	error.c error.h \
