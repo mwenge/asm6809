@@ -96,55 +96,6 @@ struct node *node_ref(struct node *n) {
 	return n;
 }
 
-/* Makes a new copy of a node.  If the source node references other nodes, the
- * ref counts of inferiors are increased.
- *
- * Not actually found a use for this yet, so consider untested... */
-
-#if 0
-
-struct node *node_copy(struct node *n) {
-	struct node *new;
-	switch (n->type) {
-	case node_type_undef:
-		error_abort("internal: unexpected node_type_undef in node_copy");
-	case node_type_pc:
-	case node_type_int:
-	case node_type_float:
-	case node_type_reg:
-	case node_type_backref:
-	case node_type_fwdref:
-		new = node_new(n->type);
-		memcpy(new, n, sizeof(*new));
-		break;
-	case node_type_interp:
-	case node_type_string:
-		new = node_new_string(xstrdup(n->data.as_string));
-		new->type = n->type;
-		break;
-	case node_type_oper:
-		new = node_new_oper_n(n->data.as_oper.oper, n->data.as_oper.nargs);
-		for (int i = 0; i < new->data.as_oper.nargs; i++) {
-			new->data.as_oper.args[i] = node_ref(n->data.as_oper.args[i]);
-		}
-		break;
-	case node_type_id:
-	case node_type_text:
-		new = node_new_id(NULL);
-		new->type = n->type;
-		for (struct slist *l = new->data.as_list; l; l = l->next) {
-			new->data.as_list = slist_append(new->data.as_list, node_ref(l->data));
-		}
-		break;
-	default:
-		error_abort("internal: unhandled node type (%d) in node_copy", n->type);
-	}
-	new->ref = 1;
-	return new;
-}
-
-#endif
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 /*
