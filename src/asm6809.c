@@ -33,10 +33,7 @@ option) any later version.
 #include "slist.h"
 #include "symbol.h"
 
-struct asm6809_options asm6809_options = {
-	.isa = asm6809_isa_6809,
-	.max_program_depth = 8,
-};
+struct asm6809_options asm6809_options;
 
 #define OUTPUT_BINARY (0)
 #define OUTPUT_DRAGONDOS (1)
@@ -49,6 +46,8 @@ static char *exec_option = NULL;
 static char *output_filename = NULL;
 static char *symbol_filename = NULL;
 static char *listing_filename = NULL;
+static int isa = asm6809_isa_6809;
+static int max_program_depth = 8;
 
 static struct option long_options[] = {
 	{ "bin", no_argument, &output_format, OUTPUT_BINARY },
@@ -57,6 +56,8 @@ static struct option long_options[] = {
 	{ "srec", no_argument, &output_format, OUTPUT_MOTOROLA_SREC },
 	{ "hex", no_argument, &output_format, OUTPUT_INTEL_HEX },
 	{ "exec", required_argument, NULL, 'e' },
+	{ "6809", no_argument, &isa, asm6809_isa_6809 },
+	{ "6309", no_argument, &isa, asm6809_isa_6309 },
 	{ "output", required_argument, NULL, 'o' },
 	{ "listing", required_argument, NULL, 'l' },
 	{ "symbols", required_argument, NULL, 's' },
@@ -76,7 +77,7 @@ static void tidy_up(void);
 int main(int argc, char **argv) {
 
 	int c;
-	while ((c = getopt_long(argc, argv, "BDCSHe:o:l:s:",
+	while ((c = getopt_long(argc, argv, "BDCSHe:893o:l:s:",
 				long_options, NULL)) != -1) {
 		switch (c) {
 		case 0:
@@ -98,6 +99,12 @@ int main(int argc, char **argv) {
 			break;
 		case 'e':
 			exec_option = optarg;
+			break;
+		case '8': case '9':
+			isa = asm6809_isa_6809;
+			break;
+		case '3':
+			isa = asm6809_isa_6309;
 			break;
 		case 'o':
 			output_filename = optarg;
@@ -124,6 +131,9 @@ int main(int argc, char **argv) {
 		error_print_list();
 		exit(EXIT_FAILURE);
 	}
+
+	asm6809_options.isa = isa;
+	asm6809_options.max_program_depth = max_program_depth;
 
 	/* Read in each file */
 	for (int i = optind; i < argc; i++) {
@@ -229,7 +239,7 @@ int main(int argc, char **argv) {
 static void helptext(void) {
 	puts(
 "Usage: asm6809 [OPTION]... SOURCE-FILE...\n"
-"Assembles 6809 source code.\n"
+"Assembles 6809/6309 source code.\n"
 "\n"
 "  -B, --bin         output to binary file (default)\n"
 "  -D, --dragondos   output to DragonDOS binary file\n"
@@ -237,6 +247,10 @@ static void helptext(void) {
 "  -S, --srec        output to Motorola SREC file\n"
 "  -H, --hex         output to Intel hex record file\n"
 "  -e, --exec=ADDR   EXEC address (for output formats that support one)\n"
+"\n"
+"  -8,\n"
+"  -9, --6809        use 6809 ISA (default)\n"
+"  -3, --6309        use 6309 ISA (6809 with extensions)\n"
 "\n"
 "  -o, --output=FILE    set output filename\n"
 "  -l, --listing=FILE   create listing file\n"
