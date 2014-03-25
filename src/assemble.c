@@ -344,7 +344,8 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 			if (op->type == OPCODE_INHERENT) {
 				instr_inherent(op, n_line.args);
 			} else if ((op_ext_type == OPCODE_IMM8 ||
-				    op_ext_type == OPCODE_IMM16) &&
+				    op_ext_type == OPCODE_IMM16 ||
+				    op_ext_type == OPCODE_IMM32) &&
 				   (arg_attr(l->args, 0) == node_attr_immediate)) {
 				instr_immediate(op, n_line.args);
 			} else if (op->type & OPCODE_MEM) {

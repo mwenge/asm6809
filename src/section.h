@@ -28,6 +28,7 @@ enum section_emit_type {
 	section_emit_type_op_extended,
 	section_emit_type_imm8,
 	section_emit_type_imm16,
+	section_emit_type_imm32,
 	section_emit_type_rel8,
 	section_emit_type_rel16
 };

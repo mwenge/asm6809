@@ -299,6 +299,10 @@ void section_emit(enum section_emit_type type, ...) {
 		output = va_arg(ap, int);
 		nbytes = 2;
 		break;
+	case section_emit_type_imm32:
+		output = va_arg(ap, int);
+		nbytes = 4;
+		break;
 	default:
 		error(error_type_fatal, "unknown emit format");
 		return;

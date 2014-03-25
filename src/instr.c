@@ -56,13 +56,17 @@ void instr_immediate(struct opcode const *op, struct node const *args) {
 	if (node_type_of(arga[0]) == node_type_int) {
 		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM8)
 			section_emit(section_emit_type_imm8, arga[0]->data.as_int);
-		else
+		else if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM16)
 			section_emit(section_emit_type_imm16, arga[0]->data.as_int);
+		else
+			section_emit(section_emit_type_imm32, arga[0]->data.as_int);
 	} else {
 		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM8)
 			section_emit(section_emit_type_pad, 1);
-		else
+		else if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM16)
 			section_emit(section_emit_type_pad, 2);
+		else
+			section_emit(section_emit_type_pad, 4);
 	}
 }
 
