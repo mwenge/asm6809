@@ -81,7 +81,7 @@ struct dict *dict_new_full(Hash_hasher hash_func,
 /* Clear all entries in dictionary and free its allocation. */
 
 void dict_destroy(struct dict *d) {
-	hash_clear(d->ht);
+	hash_free(d->ht);
 	free(d);
 }
 
