@@ -111,9 +111,12 @@ static void dict_add_ent(struct dict *d, const void *k, const void *v, bool repl
 	struct dict_ent *ent = dict_find_ent(d, k);
 	if (ent) {
 		if (replace_key) {
-			if (d->value_destroy_func && ent->value)
-				d->value_destroy_func((void *)ent->value);
+			if (d->key_destroy_func && ent->key)
+				d->key_destroy_func((void *)ent->key);
 			ent->key = k;
+		} else {
+			if (d->key_destroy_func && k)
+				d->key_destroy_func((void *)k);
 		}
 		if (d->value_destroy_func && ent->value)
 			d->value_destroy_func((void *)ent->value);
