@@ -1,12 +1,20 @@
 /*
- * asm6809 - a 6809 assembler
- * Copyright 2013-2014 Ciaran Anscomb
- *
- * See COPYING.GPL for redistribution conditions.
- */
 
-#ifndef ASM6809_DICT_H_
-#define ASM6809_DICT_H_
+Dictionaries
+Copyright 2014, Ciaran Anscomb
+
+This is free software; you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License as published by the
+Free Software Foundation; either version 2.1 of the License, or (at your
+option) any later version.
+
+A dictionary implementation using an externally supplied hash table.
+The hash table interface is expected to be as per Gnulib.
+
+*/
+
+#ifndef DICT_H__Kf6gSbxCcf8vw
+#define DICT_H__Kf6gSbxCcf8vw
 
 #include <stdbool.h>
 
@@ -46,4 +54,4 @@ bool dict_direct_equal(const void *k1, const void *k2);
 #define dict_str_hash (hash_pjw)
 bool dict_str_equal(const void *k1, const void *k2);
 
-#endif  /* ASM6809_DICT_H_ */
+#endif  /* DICT_H__Kf6gSbxCcf8vw */

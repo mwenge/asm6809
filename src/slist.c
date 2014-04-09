@@ -1,32 +1,21 @@
 /*
- * Copyright 2013-2014 Ciaran Anscomb
- *
- * This file is part of asm6809.
- *
- * asm6809 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation, either version 2 of the License,
- * or (at your option) any later version.
- *
- * asm6809 is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with asm6809.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-#ifdef HAVE_CONFIG_H
+Singly linked lists
+Copyright 2009-2014, Ciaran Anscomb
+
+This is free software; you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License as published by the
+Free Software Foundation; either version 2.1 of the License, or (at your
+option) any later version.
+
+*/
+
 #include "config.h"
-#endif
 
-#include <assert.h>
 #include <stdlib.h>
 
-#include "xalloc.h"
-
 #include "slist.h"
+#include "xalloc.h"
 
 /* Wrap data in a new list container */
 static struct slist *slist_new(void *data) {
@@ -79,12 +68,12 @@ struct slist *slist_remove(struct slist *list, void *data) {
 	return list;
 }
 
-/* Free entire list. */
+/* Free entire list (not data). */
 void slist_free(struct slist *list) {
 	slist_free_full(list, NULL);
 }
 
-/* Free entire list, call free_func on all data. */
+/* Free entire list, calling function to free data. */
 void slist_free_full(struct slist *list, slist_free_func free_func) {
 	while (list) {
 		struct slist *next = list->next;
@@ -95,11 +84,12 @@ void slist_free_full(struct slist *list, slist_free_func free_func) {
 	}
 }
 
+/* Free one list element. */
 void slist_free_1(struct slist *list) {
 	free(list);
 }
 
-/* Copy list structure. */
+/* Copy a list, new elements reference same data. */
 struct slist *slist_copy(struct slist *list) {
 	struct slist *new = NULL;
 	struct slist **entp = &new;
@@ -110,7 +100,7 @@ struct slist *slist_copy(struct slist *list) {
 	return new;
 }
 
-/* Copy list, calling an allocator for referenced data. */
+/* Copy a list, new elements are copied with user function. */
 struct slist *slist_copy_deep(struct slist *list, slist_copy_func copy_func, void *copy_data) {
 	struct slist *new = slist_copy(list);
 	for (struct slist *l = new; l; l = l->next) {
@@ -119,6 +109,8 @@ struct slist *slist_copy_deep(struct slist *list, slist_copy_func copy_func, voi
 	return new;
 }
 
+/* Helper function for slist_sort().  Merges left and right into a single
+ * sorted list, assuming inputs are sorted.  In-place. */
 static struct slist *slist_merge(struct slist *left, struct slist *right, slist_cmp_func cmp_func) {
 	struct slist *new = NULL;
 	struct slist **newp = &new;
@@ -144,6 +136,10 @@ static struct slist *slist_merge(struct slist *left, struct slist *right, slist_
 	return new;
 }
 
+/* Sort list in-place, the old list order is lost. */
+
+/* In-place merge sort.  This part breaks the list into trivially
+ * sorted lists on the heap, then calls slist_merge() to merge the result. */
 struct slist *slist_sort(struct slist *list, slist_cmp_func cmp_func) {
 	if (!list || !list->next)
 		return list;
@@ -167,6 +163,7 @@ struct slist *slist_sort(struct slist *list, slist_cmp_func cmp_func) {
 	return slist_merge(left, right, cmp_func);
 }
 
+/* Attach head of one list to the end of another (no copying). */
 struct slist *slist_concat(struct slist *list1, struct slist *list2) {
 	if (!list2)
 		return list1;
@@ -178,11 +175,28 @@ struct slist *slist_concat(struct slist *list1, struct slist *list2) {
 	return list1;
 }
 
-/* Find list entry containing data */
-struct slist *slist_find(struct slist *list, void *data) {
+/* Call a user function for each member of the list. */
+void slist_foreach(struct slist *list, slist_iter_func iter_func, void *data) {
+	struct slist *ent;
+	for (ent = list; ent; ent = ent->next)
+		iter_func(ent->data, data);
+}
+
+/* Find element with exactly the supplied data (pointer compare). */
+struct slist *slist_find(struct slist *list, const void *data) {
 	struct slist *ent;
 	for (ent = list; ent; ent = ent->next) {
 		if (ent->data == data)
+			return ent;
+	}
+	return NULL;
+}
+
+/* Find element using compare function against supplied data. */
+struct slist *slist_find_custom(struct slist *list, const void *data, slist_cmp_func cmp_func) {
+	struct slist *ent;
+	for (ent = list; ent; ent = ent->next) {
+		if (cmp_func(ent->data, data) == 0)
 			return ent;
 	}
 	return NULL;
