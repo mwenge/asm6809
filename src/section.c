@@ -138,21 +138,19 @@ void section_set(const char *name, unsigned pass) {
 
 static void verify_section(void *key, void *value, void *data) {
 	(void)key;
+	(void)data;
 	struct section *sect = value;
-	unsigned pass = (unsigned)data;
-	if (sect) {
-		if (pass == 0 || sect->pass != pass) {
-			if (sect->last_pc != sect->pc) {
-				sect->last_pc = sect->pc;
-				sect->last_put = sect->put;
-				error(error_type_inconsistent, NULL);
-			}
-		}
+	if (!sect)
+		return;
+	if (sect->last_pc != sect->pc) {
+		sect->last_pc = sect->pc;
+		sect->last_put = sect->put;
+		error(error_type_inconsistent, NULL);
 	}
 }
 
-void section_finish_pass(unsigned pass) {
-	dict_foreach(sections, verify_section, (void *)(pass + 1));
+void section_finish_pass(void) {
+	dict_foreach(sections, verify_section, NULL);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

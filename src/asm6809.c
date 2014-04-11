@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
 			struct prog *f = l->data;
 			assemble_prog(f, pass);
 		}
-		section_finish_pass(pass);
+		section_finish_pass();
 		/* Only inconsistencies trigger another pass */
 		if (error_level != error_type_inconsistent)
 			break;

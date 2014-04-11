@@ -118,7 +118,7 @@ void section_set(const char *name, unsigned pass);
 
 /* Check consistency of the end address of named sections. */
 
-void section_finish_pass(unsigned pass);
+void section_finish_pass(void);
 
 /* Coalesce all the spans in a section.  Adjacent sequential spans are joined
  * together into one.  If sort is 1, spans are sorted first.  If pad is 1, all
