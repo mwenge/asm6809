@@ -31,7 +31,7 @@ option) any later version.
  * Inherent instructions.  No arguments.
  */
 
-void instr_inherent(struct opcode *op, struct node *args) {
+void instr_inherent(struct opcode const *op, struct node const *args) {
 	int nargs = node_array_count(args);
 	if (nargs != 0) {
 		error(error_type_syntax, "unexpected argument");
@@ -45,7 +45,7 @@ void instr_inherent(struct opcode *op, struct node *args) {
  * Inherent.
  */
 
-void instr_immediate(struct opcode *op, struct node *args) {
+void instr_immediate(struct opcode const *op, struct node const *args) {
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
 	if (nargs != 1) {
@@ -72,7 +72,7 @@ void instr_immediate(struct opcode *op, struct node *args) {
  * Relative addressing.
  */
 
-void instr_rel(struct opcode *op, struct node *args) {
+void instr_rel(struct opcode const *op, struct node const *args) {
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
 	if (nargs != 1) {
@@ -358,7 +358,7 @@ invalid_mode:
 }
 
 
-void instr_indexed(struct opcode *op, struct node *args) {
+void instr_indexed(struct opcode const *op, struct node const *args) {
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
 	int indirect = 0;
@@ -411,7 +411,7 @@ void instr_indexed(struct opcode *op, struct node *args) {
  * Direct and extended addressing.
  */
 
-void instr_address(struct opcode *op, struct node *args) {
+void instr_address(struct opcode const *op, struct node const *args) {
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
 	if (nargs < 1 || nargs > 2 || (!(op->type & OPCODE_INDEXED) && nargs > 1)) {
@@ -472,7 +472,7 @@ static int stack_bit(enum reg_id r) {
 	}
 }
 
-void instr_stack(struct opcode *op, struct node *args, enum reg_id stack) {
+void instr_stack(struct opcode const *op, struct node const *args, enum reg_id stack) {
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
 	int pbyte = 0;
@@ -520,7 +520,7 @@ static int pair_nibble(enum reg_id r) {
 	}
 }
 
-void instr_pair(struct opcode *op, struct node *args) {
+void instr_pair(struct opcode const *op, struct node const *args) {
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
 	if (nargs != 2) {

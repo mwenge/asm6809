@@ -24,7 +24,7 @@ option) any later version.
 
 struct section_span;
 
-void listing_add_line(int pc, int nbytes, struct section_span *span, char *text);
+void listing_add_line(int pc, int nbytes, struct section_span const *span, char const *text);
 void listing_print(FILE *f);
 void listing_free_all(void);
 

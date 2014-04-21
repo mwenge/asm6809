@@ -28,13 +28,13 @@ option) any later version.
 struct listing_line {
 	int pc;
 	int nbytes;
-	struct section_span *span;
-	char *text;
+	struct section_span const *span;
+	char const *text;
 };
 
 static struct slist *listing_lines = NULL;
 
-void listing_add_line(int pc, int nbytes, struct section_span *span, char *text) {
+void listing_add_line(int pc, int nbytes, struct section_span const *span, char const *text) {
 	struct listing_line *l = xmalloc(sizeof(*l));
 	l->pc = pc;
 	l->nbytes = nbytes;

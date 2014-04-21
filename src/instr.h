@@ -23,12 +23,12 @@ option) any later version.
 struct node;
 struct opcode;
 
-void instr_inherent(struct opcode *op, struct node *args);
-void instr_immediate(struct opcode *op, struct node *args);
-void instr_rel(struct opcode *op, struct node *args);
-void instr_indexed(struct opcode *op, struct node *args);
-void instr_address(struct opcode *op, struct node *args);
-void instr_stack(struct opcode *op, struct node *args, enum reg_id stack);
-void instr_pair(struct opcode *op, struct node *args);
+void instr_inherent(struct opcode const *op, struct node const *args);
+void instr_immediate(struct opcode const *op, struct node const *args);
+void instr_rel(struct opcode const *op, struct node const *args);
+void instr_indexed(struct opcode const *op, struct node const *args);
+void instr_address(struct opcode const *op, struct node const *args);
+void instr_stack(struct opcode const *op, struct node const *args, enum reg_id stack);
+void instr_pair(struct opcode const *op, struct node const *args);
 
 #endif  /* ASM6809_INSTR_H_ */

@@ -93,19 +93,19 @@ struct node *node_ref(struct node *n) {
  * Utility functions.
  */
 
-enum node_type node_type_of(struct node *n) {
+enum node_type node_type_of(struct node const *n) {
 	if (!n)
 		return node_type_undef;
 	return n->type;
 }
 
-enum node_attr node_attr_of(struct node *n) {
+enum node_attr node_attr_of(struct node const *n) {
 	if (!n)
 		return node_attr_undef;
 	return n->attr;
 }
 
-int node_array_count(struct node *n) {
+int node_array_count(struct node const *n) {
 	if (!n)
 		return 0;
 	if (n->type != node_type_array)
@@ -113,7 +113,7 @@ int node_array_count(struct node *n) {
 	return n->data.as_array.nargs;
 }
 
-struct node **node_array_of(struct node *n) {
+struct node **node_array_of(struct node const *n) {
 	if (!n)
 		return NULL;
 	if (n->type != node_type_array)
@@ -150,7 +150,7 @@ struct node *node_set_attr_if(struct node *n, enum node_attr attr) {
 	return n;
 }
 
-_Bool node_equal(struct node *n1, struct node *n2) {
+_Bool node_equal(struct node const *n1, struct node const *n2) {
 	if (node_type_of(n1) == node_type_undef ||
 	    node_type_of(n2) == node_type_undef)
 		return 0;
@@ -302,7 +302,7 @@ static const char *opstr(int op) {
 	return str;
 }
 
-void node_print(FILE *f, struct node *n) {
+void node_print(FILE *f, struct node const *n) {
 	struct slist *l;
 	if (!n) {
 		return;
@@ -421,7 +421,7 @@ void node_print(FILE *f, struct node *n) {
 	}
 }
 
-void node_print_array(FILE *f, struct node *n) {
+void node_print_array(FILE *f, struct node const *n) {
 	if (!n)
 		return;
 	if (n->type != node_type_array)

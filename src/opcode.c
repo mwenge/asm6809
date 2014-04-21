@@ -41,7 +41,7 @@ option) any later version.
 
 /* MC6809 opcode table. */
 
-static struct opcode opcodes_6809[] = {
+static struct opcode const opcodes_6809[] = {
 
 	{ .op = "neg", .type = MEM, .direct = 0x00, .indexed = 0x60, .extended = 0x70 },
 	{ .op = "com", .type = MEM, .direct = 0x03, .indexed = 0x63, .extended = 0x73 },
@@ -201,7 +201,7 @@ static struct opcode opcodes_6809[] = {
 
 /* HD6309 opcode table. */
 
-static struct opcode opcodes_6309[] = {
+static struct opcode const opcodes_6309[] = {
 
 	{ .op = "oim", .type = IMM8_MEM, .direct = 0x01, .indexed = 0x61, .extended = 0x71 },
 	{ .op = "aim", .type = IMM8_MEM, .direct = 0x02, .indexed = 0x62, .extended = 0x72 },
@@ -304,7 +304,7 @@ static struct opcode opcodes_6309[] = {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct opcode *opcode_by_name(const char *name) {
+struct opcode const *opcode_by_name(const char *name) {
 	switch (asm6809_options.isa) {
 	case asm6809_isa_6309:
 		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(opcodes_6309); i++) {

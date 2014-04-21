@@ -133,10 +133,10 @@ struct node *node_ref(struct node *n);
 
 /* Access simple data safely.  Avoids NULL dereferences for undefined nodes. */
 
-enum node_type node_type_of(struct node *n);
-enum node_attr node_attr_of(struct node *n);
-int node_array_count(struct node *n);
-struct node **node_array_of(struct node *n);
+enum node_type node_type_of(struct node const *n);
+enum node_attr node_attr_of(struct node const *n);
+int node_array_count(struct node const *n);
+struct node **node_array_of(struct node const *n);
 
 /* Overwrite attribute on supplied node and return same node.  No new reference
  * is created. */
@@ -152,7 +152,7 @@ struct node *node_set_attr_if(struct node *n, enum node_attr attr);
 /* Compare two nodes.  Both must be defined and of a base type, or they will
  * compare unequal. */
 
-_Bool node_equal(struct node *n1, struct node *n2);
+_Bool node_equal(struct node const *n1, struct node const *n2);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -193,7 +193,7 @@ struct node *node_array_push(struct node *a, struct node *n);
  * Code exporting.
  */
 
-void node_print(FILE *f, struct node *n);
-void node_print_array(FILE *f, struct node *n);  // print array without []
+void node_print(FILE *f, struct node const *n);
+void node_print_array(FILE *f, struct node const *n);  // print array without []
 
 #endif  /* ASM6809_NODE_H_ */

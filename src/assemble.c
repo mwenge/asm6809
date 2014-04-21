@@ -334,7 +334,7 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 		}
 
 		/* Real instructions */
-		struct opcode *op = opcode_by_name(n_line.opcode->data.as_string);
+		struct opcode const *op = opcode_by_name(n_line.opcode->data.as_string);
 		if (op) {
 			int old_pc = cur_section->pc;
 			int op_imm = op->type & OPCODE_IMM;
