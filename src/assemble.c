@@ -44,8 +44,8 @@ static unsigned prog_depth = 0;
 static void set_label(struct node *label, struct node *value);
 static void args_float_to_int(struct node *args);
 static int verify_num_args(struct node *args, int min, int max, const char *op);
-static _Bool have_int_optional(struct node *args, int aindex, long *out, const char *op);
-static _Bool have_int_required(struct node *args, int aindex, long *out, const char *op);
+static long have_int_optional(struct node *args, int aindex, const char *op, long in);
+static long have_int_required(struct node *args, int aindex, const char *op, long in);
 
 /* Pseudo-operations */
 
@@ -165,41 +165,41 @@ static int verify_num_args(struct node *args, int min, int max, const char *op) 
 
 /* Get integer value from array.  Returns 0 (failure) if bad type. */
 
-static _Bool have_int_optional(struct node *args, int aindex, long *out, const char *op) {
+static long have_int_optional(struct node *args, int aindex, const char *op, long in) {
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
 	if (aindex < 0 || aindex >= nargs)
-		return 1;
+		return in;
 	switch (node_type_of(arga[aindex])) {
 	default:
 		error(error_type_syntax,
 		      "argument %d of '%s' invalid: expected integer value", aindex+1, op);
-		return 0;
+		return in;
 	case node_type_undef:
 		break;
 	case node_type_empty:
-		*out = 0;
+		in = 0;
 		break;
 	case node_type_int:
-		*out = arga[aindex]->data.as_int;
+		in = arga[aindex]->data.as_int;
 		break;
 	case node_type_float:
-		*out = arga[aindex]->data.as_float;
+		in = arga[aindex]->data.as_float;
 		break;
 	}
-	return 1;
+	return in;
 }
 
 /* Same, but fail if arg index out of bounds. */
 
-static _Bool have_int_required(struct node *args, int aindex, long *out, const char *op) {
+static long have_int_required(struct node *args, int aindex, const char *op, long in) {
 	int nargs = node_array_count(args);
 	if (aindex < 0 || aindex >= nargs) {
 		error(error_type_syntax,
 		      "required argument %d of '%s' missing", aindex+1, op);
-		return 0;
+		return in;
 	}
-	return have_int_optional(args, aindex, out, op);
+	return have_int_optional(args, aindex, op, in);
 }
 
 /* Perform an assembly pass on a program. */
@@ -436,14 +436,12 @@ static void pseudo_equ(struct prog_line *line) {
 static void pseudo_org(struct prog_line *line) {
 	if (verify_num_args(line->args, 1, 1, "ORG") < 0)
 		return;
-	long new_pc = cur_section->pc;
-	if (have_int_required(line->args, 0, &new_pc, "ORG")) {
-		cur_section->pc = new_pc;
-		if (new_pc >= 0)
-			cur_section->put = new_pc;
-		set_label(line->label, node_new_int(new_pc));
-		listing_add_line(new_pc & 0xffff, 0, NULL, line->text);
-	}
+	long new_pc = have_int_required(line->args, 0, "ORG", cur_section->pc);
+	cur_section->pc = new_pc;
+	if (new_pc >= 0)
+		cur_section->put = new_pc;
+	set_label(line->label, node_new_int(new_pc));
+	listing_add_line(new_pc & 0xffff, 0, NULL, line->text);
 }
 
 /* SECTION.  Switch sections. */
@@ -477,14 +475,12 @@ static void pseudo_section_name(struct prog_line *line) {
 static void pseudo_put(struct prog_line *line) {
 	if (verify_num_args(line->args, 1, 1, "PUT") < 0)
 		return;
-	long new_put = cur_section->put;
-	if (have_int_required(line->args, 0, &new_put, "PUT")) {
-		if (new_put < 0) {
-			error(error_type_out_of_range, "invalid negative address for PUT");
-			return;
-		}
-		cur_section->put = new_put;
+	long new_put = have_int_required(line->args, 0, "PUT", cur_section->put);
+	if (new_put < 0) {
+		error(error_type_out_of_range, "invalid negative address for PUT");
+		return;
 	}
+	cur_section->put = new_put;
 }
 
 /* SETDP.  Set the assumed Direct Page value (8-bit).  Addresses evaluated to
@@ -494,14 +490,12 @@ static void pseudo_put(struct prog_line *line) {
 static void pseudo_setdp(struct prog_line *line) {
 	if (verify_num_args(line->args, 1, 1, "SETDP") < 0)
 		return;
-	long new_dp = -1;
-	if (have_int_required(line->args, 0, &new_dp, "SETDP")) {
-		// negative number implies no valid DP
-		if (new_dp >= 0)
-			cur_section->dp = new_dp & 0xff;
-		else
-			cur_section->dp = -1;
-	}
+	long new_dp = have_int_required(line->args, 0, "SETDP", -1);
+	// negative number implies no valid DP
+	if (new_dp >= 0)
+		cur_section->dp = new_dp & 0xff;
+	else
+		cur_section->dp = -1;
 }
 
 /* EXPORT.  Flag a symbol or macro for exporting in the symbols file. */
@@ -563,8 +557,7 @@ static void pseudo_fdb(struct prog_line *line) {
 	if (nargs < 0)
 		return;
 	for (int i = 0; i < nargs; i++) {
-		long word = 0;
-		have_int_optional(line->args, i, &word, "FDB");
+		long word = have_int_optional(line->args, i, "FDB", 0);
 		section_emit(section_emit_type_imm16, word);
 	}
 }
@@ -575,11 +568,8 @@ static void pseudo_fdb(struct prog_line *line) {
 static void pseudo_rzb(struct prog_line *line) {
 	if (verify_num_args(line->args, 1, 2, "RZB") < 0)
 		return;
-	long count = 0, fill = 0;
-	if (!have_int_required(line->args, 0, &count, "RZB"))
-		return;
-	if (!have_int_optional(line->args, 1, &fill, "RZB"))
-		return;
+	long count = have_int_required(line->args, 0, "RZB", 0);
+	long fill = have_int_optional(line->args, 1, "RZB", 0);
 	if (count < 0) {
 		error(error_type_out_of_range, "negative count for RZB");
 	}
@@ -592,11 +582,8 @@ static void pseudo_rzb(struct prog_line *line) {
 static void pseudo_fill(struct prog_line *line) {
 	if (verify_num_args(line->args, 2, 2, "FILL") < 0)
 		return;
-	long count = 0, fill = 0;
-	if (!have_int_required(line->args, 0, &fill, "FILL"))
-		return;
-	if (!have_int_required(line->args, 1, &count, "FILL"))
-		return;
+	long fill = have_int_required(line->args, 0, "FILL", 0);
+	long count = have_int_required(line->args, 1, "FILL", 0);
 	if (count < 0) {
 		error(error_type_out_of_range, "negative count for FILL");
 	}
@@ -609,9 +596,7 @@ static void pseudo_fill(struct prog_line *line) {
 static void pseudo_rmb(struct prog_line *line) {
 	if (verify_num_args(line->args, 1, 1, "RMB") < 0)
 		return;
-	long count;
-	if (!have_int_required(line->args, 0, &count, "RMB"))
-		return;
+	long count = have_int_required(line->args, 0, "RMB", 0);
 	if (count < 0) {
 		error(error_type_out_of_range, "negative argument to RMB");
 		return;
