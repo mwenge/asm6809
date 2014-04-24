@@ -192,8 +192,8 @@ The following operators are available, listed in descending order of precedence
 Division always results in a floating point result.  Other arithmetic operators
 result in integers if both operands are integers, otherwise floating point.
 Bitwise operators and modulo all cast their operands to integers and result in
-an integer.  Integer calculations are performed using the platform's *long*
-type, floating point use *double*.
+an integer.  Integer calculations are performed using the platform's *int64_t*
+type, floating point uses *double*.
 
 
 Assembly passes

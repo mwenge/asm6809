@@ -44,8 +44,8 @@ static unsigned prog_depth = 0;
 static void set_label(struct node *label, struct node *value);
 static void args_float_to_int(struct node *args);
 static int verify_num_args(struct node *args, int min, int max, const char *op);
-static long have_int_optional(struct node *args, int aindex, const char *op, long in);
-static long have_int_required(struct node *args, int aindex, const char *op, long in);
+static int64_t have_int_optional(struct node *args, int aindex, const char *op, int64_t in);
+static int64_t have_int_required(struct node *args, int aindex, const char *op, int64_t in);
 
 /* Pseudo-operations */
 
@@ -165,7 +165,7 @@ static int verify_num_args(struct node *args, int min, int max, const char *op) 
 
 /* Get integer value from array.  Returns 0 (failure) if bad type. */
 
-static long have_int_optional(struct node *args, int aindex, const char *op, long in) {
+static int64_t have_int_optional(struct node *args, int aindex, const char *op, int64_t in) {
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
 	if (aindex < 0 || aindex >= nargs)
@@ -192,7 +192,7 @@ static long have_int_optional(struct node *args, int aindex, const char *op, lon
 
 /* Same, but fail if arg index out of bounds. */
 
-static long have_int_required(struct node *args, int aindex, const char *op, long in) {
+static int64_t have_int_required(struct node *args, int aindex, const char *op, int64_t in) {
 	int nargs = node_array_count(args);
 	if (aindex < 0 || aindex >= nargs) {
 		error(error_type_syntax,

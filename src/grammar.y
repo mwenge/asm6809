@@ -26,7 +26,7 @@ struct prog *grammar_parse_file(const char *filename);
 
 %union {
 	int as_token;
-	long as_int;
+	int64_t as_int;
 	double as_float;
 	char *as_string;
 	enum reg_id as_reg;

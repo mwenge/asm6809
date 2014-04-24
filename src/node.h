@@ -13,6 +13,7 @@ option) any later version.
 #ifndef ASM6809_NODE_H_
 #define ASM6809_NODE_H_
 
+#include <stdint.h>
 #include <stdio.h>
 
 #include "register.h"
@@ -101,7 +102,7 @@ struct node {
 	enum node_attr attr;
 	union {
 		struct node_oper as_oper;
-		long as_int;
+		int64_t as_int;
 		double as_float;
 		char *as_string;
 		enum reg_id as_reg;
@@ -163,7 +164,7 @@ _Bool node_equal(struct node const *n1, struct node const *n2);
 /* Base types */
 
 struct node *node_new_empty(void);
-struct node *node_new_int(long v);
+struct node *node_new_int(int64_t v);
 struct node *node_new_float(double v);
 struct node *node_new_reg(enum reg_id r);
 struct node *node_new_string(char *v);
@@ -171,8 +172,8 @@ struct node *node_new_string(char *v);
 /* Simple types */
 
 struct node *node_new_pc(void);
-struct node *node_new_backref(long v);
-struct node *node_new_fwdref(long v);
+struct node *node_new_backref(int64_t v);
+struct node *node_new_fwdref(int64_t v);
 struct node *node_new_interp(char *v);
 
 /* Operator types */

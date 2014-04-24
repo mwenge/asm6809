@@ -13,6 +13,7 @@ option) any later version.
 #include "config.h"
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -183,7 +184,7 @@ struct node *node_new_empty(void) {
 	return node_new(node_type_empty);
 }
 
-struct node *node_new_int(long v) {
+struct node *node_new_int(int64_t v) {
 	struct node *n = node_new(node_type_int);
 	n->data.as_int = v;
 	return n;
@@ -213,13 +214,13 @@ struct node *node_new_pc(void) {
 	return node_new(node_type_pc);
 }
 
-struct node *node_new_backref(long v) {
+struct node *node_new_backref(int64_t v) {
 	struct node *n = node_new(node_type_backref);
 	n->data.as_int = v;
 	return n;
 }
 
-struct node *node_new_fwdref(long v) {
+struct node *node_new_fwdref(int64_t v) {
 	struct node *n = node_new(node_type_fwdref);
 	n->data.as_int = v;
 	return n;
@@ -341,7 +342,7 @@ void node_print(FILE *f, struct node const *n) {
 	case node_type_empty:
 		break;
 	case node_type_int:
-		fprintf(f, "%ld", n->data.as_int);
+		fprintf(f, "%"PRId64, n->data.as_int);
 		break;
 	case node_type_float:
 		fprintf(f, "%f", n->data.as_float);
@@ -358,10 +359,10 @@ void node_print(FILE *f, struct node const *n) {
 		fprintf(f, "*");
 		break;
 	case node_type_backref:
-		fprintf(f, "%ldB", n->data.as_int);
+		fprintf(f, "%"PRId64"B", n->data.as_int);
 		break;
 	case node_type_fwdref:
-		fprintf(f, "%ldF", n->data.as_int);
+		fprintf(f, "%"PRId64"F", n->data.as_int);
 		break;
 	case node_type_interp:
 		fprintf(f, "&{%s}", n->data.as_string);

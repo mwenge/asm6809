@@ -48,13 +48,13 @@ word	[A-Za-z_][A-Za-z0-9_]*
 
 <INITIAL>{
 
-\%{bindigit}+	{ yylval.as_int = strtol(yytext+1, NULL, 2); return INTEGER; }
-0b{bindigit}+	{ yylval.as_int = strtol(yytext+2, NULL, 2); return INTEGER; }
-@{octdigit}+	{ yylval.as_int = strtol(yytext+1, NULL, 8); return INTEGER; }
-0{octdigit}+	{ yylval.as_int = strtol(yytext, NULL, 8); return INTEGER; }
-{decimal}	{ yylval.as_int = strtol(yytext, NULL, 10); return INTEGER; }
-${hexdigit}+	{ yylval.as_int = strtol(yytext+1, NULL, 16); return INTEGER; }
-0x{hexdigit}+	{ yylval.as_int = strtol(yytext+2, NULL, 16); return INTEGER; }
+\%{bindigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 2); return INTEGER; }
+0b{bindigit}+	{ yylval.as_int = strtoimax(yytext+2, NULL, 2); return INTEGER; }
+@{octdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 8); return INTEGER; }
+0{octdigit}+	{ yylval.as_int = strtoimax(yytext, NULL, 8); return INTEGER; }
+{decimal}	{ yylval.as_int = strtoimax(yytext, NULL, 10); return INTEGER; }
+${hexdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
+0x{hexdigit}+	{ yylval.as_int = strtoimax(yytext+2, NULL, 16); return INTEGER; }
 '.		{ yylval.as_int = *(yytext+1); return INTEGER; }
 \!		{ yylval.as_int = 0; return INTEGER; }
 
@@ -87,13 +87,13 @@ ${hexdigit}+	{ yylval.as_int = strtol(yytext+1, NULL, 16); return INTEGER; }
 
 <arg,argnostr>{
 
-\%{bindigit}+	{ BEGIN(argnonum); yylval.as_int = strtol(yytext+1, NULL, 2); return INTEGER; }
-0b{bindigit}+	{ BEGIN(argnonum); yylval.as_int = strtol(yytext+2, NULL, 2); return INTEGER; }
-@{octdigit}+	{ BEGIN(argnonum); yylval.as_int = strtol(yytext+1, NULL, 8); return INTEGER; }
-0{octdigit}+	{ BEGIN(argnonum); yylval.as_int = strtol(yytext, NULL, 8); return INTEGER; }
-{decimal}	{ BEGIN(argnonum); yylval.as_int = strtol(yytext, NULL, 10); return INTEGER; }
-${hexdigit}+	{ BEGIN(argnonum); yylval.as_int = strtol(yytext+1, NULL, 16); return INTEGER; }
-0x{hexdigit}+	{ BEGIN(argnonum); yylval.as_int = strtol(yytext+2, NULL, 16); return INTEGER; }
+\%{bindigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext+1, NULL, 2); return INTEGER; }
+0b{bindigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext+2, NULL, 2); return INTEGER; }
+@{octdigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext+1, NULL, 8); return INTEGER; }
+0{octdigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext, NULL, 8); return INTEGER; }
+{decimal}	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext, NULL, 10); return INTEGER; }
+${hexdigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
+0x{hexdigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext+2, NULL, 16); return INTEGER; }
 '.		{ BEGIN(argnonum); yylval.as_int = *(yytext+1); return INTEGER; }
 [0-9]*\.[0-9]+	|
 {decimal}\.	{ BEGIN(argnonum); yylval.as_float = strtod(yytext, NULL); return FLOAT; }
@@ -123,8 +123,8 @@ ${hexdigit}+	{ BEGIN(argnonum); yylval.as_int = strtol(yytext+1, NULL, 16); retu
 \+\+		{ BEGIN(argnonum); return INC2; }
 \-\-		{ BEGIN(argnonum); return DEC2; }
 
-{decimal}[bB]	{ BEGIN(argnonum); yylval.as_int = strtol(yytext, NULL, 10); return BACKREF; }
-{decimal}[fF]	{ BEGIN(argnonum); yylval.as_int = strtol(yytext, NULL, 10); return FWDREF; }
+{decimal}[bB]	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext, NULL, 10); return BACKREF; }
+{decimal}[fF]	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext, NULL, 10); return FWDREF; }
 
 "<<"		{ BEGIN(argnostr); return SHL; }
 ">>"		{ BEGIN(argnostr); return SHR; }

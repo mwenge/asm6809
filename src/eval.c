@@ -12,6 +12,7 @@ option) any later version.
 
 #include "config.h"
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -154,7 +155,7 @@ struct node *eval_string(struct node *n) {
 			addtext = xstrdup(tmp->data.as_string);
 			break;
 		case node_type_int:
-			addtext = xasprintf("%ld", tmp->data.as_int);
+			addtext = xasprintf("%"PRId64, tmp->data.as_int);
 			break;
 		case node_type_reg:
 			if (tmp->attr != node_attr_none) {
