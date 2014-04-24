@@ -30,5 +30,6 @@ void instr_indexed(struct opcode const *op, struct node const *args);
 void instr_address(struct opcode const *op, struct node const *args);
 void instr_stack(struct opcode const *op, struct node const *args, enum reg_id stack);
 void instr_pair(struct opcode const *op, struct node const *args);
+void instr_reg_mem(struct opcode const *op, struct node const *args);
 
 #endif  /* ASM6809_INSTR_H_ */

@@ -559,3 +559,68 @@ invalid_register:
 	error(error_type_syntax, "invalid register in inter-register op");
 	return;
 }
+
+/*
+ * Logical operations between specified bits from a register and a direct
+ * address.  6309 extended instructions.
+ */
+
+void instr_reg_mem(struct opcode const *op, struct node const *args) {
+	int nargs = node_array_count(args);
+	struct node **arga = node_array_of(args);
+	if (nargs != 4) {
+		error(error_type_syntax, "invalid number of arguments");
+		return;
+	}
+	int pbyte = 0xc0;
+	switch (node_type_of(arga[0])) {
+	case node_type_undef:
+		break;
+	case node_type_int:
+		pbyte |= (arga[0]->data.as_int & 3) << 6;
+		error(error_type_illegal, "numerical value used in place of register");
+		break;
+	case node_type_reg:
+		switch (arga[0]->data.as_reg) {
+		case REG_CC:
+			pbyte = 0;
+			break;
+		case REG_A:
+			pbyte = 0x40;
+			break;
+		case REG_B:
+			pbyte = 0x80;
+			break;
+		default:
+			goto invalid_register;
+		}
+		break;
+	default:
+		goto invalid_register;
+	}
+	if (node_type_of(arga[1]) == node_type_int) {
+		if (arga[1]->data.as_int < 0 || arga[1]->data.as_int > 7) {
+			error(error_type_out_of_range, "bad source bit");
+		} else {
+			pbyte |= (arga[1]->data.as_int << 3);
+		}
+	}
+	if (node_type_of(arga[2]) == node_type_int) {
+		if (arga[2]->data.as_int < 0 || arga[2]->data.as_int > 7) {
+			error(error_type_out_of_range, "bad destination bit");
+		} else {
+			pbyte |= arga[2]->data.as_int;
+		}
+	}
+	section_emit(section_emit_type_op_direct, op);
+	section_emit(section_emit_type_imm8, pbyte);
+	if (node_type_of(arga[3]) == node_type_int) {
+		section_emit(section_emit_type_imm8, arga[3]->data.as_int);
+	} else {
+		section_emit(section_emit_type_pad, 1);
+	}
+	return;
+invalid_register:
+	error(error_type_syntax, "invalid register in register-memory operation");
+	return;
+}

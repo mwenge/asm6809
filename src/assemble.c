@@ -359,6 +359,8 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 				instr_stack(op, n_line.args, REG_S);
 			} else if (op_ext_type == OPCODE_PAIR) {
 				instr_pair(op, n_line.args);
+			} else if (op_ext_type == OPCODE_REG_MEM) {
+				instr_reg_mem(op, n_line.args);
 			} else {
 				error(error_type_syntax, "invalid addressing mode");
 			}
