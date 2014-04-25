@@ -537,6 +537,7 @@ void instr_pair(struct opcode const *op, struct node const *args) {
 		case node_type_int:
 			pbyte |= (arga[i]->data.as_int & 0x0f);
 			error(error_type_illegal, "numerical values used in inter-register op");
+			break;
 		case node_type_reg:
 			nibble = pair_nibble(arga[i]->data.as_reg);
 			if (nibble == -1)
