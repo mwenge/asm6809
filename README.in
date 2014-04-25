@@ -1,9 +1,9 @@
 asm6809
 =======
 
-*asm6809* is a multiple pass 6809 cross assembler.  Text is read in and parsed,
-then as many passes are made over the parsed source as necessary (up to a
-limit), until symbols are resolved and addresses are stable.
+*asm6809* is a multiple pass 6809 & 6309 cross assembler.  Text is read in and
+parsed, then as many passes are made over the parsed source as necessary (up to
+a limit), until symbols are resolved and addresses are stable.
 
 This is a prerelease version.  It is not complete and may well have bugs
 (although reasonable diligence has been observed during development using
@@ -54,7 +54,7 @@ Running
 
 <pre>
 Usage: asm6809 [OPTION]... SOURCE-FILE...
-Assembles 6809 source code.
+Assembles 6809/6309 source code.
 
   -B, --bin         output to binary file (default)
   -D, --dragondos   output to DragonDOS binary file
