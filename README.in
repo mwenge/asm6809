@@ -63,6 +63,10 @@ Assembles 6809 source code.
   -H, --hex         output to Intel hex record file
   -e, --exec=ADDR   EXEC address (for output formats that support one)
 
+  -8,
+  -9, --6809        use 6809 ISA (default)
+  -3, --6309        use 6309 ISA (6809 with extensions)
+
   -o, --output=FILE    set output filename
   -l, --listing=FILE   create listing file
   -s, --symbols=FILE   create symbol table
