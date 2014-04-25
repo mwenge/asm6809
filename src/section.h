@@ -26,6 +26,7 @@ enum section_emit_type {
 	section_emit_type_op_direct,
 	section_emit_type_op_indexed,
 	section_emit_type_op_extended,
+	section_emit_type_op_tfm,
 	section_emit_type_imm8,
 	section_emit_type_imm16,
 	section_emit_type_imm32,

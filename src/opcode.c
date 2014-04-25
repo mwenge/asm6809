@@ -269,7 +269,7 @@ static struct opcode const opcodes_6309[] = {
 	{ .op = "bieor", .type = REG_MEM, .direct = 0x1135 },
 	{ .op = "ldbt",  .type = REG_MEM, .direct = 0x1136 },
 	{ .op = "stbt",  .type = REG_MEM, .direct = 0x1137 },
-	{ .op = "tfm", .type = TFM, .direct = 0x1138 },
+	{ .op = "tfm", .type = TFM, .immediate = 0x1138 },
 	{ .op = "bitmd", .type = IMM8, .immediate = 0x113c },
 	{ .op = "ldmd", .type = IMM8, .immediate = 0x113d },
 

@@ -31,6 +31,7 @@ void instr_address(struct opcode const *op, struct node const *args, int imm8_va
 void instr_imm8_mem(struct opcode const *op, struct node const *args);
 void instr_stack(struct opcode const *op, struct node const *args, enum reg_id stack);
 void instr_pair(struct opcode const *op, struct node const *args);
+void instr_tfm(struct opcode const *op, struct node const *args);
 void instr_reg_mem(struct opcode const *op, struct node const *args);
 
 #endif  /* ASM6809_INSTR_H_ */

@@ -554,11 +554,12 @@ static int pair_nibble(enum reg_id r) {
 
 void instr_pair(struct opcode const *op, struct node const *args) {
 	int nargs = node_array_count(args);
-	struct node **arga = node_array_of(args);
+	struct node * const *arga = node_array_of(args);
 	if (nargs != 2) {
 		error(error_type_syntax, "invalid number of arguments");
 		return;
 	}
+
 	int pbyte = 0;
 	for (int i = 0; i < 2; i++) {
 		int nibble;
@@ -580,11 +581,78 @@ void instr_pair(struct opcode const *op, struct node const *args) {
 			goto invalid_register;
 		}
 	}
+
 	section_emit(section_emit_type_op_immediate, op);
 	section_emit(section_emit_type_imm8, pbyte);
 	return;
+
 invalid_register:
 	error(error_type_syntax, "invalid register in inter-register op");
+	return;
+}
+
+/*
+ * 6309 extension TFM.
+ */
+
+void instr_tfm(struct opcode const *op, struct node const *args) {
+	int nargs = node_array_count(args);
+	struct node * const *arga = node_array_of(args);
+	if (nargs != 2) {
+		error(error_type_syntax, "invalid number of arguments");
+		return;
+	}
+
+	int pbyte = 0;
+	for (int i = 0; i < 2; i++) {
+		int nibble;
+		pbyte <<= 4;
+		switch (node_type_of(arga[i])) {
+		case node_type_undef:
+			break;
+		case node_type_int:
+			pbyte |= (arga[i]->data.as_int & 0x0f);
+			error(error_type_illegal, "numerical values used in TFM op");
+			break;
+		case node_type_reg:
+			switch (arga[i]->data.as_reg) {
+			case REG_X: case REG_Y: case REG_U: case REG_S: case REG_D:
+				break;
+			default:
+				goto invalid_register;
+			}
+			nibble = pair_nibble(arga[i]->data.as_reg);
+			if (nibble == -1)
+				goto invalid_register;
+			pbyte |= nibble;
+			break;
+		default:
+			goto invalid_register;
+		}
+	}
+
+	enum node_attr attr0 = node_attr_of(arga[0]);
+	enum node_attr attr1 = node_attr_of(arga[1]);
+	int mod = 0;
+	if (attr0 == node_attr_postinc && attr1 == node_attr_postinc) {
+		mod = 0;
+	} else if (attr0 == node_attr_postdec && attr1 == node_attr_postdec) {
+		mod = 1;
+	} else if (attr0 == node_attr_postinc && attr1 == node_attr_none) {
+		mod = 2;
+	} else if (attr0 == node_attr_none && attr1 == node_attr_postinc) {
+		mod = 3;
+	} else {
+		error(error_type_syntax, "invalid TFM mode");
+		return;
+	}
+
+	section_emit(section_emit_type_op_tfm, op, mod);
+	section_emit(section_emit_type_imm8, pbyte);
+	return;
+
+invalid_register:
+	error(error_type_syntax, "invalid register in TFM op");
 	return;
 }
 
@@ -600,6 +668,7 @@ void instr_reg_mem(struct opcode const *op, struct node const *args) {
 		error(error_type_syntax, "invalid number of arguments");
 		return;
 	}
+
 	int pbyte = 0xc0;
 	switch (node_type_of(arga[0])) {
 	case node_type_undef:
@@ -626,6 +695,7 @@ void instr_reg_mem(struct opcode const *op, struct node const *args) {
 	default:
 		goto invalid_register;
 	}
+
 	if (node_type_of(arga[1]) == node_type_int) {
 		if (arga[1]->data.as_int < 0 || arga[1]->data.as_int > 7) {
 			error(error_type_out_of_range, "bad source bit");
@@ -640,6 +710,7 @@ void instr_reg_mem(struct opcode const *op, struct node const *args) {
 			pbyte |= arga[2]->data.as_int;
 		}
 	}
+
 	section_emit(section_emit_type_op_direct, op);
 	section_emit(section_emit_type_imm8, pbyte);
 	if (node_type_of(arga[3]) == node_type_int) {
@@ -648,6 +719,7 @@ void instr_reg_mem(struct opcode const *op, struct node const *args) {
 		section_emit(section_emit_type_pad, 1);
 	}
 	return;
+
 invalid_register:
 	error(error_type_syntax, "invalid register in register-memory operation");
 	return;

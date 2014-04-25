@@ -289,6 +289,12 @@ void section_emit(enum section_emit_type type, ...) {
 		output = op->extended;
 		nbytes = op_size(output);
 		break;
+	case section_emit_type_op_tfm:
+		op = va_arg(ap, struct opcode *);
+		output = op->immediate;
+		output += va_arg(ap, int);
+		nbytes = op_size(output);
+		break;
 	case section_emit_type_imm8:
 	case section_emit_type_rel8:
 		output = va_arg(ap, int);
