@@ -17,8 +17,8 @@ option) any later version.
  * Each instruction opcode may have many forms.
  *
  * - type: Bits 0, 1 and 2 indicate the presence of direct, indexed and
- *   extended opcode values.  Bits 3-5 indicate how the the immediate opcode
- *   value is to be interpreted.
+ *   extended opcode values.  Bits 3-5 indicate an extended opcode type
+ *   (usually inherent or immediate if none of the lower bits are set).
  *
  * - immediate, direct, indexed, extended: Opcode value for the corresponding
  *   mode.  If bits 8-15 are non-zero, they indicate an instruction page byte.
@@ -36,7 +36,7 @@ struct opcode {
 #define OPCODE_DIRECT   (1 << 0)
 #define OPCODE_INDEXED  (1 << 1)
 #define OPCODE_EXTENDED (1 << 2)
-#define OPCODE_IMM      (15 << 3)
+#define OPCODE_EXT_TYPE (15 << 3)
 
 #define OPCODE_MEM (OPCODE_DIRECT|OPCODE_INDEXED|OPCODE_EXTENDED)
 

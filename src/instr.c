@@ -54,12 +54,12 @@ void instr_immediate(struct opcode const *op, struct node const *args) {
 	}
 	section_emit(section_emit_type_op_immediate, op);
 	if (node_type_of(arga[0]) == node_type_int) {
-		if ((op->type & OPCODE_IMM) == OPCODE_IMM8)
+		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM8)
 			section_emit(section_emit_type_imm8, arga[0]->data.as_int);
 		else
 			section_emit(section_emit_type_imm16, arga[0]->data.as_int);
 	} else {
-		if ((op->type & OPCODE_IMM) == OPCODE_IMM8)
+		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM8)
 			section_emit(section_emit_type_pad, 1);
 		else
 			section_emit(section_emit_type_pad, 2);
@@ -81,12 +81,12 @@ void instr_rel(struct opcode const *op, struct node const *args) {
 	}
 	section_emit(section_emit_type_op_immediate, op);
 	if (node_type_of(arga[0]) == node_type_int) {
-		if ((op->type & OPCODE_IMM) == OPCODE_REL8)
+		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_REL8)
 			section_emit(section_emit_type_rel8, arga[0]->data.as_int);
 		else
 			section_emit(section_emit_type_rel16, arga[0]->data.as_int);
 	} else {
-		if ((op->type & OPCODE_IMM) == OPCODE_REL8)
+		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_REL8)
 			section_emit(section_emit_type_pad, 1);
 		else
 			section_emit(section_emit_type_pad, 2);

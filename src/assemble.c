@@ -337,26 +337,26 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 		struct opcode const *op = opcode_by_name(n_line.opcode->data.as_string);
 		if (op) {
 			int old_pc = cur_section->pc;
-			int op_imm = op->type & OPCODE_IMM;
+			int op_ext_type = op->type & OPCODE_EXT_TYPE;
 			/* No instruction accepts floats, convert them all to
 			 * integer here as a convenience: */
 			args_float_to_int(n_line.args);
 			if (op->type == OPCODE_INHERENT) {
 				instr_inherent(op, n_line.args);
-			} else if ((op_imm == OPCODE_IMM8 ||
-				    op_imm == OPCODE_IMM16) &&
+			} else if ((op_ext_type == OPCODE_IMM8 ||
+				    op_ext_type == OPCODE_IMM16) &&
 				   (arg_attr(l->args, 0) == node_attr_immediate)) {
 				instr_immediate(op, n_line.args);
 			} else if (op->type & OPCODE_MEM) {
 				instr_address(op, n_line.args);
-			} else if (op_imm == OPCODE_REL8 ||
-				   op_imm == OPCODE_REL16) {
+			} else if (op_ext_type == OPCODE_REL8 ||
+				   op_ext_type == OPCODE_REL16) {
 				instr_rel(op, n_line.args);
-			} else if (op_imm == OPCODE_STACKU) {
+			} else if (op_ext_type == OPCODE_STACKU) {
 				instr_stack(op, n_line.args, REG_U);
-			} else if (op_imm == OPCODE_STACKS) {
+			} else if (op_ext_type == OPCODE_STACKS) {
 				instr_stack(op, n_line.args, REG_S);
-			} else if (op_imm == OPCODE_PAIR) {
+			} else if (op_ext_type == OPCODE_PAIR) {
 				instr_pair(op, n_line.args);
 			} else {
 				error(error_type_syntax, "invalid addressing mode");
