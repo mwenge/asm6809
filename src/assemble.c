@@ -348,8 +348,12 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 				    op_ext_type == OPCODE_IMM32) &&
 				   (arg_attr(l->args, 0) == node_attr_immediate)) {
 				instr_immediate(op, n_line.args);
+			} else if (op_ext_type == OPCODE_IMM8_MEM) {
+				/* Important to check this here, as the
+				 * OPCODE_MEM bits will also be set. */
+				instr_imm8_mem(op, n_line.args);
 			} else if (op->type & OPCODE_MEM) {
-				instr_address(op, n_line.args);
+				instr_address(op, n_line.args, -1);
 			} else if (op_ext_type == OPCODE_REL8 ||
 				   op_ext_type == OPCODE_REL16) {
 				instr_rel(op, n_line.args);

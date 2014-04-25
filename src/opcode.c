@@ -35,7 +35,7 @@ option) any later version.
 #define REL8     OPCODE_REL8
 #define REL16    OPCODE_REL16
 #define IMM32    OPCODE_IMM32
-#define IMM8_MEM OPCODE_IMM8_MEM
+#define IMM8_MEM OPCODE_IMM8_MEM|OPCODE_MEM
 #define REG_MEM  OPCODE_REG_MEM
 #define TFM      OPCODE_TFM
 

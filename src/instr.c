@@ -361,8 +361,7 @@ invalid_mode:
 	return;
 }
 
-
-void instr_indexed(struct opcode const *op, struct node const *args) {
+void instr_indexed(struct opcode const *op, struct node const *args, int imm8_val) {
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
 	int indirect = 0;
@@ -376,6 +375,8 @@ void instr_indexed(struct opcode const *op, struct node const *args) {
 		return;
 	}
 	section_emit(section_emit_type_op_indexed, op);
+	if (imm8_val >= 0)
+		section_emit(section_emit_type_imm8, imm8_val);
 
 	if (nargs == 1) {
 		int pbyte = indirect ? 0x9f : 0x8f;
@@ -415,7 +416,7 @@ void instr_indexed(struct opcode const *op, struct node const *args) {
  * Direct and extended addressing.
  */
 
-void instr_address(struct opcode const *op, struct node const *args) {
+void instr_address(struct opcode const *op, struct node const *args, int imm8_val) {
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
 	if (nargs < 1 || nargs > 2 || (!(op->type & OPCODE_INDEXED) && nargs > 1)) {
@@ -423,7 +424,7 @@ void instr_address(struct opcode const *op, struct node const *args) {
 		return;
 	}
 	if (nargs == 2 || (nargs == 1 && node_type_of(arga[0]) == node_type_array)) {
-		instr_indexed(op, args);
+		instr_indexed(op, args, imm8_val);
 		return;
 	}
 
@@ -440,6 +441,8 @@ void instr_address(struct opcode const *op, struct node const *args) {
 		if (attr == node_attr_8bit ||
 		    (attr == node_attr_none && (cur_section->dp == (addr >> 8)))) {
 			section_emit(section_emit_type_op_direct, op);
+			if (imm8_val >= 0)
+				section_emit(section_emit_type_imm8, imm8_val);
 			section_emit(section_emit_type_imm8, addr);
 			return;
 		}
@@ -448,12 +451,37 @@ void instr_address(struct opcode const *op, struct node const *args) {
 	if ((op->type & OPCODE_EXTENDED)) {
 		if (attr == node_attr_16bit || attr == node_attr_none) {
 			section_emit(section_emit_type_op_extended, op);
+			if (imm8_val >= 0)
+				section_emit(section_emit_type_imm8, imm8_val);
 			section_emit(section_emit_type_imm16, addr);
 			return;
 		}
 	}
 
-	instr_indexed(op, args);
+	instr_indexed(op, args, imm8_val);
+}
+
+/*
+ * 6309-specific 8-bit immediate in-memory instructions.
+ */
+
+void instr_imm8_mem(struct opcode const *op, struct node const *args) {
+	int nargs = node_array_count(args);
+	struct node **arga = node_array_of(args);
+	if (nargs < 2 || nargs > 3 || (!(op->type & OPCODE_INDEXED) && nargs > 2)) {
+		error(error_type_syntax, "invalid number of arguments");
+		return;
+	}
+	int imm8_val = 0;
+	if (node_type_of(arga[0]) == node_type_int)
+		imm8_val = arga[0]->data.as_int;
+	struct node *newa = node_new_array();
+	newa->data.as_array.nargs = nargs - 1;
+	newa->data.as_array.args = arga + 1;
+	instr_address(op, newa, imm8_val);
+	newa->data.as_array.nargs = 0;
+	newa->data.as_array.args = NULL;
+	node_free(newa);
 }
 
 /*
