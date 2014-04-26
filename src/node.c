@@ -198,6 +198,7 @@ struct node *node_new_float(double v) {
 
 struct node *node_new_reg(enum reg_id r) {
 	struct node *n = node_new(node_type_reg);
+	assert(r > REG_INVALID && r < REG_MAX);
 	n->data.as_reg = r;
 	return n;
 }
