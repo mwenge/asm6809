@@ -45,6 +45,7 @@ static struct reg_info const registers_6309[] = {
 	{ .name = "f",  .id = REG_F },
 	{ .name = "w",  .id = REG_W },
 	{ .name = "q",  .id = REG_Q },
+	{ .name = "v",  .id = REG_V },
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
