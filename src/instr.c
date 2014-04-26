@@ -36,7 +36,7 @@ void instr_inherent(struct opcode const *op, struct node const *args) {
 	if (nargs != 0) {
 		error(error_type_syntax, "unexpected argument");
 	}
-	section_emit(section_emit_type_op_immediate, op);
+	SECTION_EMIT_OP_IMMEDIATE(op);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -52,21 +52,21 @@ void instr_immediate(struct opcode const *op, struct node const *args) {
 		error(error_type_syntax, "invalid number of arguments");
 		return;
 	}
-	section_emit(section_emit_type_op_immediate, op);
+	SECTION_EMIT_OP_IMMEDIATE(op);
 	if (node_type_of(arga[0]) == node_type_int) {
 		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM8)
-			section_emit(section_emit_type_imm8, arga[0]->data.as_int);
+			SECTION_EMIT_IMM8(arga[0]->data.as_int);
 		else if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM16)
-			section_emit(section_emit_type_imm16, arga[0]->data.as_int);
+			SECTION_EMIT_IMM16(arga[0]->data.as_int);
 		else
-			section_emit(section_emit_type_imm32, arga[0]->data.as_int);
+			SECTION_EMIT_IMM32(arga[0]->data.as_int);
 	} else {
 		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM8)
-			section_emit(section_emit_type_pad, 1);
+			SECTION_EMIT_PAD(1);
 		else if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM16)
-			section_emit(section_emit_type_pad, 2);
+			SECTION_EMIT_PAD(2);
 		else
-			section_emit(section_emit_type_pad, 4);
+			SECTION_EMIT_PAD(4);
 	}
 }
 
@@ -83,17 +83,18 @@ void instr_rel(struct opcode const *op, struct node const *args) {
 		error(error_type_syntax, "invalid number of arguments");
 		return;
 	}
-	section_emit(section_emit_type_op_immediate, op);
+	SECTION_EMIT_OP_IMMEDIATE(op);
+	_Bool nowarn_rel16 = (node_attr_of(arga[0]) == node_attr_16bit);
 	if (node_type_of(arga[0]) == node_type_int) {
 		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_REL8)
-			section_emit(section_emit_type_rel8, arga[0]->data.as_int);
+			SECTION_EMIT_REL8(arga[0]->data.as_int);
 		else
-			section_emit(section_emit_type_rel16, arga[0]->data.as_int);
+			SECTION_EMIT_REL16(arga[0]->data.as_int, nowarn_rel16);
 	} else {
 		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_REL8)
-			section_emit(section_emit_type_pad, 1);
+			SECTION_EMIT_PAD(1);
 		else
-			section_emit(section_emit_type_pad, 2);
+			SECTION_EMIT_PAD(2);
 	}
 }
 
@@ -207,7 +208,7 @@ static void instr_indexed2(_Bool indirect, struct node *arg0, struct node *arg1)
 
 	switch (off_type) {
 	case node_type_undef:
-		section_emit(section_emit_type_pad, 3);
+		SECTION_EMIT_PAD(3);
 		return;
 	case node_type_empty:
 		break;
@@ -233,7 +234,7 @@ static void instr_indexed2(_Bool indirect, struct node *arg0, struct node *arg1)
 
 	switch (idx_type) {
 	case node_type_undef:
-		section_emit(section_emit_type_pad, 3);
+		SECTION_EMIT_PAD(3);
 		return;
 	case node_type_reg:
 		if (idx_attr != node_attr_none && idx_attr != node_attr_postinc &&
@@ -337,20 +338,20 @@ static void instr_indexed2(_Bool indirect, struct node *arg0, struct node *arg1)
 			pbyte |= (indirect ? 0x10 : 0);
 		if (flags_5bit)
 			pbyte |= (off_value & 0x1f);
-		section_emit(section_emit_type_imm8, pbyte);
+		SECTION_EMIT_IMM8(pbyte);
 		if (flags_5bit)
 			return;
 
 		if (!flags_rel) {
 			if (flags_8bit)
-				section_emit(section_emit_type_imm8, off_value);
+				SECTION_EMIT_IMM8(off_value);
 			if (flags_16bit)
-				section_emit(section_emit_type_imm16, off_value);
+				SECTION_EMIT_IMM16(off_value);
 		} else {
 			if (flags_8bit)
-				section_emit(section_emit_type_rel8, off_value);
+				SECTION_EMIT_REL8(off_value);
 			if (flags_16bit)
-				section_emit(section_emit_type_rel16, off_value);
+				SECTION_EMIT_REL16(off_value, 1);
 		}
 
 		return;
@@ -374,16 +375,16 @@ void instr_indexed(struct opcode const *op, struct node const *args, int imm8_va
 		error(error_type_syntax, "invalid number of arguments");
 		return;
 	}
-	section_emit(section_emit_type_op_indexed, op);
+	SECTION_EMIT_OP_INDEXED(op);
 	if (imm8_val >= 0)
-		section_emit(section_emit_type_imm8, imm8_val);
+		SECTION_EMIT_IMM8(imm8_val);
 
 	if (nargs == 1) {
 		int pbyte = indirect ? 0x9f : 0x8f;
 		int addr = 0;
 		switch (node_type_of(arga[0])) {
 		case node_type_undef:
-			section_emit(section_emit_type_pad, 3);
+			SECTION_EMIT_PAD(3);
 			break;
 		case node_type_int:
 			addr = arga[0]->data.as_int;
@@ -402,8 +403,8 @@ void instr_indexed(struct opcode const *op, struct node const *args, int imm8_va
 		}
 		if (!indirect)
 			error(error_type_illegal, "illegal indexed addressing form");
-		section_emit(section_emit_type_imm8, pbyte);
-		section_emit(section_emit_type_imm16, addr);
+		SECTION_EMIT_IMM8(pbyte);
+		SECTION_EMIT_IMM16(addr);
 		return;
 	}
 
@@ -440,20 +441,20 @@ void instr_address(struct opcode const *op, struct node const *args, int imm8_va
 	if ((op->type & OPCODE_DIRECT)) {
 		if (attr == node_attr_8bit ||
 		    (attr == node_attr_none && (cur_section->dp == (addr >> 8)))) {
-			section_emit(section_emit_type_op_direct, op);
+			SECTION_EMIT_OP_DIRECT(op);
 			if (imm8_val >= 0)
-				section_emit(section_emit_type_imm8, imm8_val);
-			section_emit(section_emit_type_imm8, addr);
+				SECTION_EMIT_IMM8(imm8_val);
+			SECTION_EMIT_IMM8(addr);
 			return;
 		}
 	}
 
 	if ((op->type & OPCODE_EXTENDED)) {
 		if (attr == node_attr_16bit || attr == node_attr_none) {
-			section_emit(section_emit_type_op_extended, op);
+			SECTION_EMIT_OP_EXTENDED(op);
 			if (imm8_val >= 0)
-				section_emit(section_emit_type_imm8, imm8_val);
-			section_emit(section_emit_type_imm16, addr);
+				SECTION_EMIT_IMM8(imm8_val);
+			SECTION_EMIT_IMM16(addr);
 			return;
 		}
 	}
@@ -520,9 +521,11 @@ void instr_stack(struct opcode const *op, struct node const *args, enum reg_id s
 			goto invalid_register;
 		pbyte |= (bit & 0xff);
 	}
-	section_emit(section_emit_type_op_immediate, op);
-	section_emit(section_emit_type_imm8, pbyte);
+
+	SECTION_EMIT_OP_IMMEDIATE(op);
+	SECTION_EMIT_IMM8(pbyte);
 	return;
+
 invalid_register:
 	error(error_type_syntax, "invalid register in stack operation");
 	return;
@@ -582,8 +585,8 @@ void instr_pair(struct opcode const *op, struct node const *args) {
 		}
 	}
 
-	section_emit(section_emit_type_op_immediate, op);
-	section_emit(section_emit_type_imm8, pbyte);
+	SECTION_EMIT_OP_IMMEDIATE(op);
+	SECTION_EMIT_IMM8(pbyte);
 	return;
 
 invalid_register:
@@ -647,8 +650,8 @@ void instr_tfm(struct opcode const *op, struct node const *args) {
 		return;
 	}
 
-	section_emit(section_emit_type_op_tfm, op, mod);
-	section_emit(section_emit_type_imm8, pbyte);
+	SECTION_EMIT_OP_TFM(op, mod);
+	SECTION_EMIT_IMM8(pbyte);
 	return;
 
 invalid_register:
@@ -711,12 +714,12 @@ void instr_reg_mem(struct opcode const *op, struct node const *args) {
 		}
 	}
 
-	section_emit(section_emit_type_op_direct, op);
-	section_emit(section_emit_type_imm8, pbyte);
+	SECTION_EMIT_OP_DIRECT(op);
+	SECTION_EMIT_IMM8(pbyte);
 	if (node_type_of(arga[3]) == node_type_int) {
-		section_emit(section_emit_type_imm8, arga[3]->data.as_int);
+		SECTION_EMIT_IMM8(arga[3]->data.as_int);
 	} else {
-		section_emit(section_emit_type_pad, 1);
+		SECTION_EMIT_PAD(1);
 	}
 	return;
 
