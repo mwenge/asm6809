@@ -326,6 +326,12 @@ void section_emit(enum section_emit_type type, ...) {
 		if (output < -128 || output > 127)
 			error(error_type_out_of_range, "8-bit relative value out of range");
 	}
+	if (type == section_emit_type_rel16) {
+		/* Note: all rel16 op-codes currently have 8-bit equivalents.
+		 * If that were to change, more data would be required here. */
+		if (output >= -128 && output <= 127)
+			error(error_type_inefficient, "16-bit relative value could be represented in 8 bits");
+	}
 
 	if (cur_section->pc >= (int)(span->org + span->allocated)) {
 		span->allocated += 128;
