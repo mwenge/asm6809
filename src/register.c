@@ -48,6 +48,29 @@ static struct reg_info const registers_6309[] = {
 	{ .name = "v",  .id = REG_V },
 };
 
+/* Useful lookup tables.  Indexed by positive reg_id only. */
+
+int8_t const reg_tfr_size[REG_MAX] = {
+	8, 8, 8, 8,
+	16, 16, 16 ,16, 16, 16,
+	-1,
+	8, 8, 16, 32, 16
+};
+
+int8_t const reg_tfr_nibble[REG_MAX] = {
+	0x0a, 0x08, 0x09, 0x0b,
+	0x01, 0x02, 0x03, 0x04, 0x05, 0x00,
+	-1,
+	0x0e, 0x0f, 0x06, -1, 0x07
+};
+
+uint8_t const reg_stack_bit[REG_MAX] = {
+	0x01, 0x02, 0x04, 0x08,
+	0x10, 0x20, 0x40, 0x40, 0x80, 0x06,
+	0,
+	0, 0, 0, 0, 0
+};
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 enum reg_id reg_name_to_id(const char *name) {

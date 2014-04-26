@@ -13,6 +13,8 @@ option) any later version.
 #ifndef ASM6809_REGISTERS_H_
 #define ASM6809_REGISTERS_H_
 
+#include <stdint.h>
+
 enum reg_id {
 	REG_INVALID = -1,
 
@@ -34,7 +36,14 @@ enum reg_id {
 	REG_W,
 	REG_Q,
 	REG_V,
+
+	REG_MAX
 };
+
+/* Useful lookup tables.  Index by positive reg_id only. */
+extern int8_t const reg_tfr_size[REG_MAX];  // -1 indicates invalid, else 8 or 16
+extern int8_t const reg_tfr_nibble[REG_MAX];  // -1 indicates invalid, else 0-15
+extern uint8_t const reg_stack_bit[REG_MAX];  // 0 indicates invalid, else single bit set
 
 /*
  * These functions will only handle registers valid in the current ISA
