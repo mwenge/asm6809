@@ -5,10 +5,6 @@ asm6809
 parsed, then as many passes are made over the parsed source as necessary (up to
 a limit), until symbols are resolved and addresses are stable.
 
-This is a prerelease version.  It is not complete and may well have bugs
-(although reasonable diligence has been observed during development using
-valgrind).
-
 [asm6809-@PACKAGE_VERSION@.tar.gz][dl]
 
 [dl]: http://www.6809.org.uk/dragon/asm6809-@PACKAGE_VERSION@.tar.gz
