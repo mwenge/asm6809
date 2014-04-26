@@ -201,10 +201,6 @@ void section_coalesce(struct section *sect, _Bool sort, _Bool pad) {
 				l->next = l->next->next;
 				section_span_free(nspan);
 				slist_free_1(ln);
-				ln = l->next;
-				span = l->data;
-				nspan = ln->data;
-				span_end = span->put + span->size;
 			} else {
 				break;
 			}
