@@ -24,6 +24,9 @@ struct asm6809_options {
 
 	/* Maximum program depth (include files, macros) */
 	unsigned max_program_depth;
+
+	/* Can be positive or negative.  Affects error reporting. */
+	int verbosity;
 };
 
 extern struct asm6809_options asm6809_options;

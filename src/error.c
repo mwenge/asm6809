@@ -20,6 +20,7 @@ option) any later version.
 #include "xalloc.h"
 #include "xvasprintf.h"
 
+#include "asm6809.h"
 #include "error.h"
 #include "program.h"
 #include "slist.h"
@@ -107,7 +108,8 @@ void error_clear_all(void) {
  */
 
 void error_print_list(void) {
-	enum error_type min_error = error_type_illegal;
+	int min_error = error_type_illegal;
+	min_error -= asm6809_options.verbosity;
 	fflush(stdout);
 	if (error_level >= error_type_inconsistent)
 		min_error = error_level;

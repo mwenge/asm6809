@@ -48,6 +48,7 @@ static char *symbol_filename = NULL;
 static char *listing_filename = NULL;
 static int isa = asm6809_isa_6809;
 static int max_program_depth = 8;
+static int verbosity = 0;
 
 static struct option long_options[] = {
 	{ "bin", no_argument, &output_format, OUTPUT_BINARY },
@@ -61,6 +62,8 @@ static struct option long_options[] = {
 	{ "output", required_argument, NULL, 'o' },
 	{ "listing", required_argument, NULL, 'l' },
 	{ "symbols", required_argument, NULL, 's' },
+	{ "quiet", no_argument, NULL, 'q' },
+	{ "verbose", no_argument, NULL, 'v' },
 	{ "help", no_argument, NULL, 'h' },
 	{ "version", no_argument, NULL, 'V' },
 	{ NULL, 0, NULL, 0 }
@@ -77,7 +80,7 @@ static void tidy_up(void);
 int main(int argc, char **argv) {
 
 	int c;
-	while ((c = getopt_long(argc, argv, "BDCSHe:893o:l:s:",
+	while ((c = getopt_long(argc, argv, "BDCSHe:893o:l:s:qv",
 				long_options, NULL)) != -1) {
 		switch (c) {
 		case 0:
@@ -115,6 +118,12 @@ int main(int argc, char **argv) {
 		case 's':
 			symbol_filename = optarg;
 			break;
+		case 'q':
+			verbosity = -1;
+			break;
+		case 'v':
+			verbosity = 1;
+			break;
 		case 'h':
 			helptext();
 			exit(EXIT_SUCCESS);
@@ -134,6 +143,7 @@ int main(int argc, char **argv) {
 
 	asm6809_options.isa = isa;
 	asm6809_options.max_program_depth = max_program_depth;
+	asm6809_options.verbosity = verbosity;
 
 	/* Read in each file */
 	for (int i = optind; i < argc; i++) {
@@ -255,6 +265,9 @@ static void helptext(void) {
 "  -o, --output=FILE    set output filename\n"
 "  -l, --listing=FILE   create listing file\n"
 "  -s, --symbols=FILE   create symbol table\n"
+"\n"
+"  -q, --quiet     don't warn about illegal (but working) code\n"
+"  -v, --verbose   warn about explicitly inefficient code\n"
 "\n"
 "      --help      show this help\n"
 "      --version   show program version\n"
