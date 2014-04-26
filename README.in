@@ -92,6 +92,10 @@ allows comments to immediately follow any operands, but this does not easily
 permit whitespace to occur within expressions, a feature I personally
 appreciate.  An asterisk ("\*") can introduce whole line comments.
 
+Because a semicolon introduces a comment, the alternate syntax of the 6309
+instructions (**AIM**, **OIM**, etc.) that operate on memory and an immediate
+value that uses a semicolon as a separator is not accepted.
+
 A symbol may be forward referenced; any time a reference is unresolvable,
 another pass is triggered, up to some defined maximum.
 
