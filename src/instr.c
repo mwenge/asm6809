@@ -489,25 +489,10 @@ void instr_imm8_mem(struct opcode const *op, struct node const *args) {
  * Stack operations.  Operands are a list of registers.  e.g., PSHS, PULU.
  */
 
-static int stack_bit(enum reg_id r) {
-	switch (r) {
-	case REG_CC: return 0x01;
-	case REG_A: return 0x02;
-	case REG_B: return 0x04;
-	case REG_D: return 0x06;
-	case REG_DP: return 0x08;
-	case REG_X: return 0x10;
-	case REG_Y: return 0x20;
-	case REG_U:
-	case REG_S: return 0x40;
-	case REG_PC: return 0x80;
-	default: return -1;
-	}
-}
-
 void instr_stack(struct opcode const *op, struct node const *args, enum reg_id stack) {
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
+
 	int pbyte = 0;
 	for (int i = 0; i < nargs; i++) {
 		if (node_type_of(arga[i]) != node_type_reg) {
@@ -516,10 +501,10 @@ void instr_stack(struct opcode const *op, struct node const *args, enum reg_id s
 		}
 		if (arga[i]->data.as_reg == stack)
 			goto invalid_register;
-		int bit = stack_bit(arga[i]->data.as_reg);
-		if (bit == -1)
+		uint8_t bit = reg_stack_bit[arga[i]->data.as_reg];
+		if (bit == 0)
 			goto invalid_register;
-		pbyte |= (bit & 0xff);
+		pbyte |= bit;
 	}
 
 	SECTION_EMIT_OP_IMMEDIATE(op);
