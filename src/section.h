@@ -139,6 +139,21 @@ struct section *section_coalesce_all(_Bool pad);
 
 void section_emit(enum section_emit_type type, ...);
 
+/* Front-end macros to section_emit() ensure arguments are cast to the correct
+ * type. */
+
+#define SECTION_EMIT_PAD(n) section_emit(section_emit_type_pad, (int)(n))
+#define SECTION_EMIT_OP_IMMEDIATE(o) section_emit(section_emit_type_op_immediate, (o))
+#define SECTION_EMIT_OP_DIRECT(o) section_emit(section_emit_type_op_direct, (o))
+#define SECTION_EMIT_OP_INDEXED(o) section_emit(section_emit_type_op_indexed, (o))
+#define SECTION_EMIT_OP_EXTENDED(o) section_emit(section_emit_type_op_extended, (o))
+#define SECTION_EMIT_OP_TFM(o,m) section_emit(section_emit_type_op_tfm, (o), (int)(m))
+#define SECTION_EMIT_IMM8(v) section_emit(section_emit_type_imm8, (int64_t)(v))
+#define SECTION_EMIT_IMM16(v) section_emit(section_emit_type_imm16, (int64_t)(v))
+#define SECTION_EMIT_IMM32(v) section_emit(section_emit_type_imm32, (int64_t)(v))
+#define SECTION_EMIT_REL8(v) section_emit(section_emit_type_rel8, (int64_t)(v))
+#define SECTION_EMIT_REL16(v,f) section_emit(section_emit_type_rel16, (int64_t)(v), (int)(f))
+
 /* Skip a number of bytes in the current section - used by RMB. */
 
 void section_skip(int nbytes);

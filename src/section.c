@@ -260,9 +260,10 @@ void section_emit(enum section_emit_type type, ...) {
 	va_list ap;
 	va_start(ap, type);
 	struct opcode *op;
-	int output = 0;
+	int64_t output = 0;
 	int nbytes;
 	_Bool pad = 0;
+	_Bool nowarn_rel16 = 0;
 
 	switch (type) {
 	case section_emit_type_pad:
@@ -297,16 +298,20 @@ void section_emit(enum section_emit_type type, ...) {
 		break;
 	case section_emit_type_imm8:
 	case section_emit_type_rel8:
-		output = va_arg(ap, int);
+		output = va_arg(ap, int64_t);
 		nbytes = 1;
 		break;
 	case section_emit_type_imm16:
+		output = va_arg(ap, int64_t);
+		nbytes = 2;
+		break;
 	case section_emit_type_rel16:
-		output = va_arg(ap, int);
+		output = va_arg(ap, int64_t);
+		nowarn_rel16 = va_arg(ap, int);
 		nbytes = 2;
 		break;
 	case section_emit_type_imm32:
-		output = va_arg(ap, int);
+		output = va_arg(ap, int64_t);
 		nbytes = 4;
 		break;
 	default:
@@ -326,7 +331,7 @@ void section_emit(enum section_emit_type type, ...) {
 		if (output < -128 || output > 127)
 			error(error_type_out_of_range, "8-bit relative value out of range");
 	}
-	if (type == section_emit_type_rel16) {
+	if (type == section_emit_type_rel16 && !nowarn_rel16) {
 		/* Note: all rel16 op-codes currently have 8-bit equivalents.
 		 * If that were to change, more data would be required here. */
 		if (output >= -128 && output <= 127)
