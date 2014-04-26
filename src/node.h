@@ -134,8 +134,14 @@ struct node *node_ref(struct node *n);
 
 /* Access simple data safely.  Avoids NULL dereferences for undefined nodes. */
 
-enum node_type node_type_of(struct node const *n);
-enum node_attr node_attr_of(struct node const *n);
+static inline enum node_type node_type_of(struct node const *n) {
+	return n ? n->type : node_type_undef;
+}
+
+static inline enum node_type node_attr_of(struct node const *n) {
+	return n ? n->attr : node_attr_undef;
+}
+
 int node_array_count(struct node const *n);
 struct node **node_array_of(struct node const *n);
 

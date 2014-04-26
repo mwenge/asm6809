@@ -94,18 +94,6 @@ struct node *node_ref(struct node *n) {
  * Utility functions.
  */
 
-enum node_type node_type_of(struct node const *n) {
-	if (!n)
-		return node_type_undef;
-	return n->type;
-}
-
-enum node_attr node_attr_of(struct node const *n) {
-	if (!n)
-		return node_attr_undef;
-	return n->attr;
-}
-
 int node_array_count(struct node const *n) {
 	if (!n)
 		return 0;
