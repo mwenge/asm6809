@@ -520,26 +520,6 @@ invalid_register:
  * Instructions operating on a pair of registers.  e.g., TFR & EXG.
  */
 
-static int pair_nibble(enum reg_id r) {
-	switch (r) {
-	case REG_D: return 0x0;
-	case REG_X: return 0x1;
-	case REG_Y: return 0x2;
-	case REG_U: return 0x3;
-	case REG_S: return 0x4;
-	case REG_PC: return 0x5;
-	case REG_W: return 0x6;
-	case REG_V: return 0x7;
-	case REG_A: return 0x8;
-	case REG_B: return 0x9;
-	case REG_CC: return 0xa;
-	case REG_DP: return 0xb;
-	case REG_E: return 0xe;
-	case REG_F: return 0xf;
-	default: return -1;
-	}
-}
-
 void instr_pair(struct opcode const *op, struct node const *args) {
 	int nargs = node_array_count(args);
 	struct node * const *arga = node_array_of(args);
@@ -548,28 +528,33 @@ void instr_pair(struct opcode const *op, struct node const *args) {
 		return;
 	}
 
-	int pbyte = 0;
+	int nibble[2];
+	int type[2];
+	int size[2];
 	for (int i = 0; i < 2; i++) {
-		int nibble;
-		pbyte <<= 4;
-		switch (node_type_of(arga[i])) {
-		case node_type_undef:
-			break;
-		case node_type_int:
-			pbyte |= (arga[i]->data.as_int & 0x0f);
+		type[i] = node_type_of(arga[i]);
+		if (type[i] == node_type_reg) {
+			nibble[i] = reg_tfr_nibble[arga[i]->data.as_reg];
+			size[i] = reg_tfr_size[arga[i]->data.as_reg];
+		} else if (type[i] == node_type_int) {
+			int v = arga[i]->data.as_int;
 			error(error_type_illegal, "numerical values used in inter-register op");
-			break;
-		case node_type_reg:
-			nibble = pair_nibble(arga[i]->data.as_reg);
-			if (nibble == -1)
-				goto invalid_register;
-			pbyte |= nibble;
-			break;
-		default:
-			goto invalid_register;
+			if (v < 0 || v > 15) {
+				error(error_type_out_of_range, "numeric value for register out of range");
+			}
+			nibble[i] = v & 15;
+			// don't warn about size as well if numeric...
+			size[i] = 16 | 8;
+		} else if (type[i] != node_type_undef) {
+			error(error_type_syntax, "invalid register in inter-register op");
+			return;
 		}
 	}
+	if ((size[0] & size[1]) == 0) {
+		error(error_type_illegal, "register size mismatch in inter-register op");
+	}
 
+	int pbyte = (nibble[0] << 4) | nibble[1];
 	SECTION_EMIT_OP_IMMEDIATE(op);
 	SECTION_EMIT_IMM8(pbyte);
 	return;
@@ -591,44 +576,39 @@ void instr_tfm(struct opcode const *op, struct node const *args) {
 		return;
 	}
 
-	int pbyte = 0;
+	int nibble[2];
+	int type[2];
+	int attr[2];
 	for (int i = 0; i < 2; i++) {
-		int nibble;
-		pbyte <<= 4;
-		switch (node_type_of(arga[i])) {
-		case node_type_undef:
-			break;
-		case node_type_int:
-			pbyte |= (arga[i]->data.as_int & 0x0f);
+		type[i] = node_type_of(arga[i]);
+		attr[i] = node_attr_of(arga[i]);
+		if (type[i] == node_type_reg) {
+			int v = reg_tfr_nibble[arga[i]->data.as_reg];
+			if (v < 0 || v > 4)
+				goto invalid_register;
+			nibble[i] = v;
+		} else if (type[i] == node_type_int) {
+			int v = arga[i]->data.as_int;
 			error(error_type_illegal, "numerical values used in TFM op");
-			break;
-		case node_type_reg:
-			switch (arga[i]->data.as_reg) {
-			case REG_X: case REG_Y: case REG_U: case REG_S: case REG_D:
-				break;
-			default:
-				goto invalid_register;
+			if (v < 0 || v > 4) {
+				error(error_type_out_of_range, "numeric value for register out of range");
 			}
-			nibble = pair_nibble(arga[i]->data.as_reg);
-			if (nibble == -1)
-				goto invalid_register;
-			pbyte |= nibble;
-			break;
-		default:
-			goto invalid_register;
+			nibble[i] = v & 15;
+		} else if (type[i] != node_type_undef) {
+			error(error_type_syntax, "invalid register in inter-register op");
+			return;
 		}
 	}
 
-	enum node_attr attr0 = node_attr_of(arga[0]);
-	enum node_attr attr1 = node_attr_of(arga[1]);
+	int pbyte = (nibble[0] << 4) | nibble[1];
 	int mod = 0;
-	if (attr0 == node_attr_postinc && attr1 == node_attr_postinc) {
+	if (attr[0] == node_attr_postinc && attr[1] == node_attr_postinc) {
 		mod = 0;
-	} else if (attr0 == node_attr_postdec && attr1 == node_attr_postdec) {
+	} else if (attr[0] == node_attr_postdec && attr[1] == node_attr_postdec) {
 		mod = 1;
-	} else if (attr0 == node_attr_postinc && attr1 == node_attr_none) {
+	} else if (attr[0] == node_attr_postinc && attr[1] == node_attr_none) {
 		mod = 2;
-	} else if (attr0 == node_attr_none && attr1 == node_attr_postinc) {
+	} else if (attr[0] == node_attr_none && attr[1] == node_attr_postinc) {
 		mod = 3;
 	} else {
 		error(error_type_syntax, "invalid TFM mode");
