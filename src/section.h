@@ -137,10 +137,10 @@ void section_emit(enum section_emit_type type, ...);
  * type. */
 
 #define SECTION_EMIT_PAD(n) section_emit(section_emit_type_pad, (unsigned)(n))
-#define SECTION_EMIT_OP(o) section_emit(section_emit_type_op, (unsigned)(o))
-#define SECTION_EMIT_IMM8(v) section_emit(section_emit_type_imm8, (unsigned)(v))
-#define SECTION_EMIT_IMM16(v) section_emit(section_emit_type_imm16, (unsigned)(v))
-#define SECTION_EMIT_IMM32(v) section_emit(section_emit_type_imm32, (unsigned long)(v))
+#define SECTION_EMIT_OP(o) section_emit(section_emit_type_op, (unsigned)((o)&0xffff))
+#define SECTION_EMIT_IMM8(v) section_emit(section_emit_type_imm8, (unsigned)((v)&0xff))
+#define SECTION_EMIT_IMM16(v) section_emit(section_emit_type_imm16, (unsigned)((v)&0xffff))
+#define SECTION_EMIT_IMM32(v) section_emit(section_emit_type_imm32, (unsigned long)((v)&0xffffffff))
 
 /* Skip a number of bytes in the current section - used by RMB. */
 

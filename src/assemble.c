@@ -548,11 +548,11 @@ static void pseudo_fcc(struct prog_line *line) {
 			SECTION_EMIT_IMM8(arg->data.as_int);
 			break;
 		case node_type_float:
-			SECTION_EMIT_IMM8(arg->data.as_float);
+			SECTION_EMIT_IMM8((int32_t)arg->data.as_float);
 			break;
 		case node_type_string:
-			for (int j = 0; arg->data.as_string[j]; j++) {
-				SECTION_EMIT_IMM8(arg->data.as_string[j]);
+			for (char const *c = arg->data.as_string; *c; c++) {
+				SECTION_EMIT_IMM8(*c);
 			}
 			break;
 		}
