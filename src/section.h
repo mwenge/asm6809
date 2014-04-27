@@ -30,8 +30,6 @@ enum section_emit_type {
 	section_emit_type_imm8,
 	section_emit_type_imm16,
 	section_emit_type_imm32,
-	section_emit_type_rel8,
-	section_emit_type_rel16
 };
 
 /*
@@ -151,8 +149,6 @@ void section_emit(enum section_emit_type type, ...);
 #define SECTION_EMIT_IMM8(v) section_emit(section_emit_type_imm8, (int64_t)(v))
 #define SECTION_EMIT_IMM16(v) section_emit(section_emit_type_imm16, (int64_t)(v))
 #define SECTION_EMIT_IMM32(v) section_emit(section_emit_type_imm32, (int64_t)(v))
-#define SECTION_EMIT_REL8(v) section_emit(section_emit_type_rel8, (int64_t)(v))
-#define SECTION_EMIT_REL16(v,f) section_emit(section_emit_type_rel16, (int64_t)(v), (int)(f))
 
 /* Skip a number of bytes in the current section - used by RMB. */
 

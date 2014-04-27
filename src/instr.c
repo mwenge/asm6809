@@ -76,6 +76,18 @@ void instr_immediate(struct opcode const *op, struct node const *args) {
  * Relative addressing.
  */
 
+/* Constrain relative values to 16 bit signed - a wrap-around could cause an
+ * 8-bit value to become valid.  Only needs to be called if the result is going
+ * to be range tested. */
+
+static int to_rel16(int64_t i) {
+	while (i < -32768)
+		i += 65536;
+	while (i > 32767)
+		i -= 65536;
+	return i;
+}
+
 void instr_rel(struct opcode const *op, struct node const *args) {
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
@@ -84,7 +96,6 @@ void instr_rel(struct opcode const *op, struct node const *args) {
 		return;
 	}
 	SECTION_EMIT_OP_IMMEDIATE(op);
-	_Bool nowarn_rel16 = (node_attr_of(arga[0]) == node_attr_16bit);
 	if (node_type_of(arga[0]) != node_type_int) {
 		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_REL8)
 			SECTION_EMIT_PAD(1);
@@ -92,7 +103,7 @@ void instr_rel(struct opcode const *op, struct node const *args) {
 			SECTION_EMIT_PAD(2);
 		return;
 	}
-	int64_t rel8 = arga[0]->data.as_int - (cur_section->pc + 1);
+	int rel8 = to_rel16(arga[0]->data.as_int - (cur_section->pc + 1));
 	_Bool rel8v = (rel8 < -128 || rel8 > 127);
 	if ((op->type & OPCODE_EXT_TYPE) == OPCODE_REL8) {
 		if (rel8v)
@@ -111,258 +122,242 @@ void instr_rel(struct opcode const *op, struct node const *args) {
  * Indexed addressing.
  */
 
-/* Check the offset argument in indexed addressing */
+/* Table of 2-arg indexed addressing modes. */
 
-#define FLAG_XYUS  (0 << 0)  // OR in the register ID
-#define FLAG_PC    (1 << 0)  // constant offset from PC
-#define FLAG_PCR   (2 << 0)  // relative offset from PC
-#define FLAG_W     (3 << 0)  // affects indirect postbytes
-#define FLAG_TYPE  (3 << 0)
-
-#define FLAG_5BIT  (1 << 2)  // value fits in 5 bits signed
-#define FLAG_8BIT  (1 << 3)  // value fits in 8 bits signed
-#define FLAG_16BIT (1 << 4)
-#define FLAG_SIZE  (7 << 2)
-
-#define FLAG_NI    (1 << 5)  // non-indirect allowed
-#define FLAG_I     (1 << 6)  // indirect allowed
-#define FLAG_WI    (1 << 7)  // warn if indirect used (error for 6309)
-#define FLAG_NI_I  (FLAG_NI|FLAG_I)
-#define FLAG_NI_WI (FLAG_NI_I|FLAG_WI)
-
-/* Map index register to FLAG_TYPE and (for X, Y, U & S) the value to OR into
- * postbyte. */
-
-static struct {
-	enum reg_id reg_id;
-	int pbyte_xyus;
-	int flags;
-} idx_regs[] = {
-	{ REG_X, 0x00, FLAG_XYUS },
-	{ REG_Y, 0x20, FLAG_XYUS },
-	{ REG_U, 0x40, FLAG_XYUS },
-	{ REG_S, 0x60, FLAG_XYUS },
-	{ REG_PC, 0, FLAG_PC },
-	{ REG_PCR, 0, FLAG_PCR },
-	{ REG_W, 0, FLAG_W },
-	{ .reg_id = REG_INVALID }
+enum off_type {
+	off_type_none,
+	off_type_zero,
+	off_type_5bit,
+	off_type_8bit,
+	off_type_16bit,
+	off_type_reg_a,
+	off_type_reg_b,
+	off_type_reg_d,
+	off_type_reg_e,
+	off_type_reg_f,
+	off_type_reg_w,
 };
 
-/* Big table of indexed addressing modes defining all the 2-arg modes.  All
- * of off_type, off_reg, idx_attr and the indirect flag in flags must
- * match.  If postbyte then == -1, each of 5-bit, 8-bit and 16-bit versions are
- * tried in turn (if the appropriate bit is set in flags). */
+enum idx_type {
+	idx_type_xyus,
+	idx_type_pcr,
+	idx_type_w,
+};
+
+enum idx_indirect {
+	idx_indirect_ok,
+	idx_indirect_ok_6309,  // postbyte += 1, rather than postbyte += 0x10
+	idx_indirect_impossible,
+	idx_indirect_illegal,
+};
 
 static struct {
-	enum node_type off_type;
-	enum reg_id off_reg;
+	enum idx_type idx_type;
 	enum node_attr idx_attr;
-	int postbyte;
-	unsigned flags;
-} indexed_modes[] = {
-	/* Constant offset from R */
-	{ node_type_empty, REG_INVALID, node_attr_none, 0x84, FLAG_XYUS|FLAG_NI_I },
-	{ node_type_int,   REG_INVALID, node_attr_none, 0x00, FLAG_XYUS|FLAG_5BIT|FLAG_NI },
-	{ node_type_int,   REG_INVALID, node_attr_none, 0x88, FLAG_XYUS|FLAG_8BIT|FLAG_NI_I },
-	{ node_type_int,   REG_INVALID, node_attr_none, 0x89, FLAG_XYUS|FLAG_16BIT|FLAG_NI_I },
-	{ node_type_int,   REG_INVALID, node_attr_none,   -1, FLAG_XYUS|FLAG_5BIT|FLAG_8BIT|FLAG_16BIT|FLAG_NI },
-	{ node_type_int,   REG_INVALID, node_attr_none,   -1, FLAG_XYUS|FLAG_8BIT|FLAG_16BIT|FLAG_I },
-
-	/* Accumulator offset from R */
-	{ node_type_reg, REG_A, node_attr_none, 0x86, FLAG_XYUS|FLAG_NI_I },
-	{ node_type_reg, REG_B, node_attr_none, 0x85, FLAG_XYUS|FLAG_NI_I },
-	{ node_type_reg, REG_D, node_attr_none, 0x8b, FLAG_XYUS|FLAG_NI_I },
-
-	/* Auto increment/decrement R */
-	{ node_type_empty, REG_INVALID, node_attr_postinc,  0x80, FLAG_XYUS|FLAG_NI_WI },
-	{ node_type_empty, REG_INVALID, node_attr_postinc2, 0x81, FLAG_XYUS|FLAG_NI_I },
-	{ node_type_empty, REG_INVALID, node_attr_predec,   0x82, FLAG_XYUS|FLAG_NI_WI },
-	{ node_type_empty, REG_INVALID, node_attr_predec2,  0x83, FLAG_XYUS|FLAG_NI_I },
-
-	/* Constant offset from PC */
-	{ node_type_empty, REG_INVALID, node_attr_none, 0x8c, FLAG_PC|FLAG_8BIT|FLAG_NI_I },
-	{ node_type_int,   REG_INVALID, node_attr_none, 0x8c, FLAG_PC|FLAG_8BIT|FLAG_NI_I },
-	{ node_type_int,   REG_INVALID, node_attr_none, 0x8d, FLAG_PC|FLAG_16BIT|FLAG_NI_I },
-	{ node_type_int,   REG_INVALID, node_attr_none,   -1, FLAG_PC|FLAG_8BIT|FLAG_16BIT|FLAG_NI },
-	{ node_type_int,   REG_INVALID, node_attr_none,   -1, FLAG_PC|FLAG_16BIT|FLAG_I },
-	{ node_type_int,   REG_INVALID, node_attr_none, 0x8c, FLAG_PCR|FLAG_8BIT|FLAG_NI_I },
-	{ node_type_int,   REG_INVALID, node_attr_none, 0x8d, FLAG_PCR|FLAG_16BIT|FLAG_NI_I },
-	{ node_type_int,   REG_INVALID, node_attr_none,   -1, FLAG_PCR|FLAG_8BIT|FLAG_16BIT|FLAG_NI },
-	{ node_type_int,   REG_INVALID, node_attr_none,   -1, FLAG_PCR|FLAG_16BIT|FLAG_I },
-
-	/* Offset from W (6309 extensions) */
-	{ node_type_empty, REG_INVALID, node_attr_none,     0x8f, FLAG_W|FLAG_NI_I },
-	{ node_type_int,   REG_INVALID, node_attr_none,     0xaf, FLAG_W|FLAG_16BIT|FLAG_NI_I },
-	{ node_type_int,   REG_INVALID, node_attr_none,     0xaf, FLAG_W|FLAG_16BIT|FLAG_NI_I },
-	{ node_type_empty, REG_INVALID, node_attr_postinc2, 0xcf, FLAG_W|FLAG_NI_I },
-	{ node_type_empty, REG_INVALID, node_attr_predec2,  0xef, FLAG_W|FLAG_NI_I },
-
-	/* Accumulator offset from R (6309 extensions) */
-	{ node_type_reg, REG_E, node_attr_none, 0x87, FLAG_XYUS|FLAG_NI_I },
-	{ node_type_reg, REG_F, node_attr_none, 0x8a, FLAG_XYUS|FLAG_NI_I },
-	{ node_type_reg, REG_W, node_attr_none, 0x8e, FLAG_XYUS|FLAG_NI_I },
+	enum off_type off_type;
+	uint8_t postbyte;
+	enum idx_indirect idx_indirect;
+} const indexed_modes[] = {
+	{ idx_type_xyus, node_attr_none,     off_type_zero,  0x84, idx_indirect_ok },
+	{ idx_type_xyus, node_attr_none,     off_type_5bit,  0x00, idx_indirect_impossible },
+	{ idx_type_xyus, node_attr_none,     off_type_8bit,  0x88, idx_indirect_ok },
+	{ idx_type_xyus, node_attr_none,     off_type_16bit, 0x89, idx_indirect_ok },
+	{ idx_type_xyus, node_attr_none,     off_type_reg_a, 0x86, idx_indirect_ok },
+	{ idx_type_xyus, node_attr_none,     off_type_reg_b, 0x85, idx_indirect_ok },
+	{ idx_type_xyus, node_attr_none,     off_type_reg_d, 0x8b, idx_indirect_ok },
+	{ idx_type_xyus, node_attr_postinc,  off_type_none,  0x80, idx_indirect_illegal },
+	{ idx_type_xyus, node_attr_postinc2, off_type_none,  0x81, idx_indirect_ok },
+	{ idx_type_xyus, node_attr_predec,   off_type_none,  0x82, idx_indirect_illegal },
+	{ idx_type_xyus, node_attr_predec2,  off_type_none,  0x83, idx_indirect_ok },
+	{ idx_type_pcr,  node_attr_none,     off_type_8bit,  0x8c, idx_indirect_ok },
+	{ idx_type_pcr,  node_attr_none,     off_type_16bit, 0x8d, idx_indirect_ok },
+	/* 6309 extensions */
+	{ idx_type_xyus, node_attr_none,     off_type_reg_e, 0x87, idx_indirect_ok },
+	{ idx_type_xyus, node_attr_none,     off_type_reg_f, 0x8a, idx_indirect_ok },
+	{ idx_type_xyus, node_attr_none,     off_type_reg_w, 0x8e, idx_indirect_ok },
+	{ idx_type_w,    node_attr_none,     off_type_none,  0x8f, idx_indirect_ok_6309 },
+	{ idx_type_w,    node_attr_none,     off_type_16bit, 0xaf, idx_indirect_ok_6309 },
+	{ idx_type_w,    node_attr_postinc2, off_type_none,  0xcf, idx_indirect_ok_6309 },
+	{ idx_type_w,    node_attr_predec2,  off_type_none,  0xef, idx_indirect_ok_6309 },
 };
+#define NUM_INDEXED_MODES ARRAY_N_ELEMENTS(indexed_modes)
 
-static void instr_indexed2(_Bool indirect, struct node *arg0, struct node *arg1) {
+static _Bool off_type_compatible(enum off_type off_type, _Bool pcr, struct node const *n) {
+	enum node_type ntype = node_type_of(n);
+	enum node_type nattr = node_attr_of(n);
 
-	enum node_type off_type = node_type_of(arg0);
-	enum node_attr off_attr = node_attr_of(arg0);
-	enum node_type idx_type = node_type_of(arg1);
-	enum node_attr idx_attr = node_attr_of(arg1);
-
-	int off_value = 0;
-	enum reg_id off_reg = REG_INVALID;
+	switch (nattr) {
+	case node_attr_none:
+		break;
+	case node_attr_5bit:
+		return off_type == off_type_5bit;
+	case node_attr_8bit:
+		return off_type == off_type_8bit;
+	case node_attr_16bit:
+		return off_type == off_type_16bit;
+	default:
+		return 0;
+	}
 
 	switch (off_type) {
-	case node_type_undef:
+	case off_type_none:
+		return ntype == node_type_empty;
+	case off_type_zero:
+		if (ntype == node_type_int)
+			return n->data.as_int == 0;
+		return ntype == node_type_empty;
+	case off_type_5bit:
+		if (ntype == node_type_int) {
+			return n->data.as_int >= -16 && n->data.as_int <= 15;
+		}
+		return ntype == node_type_empty;
+	case off_type_8bit:
+		if (ntype == node_type_int) {
+			int64_t val_int = n->data.as_int;
+			if (pcr)
+				val_int = to_rel16(val_int - (cur_section->pc + 2));
+			return val_int >= -128 && val_int <= 127;
+		}
+		return ntype == node_type_empty;
+	case off_type_16bit:
+		return ntype == node_type_int || ntype == node_type_empty;
+	case off_type_reg_a:
+		return ntype == node_type_reg && n->data.as_reg == REG_A;
+	case off_type_reg_b:
+		return ntype == node_type_reg && n->data.as_reg == REG_B;
+	case off_type_reg_d:
+		return ntype == node_type_reg && n->data.as_reg == REG_D;
+	case off_type_reg_e:
+		return ntype == node_type_reg && n->data.as_reg == REG_E;
+	case off_type_reg_f:
+		return ntype == node_type_reg && n->data.as_reg == REG_F;
+	case off_type_reg_w:
+		return ntype == node_type_reg && n->data.as_reg == REG_W;
+	default:
+		break;
+	}
+
+	return 0;
+}
+
+static void instr_indexed2(_Bool indirect, struct node const *arg0, struct node const *arg1) {
+
+	enum node_type arg0_type = node_type_of(arg0);
+	enum node_attr arg0_attr = node_attr_of(arg0);
+	enum node_type arg1_type = node_type_of(arg1);
+	enum node_attr arg1_attr = node_attr_of(arg1);
+
+	if (arg0_type == node_type_undef || arg1_type == node_type_undef) {
 		SECTION_EMIT_PAD(3);
 		return;
-	case node_type_empty:
+	}
+
+	if (arg1_type != node_type_reg)
+		goto invalid_mode;
+
+	enum idx_type idx_type;
+	uint8_t idx_select = 0;
+	_Bool pcr = 0;
+
+	switch (arg1->data.as_reg) {
+	case REG_X:
+		idx_type = idx_type_xyus;
+		idx_select = 0x00;
 		break;
-	case node_type_int:
-		if (off_attr != node_attr_none && off_attr != node_attr_5bit &&
-		    off_attr != node_attr_8bit && off_attr != node_attr_16bit) {
-			goto invalid_mode;
-		}
+	case REG_Y:
+		idx_type = idx_type_xyus;
+		idx_select = 0x20;
+		break;
+	case REG_U:
+		idx_type = idx_type_xyus;
+		idx_select = 0x40;
+		break;
+	case REG_S:
+		idx_type = idx_type_xyus;
+		idx_select = 0x60;
+		break;
+	case REG_PC:
+		idx_type = idx_type_pcr;
+		pcr = 0;
+		break;
+	case REG_PCR:
+		idx_type = idx_type_pcr;
+		pcr = 1;
+		break;
+	case REG_W:
+		idx_type = idx_type_w;
+		break;
+	default:
+		goto invalid_mode;
+	}
+
+	if (arg0_type == node_type_int && arg0_attr == node_attr_none
+	    && arg0->data.as_int == 0) {
+		arg0_type = node_type_empty;
+	}
+
+	enum off_type off_type;
+	enum idx_indirect idx_indirect;
+	int postbyte = -1;
+	for (int i = 0; i < NUM_INDEXED_MODES; i++) {
+		if (indexed_modes[i].idx_type != idx_type)
+			continue;
+		if (indexed_modes[i].idx_attr != arg1_attr)
+			continue;
+		off_type = indexed_modes[i].off_type;
+		if (!off_type_compatible(off_type, pcr, arg0))
+			continue;
+		idx_indirect = indexed_modes[i].idx_indirect;
+		if (indirect && idx_indirect == idx_indirect_impossible)
+			continue;
+		postbyte = indexed_modes[i].postbyte;
+		break;
+	}
+
+	if (postbyte == -1)
+		goto invalid_mode;
+
+	postbyte |= idx_select;
+
+	int64_t off_value = 0;
+	if (arg0_type == node_type_int) {
 		off_value = arg0->data.as_int;
-		if (off_value == 0 && off_attr == node_attr_none)
-			off_type = node_type_empty;
-		break;
-	case node_type_reg:
-		if (off_attr != node_attr_none)
-			goto invalid_mode;
-		off_reg = arg0->data.as_reg;
-		break;
-	default:
-		goto invalid_mode;
-	}
-
-	enum reg_id idx_reg = REG_INVALID;
-
-	switch (idx_type) {
-	case node_type_undef:
-		SECTION_EMIT_PAD(3);
-		return;
-	case node_type_reg:
-		if (idx_attr != node_attr_none && idx_attr != node_attr_postinc &&
-		    idx_attr != node_attr_postinc2 && idx_attr != node_attr_predec &&
-		    idx_attr != node_attr_predec2) {
-			goto invalid_mode;
-		}
-		idx_reg = arg1->data.as_reg;
-		break;
-	default:
-		goto invalid_mode;
-	}
-
-	int pbyte_xyus = 0;
-	int idx_flags = -1;
-
-	for (unsigned i = 0; i < ARRAY_N_ELEMENTS(idx_regs); i++) {
-		if (idx_regs[i].reg_id == REG_INVALID) {
-			error(error_type_syntax, "invalid index register");
-			return;
-		}
-		if (idx_regs[i].reg_id == idx_reg) {
-			pbyte_xyus = idx_regs[i].pbyte_xyus;
-			idx_flags = idx_regs[i].flags;
-			break;
+		if (pcr) {
+			if (off_type == off_type_8bit) {
+				off_value -= (cur_section->pc + 2);
+			} else if (off_type == off_type_16bit) {
+				off_value -= (cur_section->pc + 3);
+			}
 		}
 	}
 
-	for (unsigned i = 0; i < ARRAY_N_ELEMENTS(indexed_modes); i++) {
-		int flags_type = indexed_modes[i].flags & FLAG_TYPE;
-		int flags_size = indexed_modes[i].flags & FLAG_SIZE;
-		_Bool flags_rel = (flags_type == FLAG_PCR);
-		_Bool flags_5bit = flags_size & FLAG_5BIT;
-		_Bool flags_8bit = flags_size & FLAG_8BIT;
-		_Bool flags_16bit = flags_size & FLAG_16BIT;
-		int pbyte = indexed_modes[i].postbyte;
+	if (off_type == off_type_5bit)
+		postbyte |= (off_value & 0x1f);
 
-		if (off_type != indexed_modes[i].off_type)
-			continue;
-		if (flags_size == FLAG_5BIT && off_attr != node_attr_5bit)
-			continue;
-		if (flags_size == FLAG_8BIT && off_attr != node_attr_8bit)
-			continue;
-		if (flags_size == FLAG_16BIT && off_attr != node_attr_16bit)
-			continue;
-		if (off_type == node_type_reg && off_reg != indexed_modes[i].off_reg)
-			continue;
-
-		if (idx_flags != flags_type)
-			continue;
-
-		if (idx_attr != indexed_modes[i].idx_attr)
-			continue;
-
-		if (!indirect && !(indexed_modes[i].flags & FLAG_NI))
-			continue;
-		if (indirect && !(indexed_modes[i].flags & FLAG_I))
-			continue;
-		if (indirect && (indexed_modes[i].flags & FLAG_WI))
-			error(error_type_illegal, "illegal indexed addressing form");
-
-		/* If the postbyte in the table is -1, that indicates a need to try
-		 * the value against each of 5-bit, 8-bit and 16-bit offsets. */
-		if (pbyte == -1) {
-			assert(off_type == node_type_int);
-			struct node *arg0c = node_new_int(off_value);
-			int try;
-			int pc = cur_section->pc;
-			if (flags_5bit) {
-				try = flags_rel ? (off_value - (pc + 1)) : off_value;
-				if (try >= -16 && try <= 15) {
-					arg0c = node_set_attr(arg0c, node_attr_5bit);
-					instr_indexed2(indirect, arg0c, arg1);
-					node_free(arg0c);
-					return;
-				}
-			}
-			if (flags_8bit) {
-				try = flags_rel ? (off_value - (pc + 2)) : off_value;
-				if (try >= -128 && try <= 127) {
-					arg0c = node_set_attr(arg0c, node_attr_8bit);
-					instr_indexed2(indirect, arg0c, arg1);
-					node_free(arg0c);
-					return;
-				}
-			}
-			if (flags_16bit) {
-				arg0c = node_set_attr(arg0c, node_attr_16bit);
-				instr_indexed2(indirect, arg0c, arg1);
-				node_free(arg0c);
-				return;
-			}
-			node_free(arg0c);
-			goto invalid_mode;
-		}
-
-		pbyte |= pbyte_xyus;
-		if (flags_type == FLAG_W)
-			pbyte += (indirect ? 1 : 0);
+	if (indirect) {
+		// impossible dealt with above
+		if (idx_indirect == idx_indirect_illegal)
+			error(error_type_illegal, "illegal indirect indexed mode");
+		if (idx_indirect == idx_indirect_ok_6309)
+			postbyte++;
 		else
-			pbyte |= (indirect ? 0x10 : 0);
-		if (flags_5bit)
-			pbyte |= (off_value & 0x1f);
-		SECTION_EMIT_IMM8(pbyte);
-		if (flags_5bit)
-			return;
-
-		if (!flags_rel) {
-			if (flags_8bit)
-				SECTION_EMIT_IMM8(off_value);
-			if (flags_16bit)
-				SECTION_EMIT_IMM16(off_value);
-		} else {
-			if (flags_8bit)
-				SECTION_EMIT_REL8(off_value);
-			if (flags_16bit)
-				SECTION_EMIT_REL16(off_value, 1);
-		}
-
-		return;
+			postbyte |= 0x10;
 	}
+
+	SECTION_EMIT_IMM8(postbyte);
+
+	switch (off_type) {
+	case off_type_8bit:
+		SECTION_EMIT_IMM8(off_value);
+		break;
+	case off_type_16bit:
+		SECTION_EMIT_IMM16(off_value);
+		break;
+	default:
+		break;
+	}
+
+	return;
 
 invalid_mode:
 	error(error_type_syntax, "invalid addressing mode");
