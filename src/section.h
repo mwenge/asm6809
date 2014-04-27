@@ -22,11 +22,7 @@ option) any later version.
 
 enum section_emit_type {
 	section_emit_type_pad,
-	section_emit_type_op_immediate,
-	section_emit_type_op_direct,
-	section_emit_type_op_indexed,
-	section_emit_type_op_extended,
-	section_emit_type_op_tfm,
+	section_emit_type_op,
 	section_emit_type_imm8,
 	section_emit_type_imm16,
 	section_emit_type_imm32,
@@ -140,15 +136,11 @@ void section_emit(enum section_emit_type type, ...);
 /* Front-end macros to section_emit() ensure arguments are cast to the correct
  * type. */
 
-#define SECTION_EMIT_PAD(n) section_emit(section_emit_type_pad, (int)(n))
-#define SECTION_EMIT_OP_IMMEDIATE(o) section_emit(section_emit_type_op_immediate, (o))
-#define SECTION_EMIT_OP_DIRECT(o) section_emit(section_emit_type_op_direct, (o))
-#define SECTION_EMIT_OP_INDEXED(o) section_emit(section_emit_type_op_indexed, (o))
-#define SECTION_EMIT_OP_EXTENDED(o) section_emit(section_emit_type_op_extended, (o))
-#define SECTION_EMIT_OP_TFM(o,m) section_emit(section_emit_type_op_tfm, (o), (int)(m))
-#define SECTION_EMIT_IMM8(v) section_emit(section_emit_type_imm8, (int64_t)(v))
-#define SECTION_EMIT_IMM16(v) section_emit(section_emit_type_imm16, (int64_t)(v))
-#define SECTION_EMIT_IMM32(v) section_emit(section_emit_type_imm32, (int64_t)(v))
+#define SECTION_EMIT_PAD(n) section_emit(section_emit_type_pad, (unsigned)(n))
+#define SECTION_EMIT_OP(o) section_emit(section_emit_type_op, (unsigned)(o))
+#define SECTION_EMIT_IMM8(v) section_emit(section_emit_type_imm8, (unsigned)(v))
+#define SECTION_EMIT_IMM16(v) section_emit(section_emit_type_imm16, (unsigned)(v))
+#define SECTION_EMIT_IMM32(v) section_emit(section_emit_type_imm32, (unsigned long)(v))
 
 /* Skip a number of bytes in the current section - used by RMB. */
 

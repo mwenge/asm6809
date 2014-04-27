@@ -231,7 +231,7 @@ struct section *section_coalesce_all(_Bool pad) {
  * appropriate.
  */
 
-static int op_size(unsigned short op) {
+static int op_size(unsigned long op) {
 	return (op & 0xff00) ? 2 : 1;
 }
 
@@ -256,51 +256,29 @@ void section_emit(enum section_emit_type type, ...) {
 	va_list ap;
 	va_start(ap, type);
 	struct opcode *op;
-	uint32_t output = 0;
+	unsigned long output = 0;
 	int nbytes;
 	_Bool pad = 0;
 
 	switch (type) {
 	case section_emit_type_pad:
-		nbytes = va_arg(ap, int);
+		nbytes = va_arg(ap, unsigned);
 		pad = 1;
 		break;
-	case section_emit_type_op_immediate:
-		op = va_arg(ap, struct opcode *);
-		output = op->immediate;
-		nbytes = op_size(output);
-		break;
-	case section_emit_type_op_direct:
-		op = va_arg(ap, struct opcode *);
-		output = op->direct;
-		nbytes = op_size(output);
-		break;
-	case section_emit_type_op_indexed:
-		op = va_arg(ap, struct opcode *);
-		output = op->indexed;
-		nbytes = op_size(output);
-		break;
-	case section_emit_type_op_extended:
-		op = va_arg(ap, struct opcode *);
-		output = op->extended;
-		nbytes = op_size(output);
-		break;
-	case section_emit_type_op_tfm:
-		op = va_arg(ap, struct opcode *);
-		output = op->immediate;
-		output += va_arg(ap, int);
+	case section_emit_type_op:
+		output = va_arg(ap, unsigned);
 		nbytes = op_size(output);
 		break;
 	case section_emit_type_imm8:
-		output = va_arg(ap, int64_t);
+		output = va_arg(ap, unsigned);
 		nbytes = 1;
 		break;
 	case section_emit_type_imm16:
-		output = va_arg(ap, int64_t);
+		output = va_arg(ap, unsigned);
 		nbytes = 2;
 		break;
 	case section_emit_type_imm32:
-		output = va_arg(ap, int64_t);
+		output = va_arg(ap, unsigned long);
 		nbytes = 4;
 		break;
 	default:
