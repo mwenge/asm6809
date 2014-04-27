@@ -85,16 +85,23 @@ void instr_rel(struct opcode const *op, struct node const *args) {
 	}
 	SECTION_EMIT_OP_IMMEDIATE(op);
 	_Bool nowarn_rel16 = (node_attr_of(arga[0]) == node_attr_16bit);
-	if (node_type_of(arga[0]) == node_type_int) {
-		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_REL8)
-			SECTION_EMIT_REL8(arga[0]->data.as_int);
-		else
-			SECTION_EMIT_REL16(arga[0]->data.as_int, nowarn_rel16);
-	} else {
+	if (node_type_of(arga[0]) != node_type_int) {
 		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_REL8)
 			SECTION_EMIT_PAD(1);
 		else
 			SECTION_EMIT_PAD(2);
+		return;
+	}
+	int64_t rel8 = arga[0]->data.as_int - (cur_section->pc + 1);
+	_Bool rel8v = (rel8 < -128 || rel8 > 127);
+	if ((op->type & OPCODE_EXT_TYPE) == OPCODE_REL8) {
+		if (rel8v)
+			error(error_type_out_of_range, "8-bit relative value out of range");
+		SECTION_EMIT_IMM8(rel8);
+	} else {
+		if (!rel8v && node_attr_of(arga[0]) != node_attr_16bit)
+			error(error_type_inefficient, "16-bit relative value could be represented in 8 bits");
+		SECTION_EMIT_IMM16(rel8 - 1);
 	}
 }
 
