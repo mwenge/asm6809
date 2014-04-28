@@ -1,0 +1,6 @@
+MOSTLYCLEANFILES = *.out
+CLEANFILES = *.lis
+
+AM_TESTS_ENVIRONMENT =
+
+TESTS = test-isa6809.sh

@@ -53,5 +53,5 @@ AC_FUNC_STRNLEN
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([getpagesize localeconv mblen mbrlen memchr memset nl_langinfo strchr strerror strndup strtol])
 
-AC_CONFIG_FILES([README Makefile gnulib/Makefile src/Makefile])
+AC_CONFIG_FILES([README Makefile gnulib/Makefile src/Makefile tests/Makefile])
 AC_OUTPUT
