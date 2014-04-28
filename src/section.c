@@ -231,14 +231,10 @@ struct section *section_coalesce_all(_Bool pad) {
  * appropriate.
  */
 
-static int op_size(unsigned long op) {
-	return (op & 0xff00) ? 2 : 1;
-}
-
 #define next_put(s) ((s)->put + (s)->size)
 #define next_pc(s) ((int)((s)->org + (s)->size))
 
-void section_emit(enum section_emit_type type, ...) {
+static void section_emit(uint8_t const *buf, int nbytes) {
 	assert(cur_section != NULL);
 	struct section_span *span = cur_section->span;
 
@@ -253,39 +249,6 @@ void section_emit(enum section_emit_type type, ...) {
 	}
 	cur_section->span = span;
 
-	va_list ap;
-	va_start(ap, type);
-	struct opcode *op;
-	unsigned long output = 0;
-	int nbytes;
-	_Bool pad = 0;
-
-	switch (type) {
-	case section_emit_type_pad:
-		nbytes = va_arg(ap, unsigned);
-		pad = 1;
-		break;
-	case section_emit_type_op:
-		output = va_arg(ap, unsigned);
-		nbytes = op_size(output);
-		break;
-	case section_emit_type_imm8:
-		output = va_arg(ap, unsigned);
-		nbytes = 1;
-		break;
-	case section_emit_type_imm16:
-		output = va_arg(ap, unsigned);
-		nbytes = 2;
-		break;
-	case section_emit_type_imm32:
-		output = va_arg(ap, unsigned long);
-		nbytes = 4;
-		break;
-	default:
-		error(error_type_fatal, "unknown emit format");
-		return;
-	}
-
 	if (cur_section->pc < 0) {
 		error(error_type_out_of_range, "assembling to negative address");
 	}
@@ -298,19 +261,40 @@ void section_emit(enum section_emit_type type, ...) {
 		span->data = xrealloc(span->data, span->allocated);
 	}
 
-	if (pad) {
-		for (int i = 0; i < nbytes; i++) {
-			span->data[span->size++] = 0;
-		}
-	} else for (int i = 1; i <= nbytes; i++) {
-		span->data[span->size++] = (output >> ((nbytes-i)*8)) & 0xff;
+	if (!buf) {
+		memset(&span->data[span->size], 0, nbytes);
+	} else for (int i = 0; i < nbytes; i++) {
+		memcpy(&span->data[span->size], buf, nbytes);
 	}
+	span->size += nbytes;
 
 	if (cur_section->pc > 0xffff) {
 		error(error_type_out_of_range, "assembling beyond addressable memory");
 	}
+}
 
-	va_end(ap);
+void section_emit_pad(int nbytes) {
+	section_emit(NULL, nbytes);
+}
+
+void section_emit_op(uint16_t op) {
+	uint8_t buf[2] = { op >> 8, op & 0xff };
+	int nbytes = buf[0] ? 2 : 1;
+	section_emit(buf + (2 - nbytes), nbytes);
+}
+
+void section_emit_uint8(uint8_t v) {
+	section_emit(&v, 1);
+}
+
+void section_emit_uint16(uint16_t v) {
+	uint8_t buf[2] = { v >> 8, v & 0xff };
+	section_emit(buf, 2);
+}
+
+void section_emit_uint32(uint32_t v) {
+	uint8_t buf[4] = { v >> 24, v >> 16, v >> 8, v & 0xff };
+	section_emit(buf, 4);
 }
 
 void section_skip(int nbytes) {

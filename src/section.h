@@ -17,17 +17,6 @@ option) any later version.
 
 #include "dict.h"
 
-/* Types of data that assembly instructions and pseudo-ops can pass to
- * section_emit() */
-
-enum section_emit_type {
-	section_emit_type_pad,
-	section_emit_type_op,
-	section_emit_type_imm8,
-	section_emit_type_imm16,
-	section_emit_type_imm32,
-};
-
 /*
  * A section span is one region of consecutive data.  Reference counted so that
  * meta-sections can be created combining other sections, and coelesced.
@@ -128,19 +117,24 @@ void section_coalesce(struct section *, _Bool sort, _Bool pad);
 
 struct section *section_coalesce_all(_Bool pad);
 
-/* Add data to the current section.  Additional arguments depend on the value
- * of type. */
+/* Types of data that assembly instructions and pseudo-ops can pass to
+ * section_emit() */
 
-void section_emit(enum section_emit_type type, ...);
+enum section_emit_type {
+	section_emit_type_pad,
+	section_emit_type_op,
+	section_emit_type_imm8,
+	section_emit_type_imm16,
+	section_emit_type_imm32,
+};
 
-/* Front-end macros to section_emit() ensure arguments are cast to the correct
- * type. */
+/* Add data of the specified type to the current section. */
 
-#define SECTION_EMIT_PAD(n) section_emit(section_emit_type_pad, (unsigned)(n))
-#define SECTION_EMIT_OP(o) section_emit(section_emit_type_op, (unsigned)((o)&0xffff))
-#define SECTION_EMIT_IMM8(v) section_emit(section_emit_type_imm8, (unsigned)((v)&0xff))
-#define SECTION_EMIT_IMM16(v) section_emit(section_emit_type_imm16, (unsigned)((v)&0xffff))
-#define SECTION_EMIT_IMM32(v) section_emit(section_emit_type_imm32, (unsigned long)((v)&0xffffffff))
+void section_emit_pad(int nbytes);
+void section_emit_op(uint16_t op);
+void section_emit_uint8(uint8_t v);
+void section_emit_uint16(uint16_t v);
+void section_emit_uint32(uint32_t v);
 
 /* Skip a number of bytes in the current section - used by RMB. */
 

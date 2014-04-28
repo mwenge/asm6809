@@ -539,20 +539,20 @@ static void pseudo_fcc(struct prog_line *line) {
 			      i+1);
 			break;
 		case node_type_undef:
-			SECTION_EMIT_PAD(1);
+			section_emit_pad(1);
 			break;
 		case node_type_empty:
-			SECTION_EMIT_IMM8(0);
+			section_emit_uint8(0);
 			break;
 		case node_type_int:
-			SECTION_EMIT_IMM8(arg->data.as_int);
+			section_emit_uint8(arg->data.as_int);
 			break;
 		case node_type_float:
-			SECTION_EMIT_IMM8((int32_t)arg->data.as_float);
+			section_emit_uint8((int32_t)arg->data.as_float);
 			break;
 		case node_type_string:
 			for (char const *c = arg->data.as_string; *c; c++) {
-				SECTION_EMIT_IMM8(*c);
+				section_emit_uint8(*c);
 			}
 			break;
 		}
@@ -567,7 +567,7 @@ static void pseudo_fdb(struct prog_line *line) {
 		return;
 	for (int i = 0; i < nargs; i++) {
 		long word = have_int_optional(line->args, i, "FDB", 0);
-		SECTION_EMIT_IMM16(word);
+		section_emit_uint16(word);
 	}
 }
 
@@ -583,7 +583,7 @@ static void pseudo_rzb(struct prog_line *line) {
 		error(error_type_out_of_range, "negative count for RZB");
 	}
 	for (long i = 0; i < count; i++)
-		SECTION_EMIT_IMM8(fill);
+		section_emit_uint8(fill);
 }
 
 /* FILL.  Effectively an arg-swapped version of the two-arg form of RZB. */
@@ -597,7 +597,7 @@ static void pseudo_fill(struct prog_line *line) {
 		error(error_type_out_of_range, "negative count for FILL");
 	}
 	for (long i = 0; i < count; i++)
-		SECTION_EMIT_IMM8(fill);
+		section_emit_uint8(fill);
 }
 
 /* RMB.  Reserve memory. */
@@ -651,7 +651,7 @@ static void pseudo_includebin(struct prog_line *line) {
 	}
 	int c;
 	while ((c = fgetc(f)) != EOF) {
-		SECTION_EMIT_IMM8(c);
+		section_emit_uint8(c);
 	}
 	fclose(f);
 }

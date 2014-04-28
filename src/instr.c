@@ -36,7 +36,7 @@ void instr_inherent(struct opcode const *op, struct node const *args) {
 	if (nargs != 0) {
 		error(error_type_syntax, "unexpected argument");
 	}
-	SECTION_EMIT_OP(op->immediate);
+	section_emit_op(op->immediate);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -52,21 +52,21 @@ void instr_immediate(struct opcode const *op, struct node const *args) {
 		error(error_type_syntax, "invalid number of arguments");
 		return;
 	}
-	SECTION_EMIT_OP(op->immediate);
+	section_emit_op(op->immediate);
 	if (node_type_of(arga[0]) == node_type_int) {
 		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM8)
-			SECTION_EMIT_IMM8(arga[0]->data.as_int);
+			section_emit_uint8(arga[0]->data.as_int);
 		else if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM16)
-			SECTION_EMIT_IMM16(arga[0]->data.as_int);
+			section_emit_uint16(arga[0]->data.as_int);
 		else
-			SECTION_EMIT_IMM32(arga[0]->data.as_int);
+			section_emit_uint32(arga[0]->data.as_int);
 	} else {
 		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM8)
-			SECTION_EMIT_PAD(1);
+			section_emit_pad(1);
 		else if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM16)
-			SECTION_EMIT_PAD(2);
+			section_emit_pad(2);
 		else
-			SECTION_EMIT_PAD(4);
+			section_emit_pad(4);
 	}
 }
 
@@ -95,12 +95,12 @@ void instr_rel(struct opcode const *op, struct node const *args) {
 		error(error_type_syntax, "invalid number of arguments");
 		return;
 	}
-	SECTION_EMIT_OP(op->immediate);
+	section_emit_op(op->immediate);
 	if (node_type_of(arga[0]) != node_type_int) {
 		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_REL8)
-			SECTION_EMIT_PAD(1);
+			section_emit_pad(1);
 		else
-			SECTION_EMIT_PAD(2);
+			section_emit_pad(2);
 		return;
 	}
 	int rel8 = to_rel16(arga[0]->data.as_int - (cur_section->pc + 1));
@@ -108,11 +108,11 @@ void instr_rel(struct opcode const *op, struct node const *args) {
 	if ((op->type & OPCODE_EXT_TYPE) == OPCODE_REL8) {
 		if (rel8v)
 			error(error_type_out_of_range, "8-bit relative value out of range");
-		SECTION_EMIT_IMM8(rel8);
+		section_emit_uint8(rel8);
 	} else {
 		if (!rel8v && node_attr_of(arga[0]) != node_attr_16bit)
 			error(error_type_inefficient, "16-bit relative value could be represented in 8 bits");
-		SECTION_EMIT_IMM16(rel8 - 1);
+		section_emit_uint16(rel8 - 1);
 	}
 }
 
@@ -248,7 +248,7 @@ static void instr_indexed2(_Bool indirect, struct node const *arg0, struct node 
 	enum node_attr arg1_attr = node_attr_of(arg1);
 
 	if (arg0_type == node_type_undef || arg1_type == node_type_undef) {
-		SECTION_EMIT_PAD(3);
+		section_emit_pad(3);
 		return;
 	}
 
@@ -344,14 +344,14 @@ static void instr_indexed2(_Bool indirect, struct node const *arg0, struct node 
 			postbyte |= 0x10;
 	}
 
-	SECTION_EMIT_IMM8(postbyte);
+	section_emit_uint8(postbyte);
 
 	switch (off_type) {
 	case off_type_8bit:
-		SECTION_EMIT_IMM8(off_value);
+		section_emit_uint8(off_value);
 		break;
 	case off_type_16bit:
-		SECTION_EMIT_IMM16(off_value);
+		section_emit_uint16(off_value);
 		break;
 	default:
 		break;
@@ -377,16 +377,16 @@ void instr_indexed(struct opcode const *op, struct node const *args, int imm8_va
 		error(error_type_syntax, "invalid number of arguments");
 		return;
 	}
-	SECTION_EMIT_OP(op->indexed);
+	section_emit_op(op->indexed);
 	if (imm8_val >= 0)
-		SECTION_EMIT_IMM8(imm8_val);
+		section_emit_uint8(imm8_val);
 
 	if (nargs == 1) {
 		int pbyte = indirect ? 0x9f : 0x8f;
 		int addr = 0;
 		switch (node_type_of(arga[0])) {
 		case node_type_undef:
-			SECTION_EMIT_PAD(3);
+			section_emit_pad(3);
 			break;
 		case node_type_int:
 			addr = arga[0]->data.as_int;
@@ -405,8 +405,8 @@ void instr_indexed(struct opcode const *op, struct node const *args, int imm8_va
 		}
 		if (!indirect)
 			error(error_type_illegal, "illegal indexed addressing form");
-		SECTION_EMIT_IMM8(pbyte);
-		SECTION_EMIT_IMM16(addr);
+		section_emit_uint8(pbyte);
+		section_emit_uint16(addr);
 		return;
 	}
 
@@ -443,20 +443,20 @@ void instr_address(struct opcode const *op, struct node const *args, int imm8_va
 	if ((op->type & OPCODE_DIRECT)) {
 		if (attr == node_attr_8bit ||
 		    (attr == node_attr_none && (cur_section->dp == (addr >> 8)))) {
-			SECTION_EMIT_OP(op->direct);
+			section_emit_op(op->direct);
 			if (imm8_val >= 0)
-				SECTION_EMIT_IMM8(imm8_val);
-			SECTION_EMIT_IMM8(addr);
+				section_emit_uint8(imm8_val);
+			section_emit_uint8(addr);
 			return;
 		}
 	}
 
 	if ((op->type & OPCODE_EXTENDED)) {
 		if (attr == node_attr_16bit || attr == node_attr_none) {
-			SECTION_EMIT_OP(op->extended);
+			section_emit_op(op->extended);
 			if (imm8_val >= 0)
-				SECTION_EMIT_IMM8(imm8_val);
-			SECTION_EMIT_IMM16(addr);
+				section_emit_uint8(imm8_val);
+			section_emit_uint16(addr);
 			return;
 		}
 	}
@@ -509,8 +509,8 @@ void instr_stack(struct opcode const *op, struct node const *args, enum reg_id s
 		pbyte |= bit;
 	}
 
-	SECTION_EMIT_OP(op->immediate);
-	SECTION_EMIT_IMM8(pbyte);
+	section_emit_op(op->immediate);
+	section_emit_uint8(pbyte);
 	return;
 
 invalid_register:
@@ -557,8 +557,8 @@ void instr_pair(struct opcode const *op, struct node const *args) {
 	}
 
 	int pbyte = (nibble[0] << 4) | nibble[1];
-	SECTION_EMIT_OP(op->immediate);
-	SECTION_EMIT_IMM8(pbyte);
+	section_emit_op(op->immediate);
+	section_emit_uint8(pbyte);
 	return;
 
 invalid_register:
@@ -617,8 +617,8 @@ void instr_tfm(struct opcode const *op, struct node const *args) {
 		return;
 	}
 
-	SECTION_EMIT_OP(op->immediate + mod);
-	SECTION_EMIT_IMM8(pbyte);
+	section_emit_op(op->immediate + mod);
+	section_emit_uint8(pbyte);
 	return;
 
 invalid_register:
@@ -681,12 +681,12 @@ void instr_reg_mem(struct opcode const *op, struct node const *args) {
 		}
 	}
 
-	SECTION_EMIT_OP(op->direct);
-	SECTION_EMIT_IMM8(pbyte);
+	section_emit_op(op->direct);
+	section_emit_uint8(pbyte);
 	if (node_type_of(arga[3]) == node_type_int) {
-		SECTION_EMIT_IMM8(arga[3]->data.as_int);
+		section_emit_uint8(arga[3]->data.as_int);
 	} else {
-		SECTION_EMIT_PAD(1);
+		section_emit_pad(1);
 	}
 	return;
 
