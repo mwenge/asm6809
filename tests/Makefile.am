@@ -3,4 +3,4 @@ CLEANFILES = *.lis
 
 AM_TESTS_ENVIRONMENT =
 
-TESTS = test-isa6809.sh
+TESTS = test-isa6809.sh test-isa6309.sh
