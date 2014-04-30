@@ -129,7 +129,7 @@ Any label must appear at the very beginning of the line.  If a label is
 omitted, whitespace must appear before the operator field.  Certain pseudo-ops
 affect a label's meaning, but their usual purpose is to define a symbol
 referring to the current position in the code (Program Counter, or PC).  The
-next most common use is with the **EQU** psuedo-op, which assigns a particular
+next most common use is with the **EQU** pseudo-op, which assigns a particular
 value to a symbol.
 
 The instruction field contains either instruction op-codes (mnemonics),
@@ -145,7 +145,7 @@ or pseudo-op, but in general they may be:
  * A nested list surrounded by "[" and "]".  This is generally only used to
    indicate indirect indexed addressing.
 
-In addition, any argument may be preceeded by:
+In addition, any argument may be preceded by:
 
  * "#", indicate immediate value.
  * "<<", force 5-bit index offset.
@@ -159,9 +159,9 @@ Expressions
 Expressions are formed of:
 
  * A decimal number.
- * An octal number preceeded by "@".
- * A binary number preceeded by "%" or "0b".
- * A hexadecimal number preceeded by "$" or "0x".
+ * An octal number preceded by "@".
+ * A binary number preceded by "%" or "0b".
+ * A hexadecimal number preceded by "$" or "0x".
  * A floating point number (decimal digits surrounding exactly one ".").
  * A single quote followed by any ASCII character (yielding the ASCII value of
    that character).
@@ -242,7 +242,7 @@ considered the same as decimal zero.  Identical numerical labels may occur more
 than once, other labels may not.
 
 As an operand, a decimal number followed by "B" or "F" is considered to be a
-back or forward reference to the previous or next occurence of that numerical
+back or forward reference to the previous or next occurrence of that numerical
 local label in the section.  Operands of "<" and ">" are considered equivalent
 to "0B" and "0F" respectively, and can therefore be used to refer to the  "!"
 local label, as in some other assemblers.

@@ -2,33 +2,32 @@ TODO
 ----
 
 While functional, there's a lot still to be added or considered.  This list is
-not necessarily complete, and in some regarts just acts as a scratch pad for me
+not necessarily complete, and in some regards just acts as a scratch pad for me
 to remember things that need doing.
 
 ### Medium priority
 
  * Conditional assembly pseudo-ops.
- * **RZB** should support a fill value other than zero.
- * **ENDM** argument should match the opening MACRO if specified.
+ * **ENDM** argument could match the opening MACRO if specified.
  * Check all symbols are valid.  After variable substitution (e.g., in macros),
    they might end up containing invalid characters.
  * Structs.
 
 ### Low priority
 
- * **INCLUDE** should push new positional variables.
+ * **INCLUDE** could push arguments as new positional variables.
  * **EQU** could permit any value, including lists.  A list could expand
    in-place somehow.
  * Should **DP** default to zero, not disabled?
  * Ability to specify maximum number of passes.
  * See if it's possible to support comments without a ";" in unambiguous
-   sitiation.  Check out Bison/YACC error recovery.
+   situation.  Check out Bison/YACC error recovery.
  * As it stands, section names need to be quoted - can this requirement be
    lifted?  Similarly when pasting macro args - maybe pass a simplified ID?
- * 6800, 6801, 6803, 6309 ISA support.
+ * 6800, 6801, 6803 ISA support.
  * Support the extended syntax pseudo-ops from the Perl version.
  * For CoCo3 and others, destination addresses could usefully be outside the
    64K range.
- * The limitation on inclusion and macro expansion occuring in the first pass
+ * The limitation on inclusion and macro expansion occurring in the first pass
    could be lifted.  Should just be able to clear all local label tables
    whenever an expansion occurs in a later pass, and then trigger another one.
