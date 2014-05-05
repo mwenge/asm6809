@@ -48,6 +48,7 @@ static char *symbol_filename = NULL;
 static char *listing_filename = NULL;
 static int isa = asm6809_isa_6809;
 static int max_program_depth = 8;
+static int setdp = -1;
 static int verbosity = 0;
 
 static struct option long_options[] = {
@@ -59,6 +60,7 @@ static struct option long_options[] = {
 	{ "exec", required_argument, NULL, 'e' },
 	{ "6809", no_argument, &isa, asm6809_isa_6809 },
 	{ "6309", no_argument, &isa, asm6809_isa_6309 },
+	{ "setdp", required_argument, &setdp, 0 },
 	{ "output", required_argument, NULL, 'o' },
 	{ "listing", required_argument, NULL, 'l' },
 	{ "symbols", required_argument, NULL, 's' },
@@ -143,6 +145,7 @@ int main(int argc, char **argv) {
 
 	asm6809_options.isa = isa;
 	asm6809_options.max_program_depth = max_program_depth;
+	asm6809_options.setdp = setdp;
 	asm6809_options.verbosity = verbosity;
 
 	/* Read in each file */
@@ -259,8 +262,9 @@ static void helptext(void) {
 "  -e, --exec=ADDR   EXEC address (for output formats that support one)\n"
 "\n"
 "  -8,\n"
-"  -9, --6809        use 6809 ISA (default)\n"
-"  -3, --6309        use 6309 ISA (6809 with extensions)\n"
+"  -9, --6809          use 6809 ISA (default)\n"
+"  -3, --6309          use 6309 ISA (6809 with extensions)\n"
+"      --setdp=VALUE   initial value assumed for DP [undefined]\n"
 "\n"
 "  -o, --output=FILE    set output filename\n"
 "  -l, --listing=FILE   create listing file\n"

@@ -21,6 +21,7 @@ option) any later version.
 
 #include "xalloc.h"
 
+#include "asm6809.h"
 #include "dict.h"
 #include "error.h"
 #include "opcode.h"
@@ -80,7 +81,7 @@ static struct section *section_new(void) {
 	sect->line_number = 0;
 	sect->pc = 0;
 	sect->put = 0;
-	sect->dp = -1;
+	sect->dp = asm6809_options.setdp;
 	sect->last_pc = 0;
 	sect->last_put = 0;
 	return sect;
@@ -128,7 +129,7 @@ void section_set(const char *name, unsigned pass) {
 			next_section->put = 0;
 		}
 		next_section->pass = pass;
-		next_section->dp = -1;
+		next_section->dp = asm6809_options.setdp;
 		next_section->line_number = 0;
 	}
 

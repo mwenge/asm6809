@@ -25,6 +25,9 @@ struct asm6809_options {
 	/* Maximum program depth (include files, macros) */
 	unsigned max_program_depth;
 
+	/* Initial SETDP */
+	int setdp;
+
 	/* Can be positive or negative.  Affects error reporting. */
 	int verbosity;
 };
