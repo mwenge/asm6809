@@ -13,9 +13,7 @@ option) any later version.
 /* for getopt_long */
 #define _GNU_SOURCE
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <errno.h>
 #include <getopt.h>
