@@ -12,6 +12,7 @@
 #include "register.h"
 #include "slist.h"
 
+static void raise_error(void);
 static void yyerror(char *);
 void yylex_destroy(void);
 int yylex(void);
@@ -45,9 +46,9 @@ struct prog *grammar_parse_file(const char *filename);
 %token DELIM
 %token DEC2 INC2
 
-%type <as_node> label opcode
+%type <as_node> label
 %type <as_node> id string
-%type <as_node> idpart strpart arg args
+%type <as_node> idpart strpart arg
 %type <as_node> arglist
 %type <as_list> idlist strlist
 %type <as_node> expr reg
@@ -65,24 +66,20 @@ struct prog *grammar_parse_file(const char *filename);
 %%
 
 program	:
-	| program line '\n'	{ prog_line_set_text($2, lex_fetch_line()); prog_ctx_add_line(cur_ctx, $2); }
-	| program error '\n'	{ yyerrok; }
+	| program line	{ prog_line_set_text($2, lex_fetch_line()); prog_ctx_add_line(cur_ctx, $2); }
+	| program error '\n'	{ raise_error(); yyerrok; }
 	;
 
-line	: label opcode args	{ $$ = prog_line_new($1, $2, $3); }
+line	: label WS id WS arglist '\n'	{ $$ = prog_line_new($1, $3, $5); }
+	| label WS id WS arglist error '\n'	{ $$ = prog_line_new($1, $3, $5); }
+	| label WS id '\n'		{ $$ = prog_line_new($1, $3, NULL); }
+	| label WS id error '\n'	{ $$ = prog_line_new($1, $3, NULL); }
+	| label '\n'			{ $$ = prog_line_new($1, NULL, NULL); }
 	;
 
 label	:			{ $$ = NULL; }
 	| INTEGER		{ $$ = node_new_int($1); }
 	| id			{ $$ = $1; }
-	;
-
-opcode	:			{ $$ = NULL; }
-	| WS id			{ $$ = $2; }
-	;
-
-args	:			{ $$ = NULL; }
-	| WS arglist		{ $$ = $2; }
 	;
 
 id	: idlist		{ $$ = node_new_id($1); }
@@ -156,12 +153,16 @@ strpart	: TEXT			{ $$ = node_new_string($1); }
 
 %%
 
-static void yyerror(char *s) {
+static void raise_error(void) {
 	// discard line with error - going to fail anyway
 	char *l = lex_fetch_line();
 	free(l);
 	cur_ctx->line_number++;
-	error(error_type_syntax, "%s", s);
+	error(error_type_syntax, "");
+}
+
+static void yyerror(char *s) {
+	(void)s;
 }
 
 struct prog *grammar_parse_file(const char *filename) {

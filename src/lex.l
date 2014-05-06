@@ -30,7 +30,6 @@ void lex_free_all(void);
 
 %s opcode
 %s arg
-%s argnonum
 %s argnostr
 %s string
 
@@ -42,7 +41,7 @@ hexdigit	[0-9A-Fa-f]
 ws	[ \t]
 
 decimal	{digit}+
-word	[A-Za-z_][A-Za-z0-9_]*
+word	[A-Za-z_][A-Za-z0-9_\.]*
 
 %%
 
@@ -62,9 +61,9 @@ ${hexdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
 &{decimal}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
 &\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
-\r		/* skip CR */
-{ws}*[;\*].*	/* skip comment */
+{ws}*[;\*].*	/* ";" or "*" introduces comment to end of line */
 {ws}+		{ BEGIN(opcode); return WS; }
+\r		/* skip CR */
 {ws}*\n		{ return '\n'; }
 .		{ return *yytext; }
 
@@ -77,26 +76,11 @@ ${hexdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
 &\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
 
-\r		/* skip CR */
-{ws}*;.*	/* skip comment */
+{ws}*;.*	/* ";" introduces comment to end of line */
 {ws}+		{ BEGIN(arg); return WS; }
 {ws}*\n		{ BEGIN(INITIAL); return '\n'; }
+\r		/* skip CR */
 .		{ BEGIN(INITIAL); return *yytext; }
-
-}
-
-<arg,argnostr>{
-
-\%{bindigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext+1, NULL, 2); return INTEGER; }
-0b{bindigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext+2, NULL, 2); return INTEGER; }
-@{octdigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext+1, NULL, 8); return INTEGER; }
-0{octdigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext, NULL, 8); return INTEGER; }
-{decimal}	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext, NULL, 10); return INTEGER; }
-${hexdigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
-0x{hexdigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext+2, NULL, 16); return INTEGER; }
-'.		{ BEGIN(argnonum); yylval.as_int = *(yytext+1); return INTEGER; }
-[0-9]*\.[0-9]+	|
-{decimal}\.	{ BEGIN(argnonum); yylval.as_float = strtod(yytext, NULL); return FLOAT; }
 
 }
 
@@ -110,21 +94,28 @@ ${hexdigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext+1, NULL, 16); r
 
 }
 
-<argnonum,argnostr>{
-[/"]		{ BEGIN(argnostr); return *yytext; }
-}
+<arg,argnostr>{
 
-<arg,argnonum,argnostr>{
+{word}		{ BEGIN(argnostr); return id_or_reg(); }
+&{decimal}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+&\{{decimal}\}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
-{word}		{ BEGIN(argnonum); return id_or_reg(); }
-&{decimal}	{ BEGIN(argnonum); yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
-&\{{decimal}\}	{ BEGIN(argnonum); yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
+\+\+		{ BEGIN(argnostr); return INC2; }
+\-\-		{ BEGIN(argnostr); return DEC2; }
 
-\+\+		{ BEGIN(argnonum); return INC2; }
-\-\-		{ BEGIN(argnonum); return DEC2; }
+{decimal}[bB]	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext, NULL, 10); return BACKREF; }
+{decimal}[fF]	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext, NULL, 10); return FWDREF; }
 
-{decimal}[bB]	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext, NULL, 10); return BACKREF; }
-{decimal}[fF]	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext, NULL, 10); return FWDREF; }
+\%{bindigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+1, NULL, 2); return INTEGER; }
+0b{bindigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+2, NULL, 2); return INTEGER; }
+@{octdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+1, NULL, 8); return INTEGER; }
+0{octdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext, NULL, 8); return INTEGER; }
+{decimal}	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext, NULL, 10); return INTEGER; }
+${hexdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
+0x{hexdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+2, NULL, 16); return INTEGER; }
+'.		{ BEGIN(argnostr); yylval.as_int = *(yytext+1); return INTEGER; }
+[0-9]*\.[0-9]+	|
+{decimal}\.	{ BEGIN(argnostr); yylval.as_float = strtod(yytext, NULL); return FLOAT; }
 
 "<<"		{ BEGIN(argnostr); return SHL; }
 ">>"		{ BEGIN(argnostr); return SHR; }
@@ -133,11 +124,11 @@ ${hexdigit}+	{ BEGIN(argnonum); yylval.as_int = strtoimax(yytext+1, NULL, 16); r
 
 ,		{ BEGIN(arg); return *yytext; }
 
-\r		/* skip CR */
-{ws}*;.*	/* skip comment */
+{ws}*;.*	/* ";" introduces comment to end of line */
 {ws}+		/* skip whitespace */
-\n		|
-.		{ BEGIN(INITIAL); return *yytext; }
+\r		/* skip CR */
+\n		{ BEGIN(INITIAL); return *yytext; }
+.		{ return *yytext; }
 
 }
 
