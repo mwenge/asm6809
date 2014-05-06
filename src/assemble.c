@@ -95,6 +95,7 @@ static struct pseudo_op pseudo_data_ops[] = {
 	{ .name = "fcb", .handler = &pseudo_fcc },  // treat the same
 	{ .name = "fdb", .handler = &pseudo_fdb },
 	{ .name = "rzb", .handler = &pseudo_rzb },
+	{ .name = "fzb", .handler = &pseudo_rzb },
 	{ .name = "zmb", .handler = &pseudo_rzb },  // alias
 	{ .name = "bsz", .handler = &pseudo_rzb },  // alias
 	{ .name = "fill", .handler = &pseudo_fill },
