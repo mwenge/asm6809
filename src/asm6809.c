@@ -25,6 +25,7 @@ option) any later version.
 #include "assemble.h"
 #include "error.h"
 #include "listing.h"
+#include "node.h"
 #include "output.h"
 #include "program.h"
 #include "section.h"
@@ -70,6 +71,8 @@ static struct option long_options[] = {
 };
 
 static struct slist *files = NULL;
+
+#define MAX_PASSES (10)
 
 static void helptext(void);
 static void versiontext(void);
@@ -160,7 +163,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* Attempt to assemble files until consistent */
-	for (unsigned pass = 0; pass < 10; pass++) {
+	for (unsigned pass = 0; pass < MAX_PASSES; pass++) {
 		error_clear_all();
 		listing_free_all();
 		section_set("", pass);
@@ -194,6 +197,37 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	/* Special parsing of option exec address option.  Overrides any use of
+	 * the END pseudo-op. */
+	if (exec_option) {
+		struct node *n = NULL;
+		if (exec_option[0] == '$') {
+			n = node_new_int(strtol(exec_option+1, NULL, 16));
+		} else if (exec_option[0] == '@') {
+			n = node_new_int(strtol(exec_option+1, NULL, 8));
+		} else if (exec_option[0] == '%') {
+			n = node_new_int(strtol(exec_option+1, NULL, 2));
+		} else if (exec_option[0] == '0') {
+			if (exec_option[1] == 'x')
+				n = node_new_int(strtol(exec_option+2, NULL, 16));
+			if (exec_option[1] == 'b')
+				n = node_new_int(strtol(exec_option+2, NULL, 2));
+		} else if (exec_option[0] >= '0' && exec_option[0] <= '9') {
+			n = node_new_int(strtol(exec_option+1, NULL, 10));
+		} else {
+			unsigned v = 0;
+			struct node *tmp = symbol_get(exec_option);
+			if (tmp) {
+				v = tmp->data.as_int & 0xffff;
+				node_free(tmp);
+			} else {
+				error(error_type_fatal, "exec symbol '%s' not defined", exec_option);
+			}
+			n = node_new_int(v);
+		}
+		symbol_force_set(".exec", n, MAX_PASSES);
+	}
+
 	// XXX At the moment listing generation must precede output, as
 	// coelescing spans might screw with the span data to which the listing
 	// refers.  Not a big deal, but needs fixing.
@@ -202,19 +236,19 @@ int main(int argc, char **argv) {
 	if (output_filename) {
 		switch (output_format) {
 		case OUTPUT_BINARY:
-			output_binary(output_filename, exec_option);
+			output_binary(output_filename);
 			break;
 		case OUTPUT_DRAGONDOS:
-			output_dragondos(output_filename, exec_option);
+			output_dragondos(output_filename);
 			break;
 		case OUTPUT_COCO:
-			output_coco(output_filename, exec_option);
+			output_coco(output_filename);
 			break;
 		case OUTPUT_MOTOROLA_SREC:
-			output_motorola_srec(output_filename, exec_option);
+			output_motorola_srec(output_filename);
 			break;
 		case OUTPUT_INTEL_HEX:
-			output_intel_hex(output_filename, exec_option);
+			output_intel_hex(output_filename);
 			break;
 		default:
 			error(error_type_fatal, "internal: unexpected output format");

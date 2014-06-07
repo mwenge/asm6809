@@ -68,6 +68,7 @@ static void pseudo_put(struct prog_line *);
 static void pseudo_setdp(struct prog_line *);
 static void pseudo_include(struct prog_line *);
 static void pseudo_includebin(struct prog_line *);
+static void pseudo_end(struct prog_line *);
 static void pseudo_nop(struct prog_line *);
 
 struct pseudo_op {
@@ -109,6 +110,7 @@ static struct pseudo_op pseudo_ops[] = {
 	{ .name = "setdp", .handler = &pseudo_setdp },
 	{ .name = "include", .handler = &pseudo_include },
 	{ .name = "includebin", .handler = &pseudo_includebin },
+	{ .name = "end", .handler = &pseudo_end },
 	{ .name = "page", .handler = &pseudo_nop },
 	{ .name = "opt", .handler = &pseudo_nop },
 	{ .name = "spc", .handler = &pseudo_nop },
@@ -704,6 +706,16 @@ static void pseudo_endm(struct prog_line *line) {
 		return;
 	prog_ctx_free(defining_macro_ctx);
 	defining_macro_ctx = NULL;
+}
+
+/* END.  Specify EXEC address. */
+
+static void pseudo_end(struct prog_line *line) {
+	int nargs = verify_num_args(line->args, 0, 1, "END");
+	if (nargs < 1)
+		return;
+	struct node **arga = node_array_of(line->args);
+	symbol_set(".exec", node_ref(arga[0]), asm_pass);
 }
 
 /* Ignore certain historical pseudo-ops */

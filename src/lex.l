@@ -177,6 +177,8 @@ static char *line = NULL;
 static int line_length = 0;
 
 static int read_line(char *buf, int max_size) {
+	if (!yyin)
+		return YY_NULL;
 	char *r = fgets(buf, max_size, yyin);
 	if (!r) {
 		if (line) {

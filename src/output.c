@@ -34,45 +34,20 @@ static void write_single_binary(FILE *f, struct section_span *span) {
 
 /* Helper to figure out exec address. */
 
-static unsigned get_exec_addr(const char *exec) {
-	if (!exec)
-		return 0;
-
-	/* Standard numeric forms */
-	if (exec[0] == '$')
-		return strtol(exec+1, NULL, 16);
-	if (exec[0] == '@')
-		return strtol(exec+1, NULL, 8);
-	if (exec[0] == '%')
-		return strtol(exec+1, NULL, 2);
-	if (exec[0] == '0') {
-		if (exec[1] == 'x')
-			return strtol(exec+2, NULL, 16);
-		if (exec[1] == 'b')
-			return strtol(exec+2, NULL, 2);
-	}
-	if (exec[0] >= '0' && exec[0] <= '9')
-		return strtol(exec, NULL, 10);
-
-	struct node *n = symbol_get(exec);
-	unsigned ret = 0;
+static int get_exec_addr(void) {
+	struct node *n = symbol_try_get(".exec");
+	int ret = -1;
 	if (n) {
-		ret = n->data.as_int & 0xffff;
+		if (n->data.as_int >= 0)
+			ret = n->data.as_int & 0xffff;
 		node_free(n);
-	} else {
-		error(error_type_fatal, "exec symbol '%s' not defined", exec);
 	}
 	return ret;
 }
 
 /* Output format: Plain binary.  All coalesced into one big blob. */
 
-void output_binary(const char *filename, const char *exec) {
-	if (exec) {
-		error(error_type_fatal, "exec address not valid for binary output");
-		return;
-	}
-
+void output_binary(const char *filename) {
 	FILE *f = fopen(filename, "wb");
 	if (!f)
 		return;
@@ -87,8 +62,8 @@ void output_binary(const char *filename, const char *exec) {
 
 /* Output format: DragonDOS binary. */
 
-void output_dragondos(const char *filename, const char *exec) {
-	unsigned exec_addr = get_exec_addr(exec);
+void output_dragondos(const char *filename) {
+	int exec_addr = get_exec_addr();
 
 	FILE *f = fopen(filename, "wb");
 	if (!f)
@@ -98,8 +73,8 @@ void output_dragondos(const char *filename, const char *exec) {
 	struct section_span *span = sect->spans->data;
 	unsigned put = span->put;
 	unsigned size = span->size;
-	if (!exec_addr)
-		exec_addr = put;
+	if (exec_addr < 0)
+		exec_addr = put & 0xffff;
 
 	fputc(0x55, f);
 	fputc(0x02, f);
@@ -124,8 +99,8 @@ void output_dragondos(const char *filename, const char *exec) {
  * order.
  */
 
-void output_coco(const char *filename, const char *exec) {
-	unsigned exec_addr = get_exec_addr(exec);
+void output_coco(const char *filename) {
+	int exec_addr = get_exec_addr();
 
 	FILE *f = fopen(filename, "wb");
 	if (!f)
@@ -137,8 +112,8 @@ void output_coco(const char *filename, const char *exec) {
 		struct section_span *span = l->data;
 		unsigned put = span->put;
 		unsigned size = span->size;
-		if (!exec_addr)
-			exec_addr = put;
+		if (exec_addr < 0)
+			exec_addr = put & 0xffff;
 		fputc(0x00, f);
 		fputc((size >> 8) & 0xff, f);
 		fputc(size & 0xff, f);
@@ -159,8 +134,8 @@ void output_coco(const char *filename, const char *exec) {
 
 /* Output format: Motorola SREC. */
 
-void output_motorola_srec(const char *filename, const char *exec) {
-	unsigned exec_addr = get_exec_addr(exec);
+void output_motorola_srec(const char *filename) {
+	int exec_addr = get_exec_addr();
 
 	FILE *f = fopen(filename, "wb");
 	if (!f)
@@ -189,7 +164,7 @@ void output_motorola_srec(const char *filename, const char *exec) {
 		}
 	}
 
-	if (exec) {
+	if (exec_addr >= 0) {
 		unsigned sum = exec_addr + (exec_addr >> 8) + 3;
 		fprintf(f, "S903%04X%02X\n", exec_addr, ~sum & 0xff);
 	}
@@ -200,8 +175,8 @@ void output_motorola_srec(const char *filename, const char *exec) {
 
 /* Output format: Intel HEX. */
 
-void output_intel_hex(const char *filename, const char *exec) {
-	unsigned exec_addr = get_exec_addr(exec);
+void output_intel_hex(const char *filename) {
+	int exec_addr = get_exec_addr();
 
 	FILE *f = fopen(filename, "wb");
 	if (!f)
@@ -230,7 +205,7 @@ void output_intel_hex(const char *filename, const char *exec) {
 		}
 	}
 
-	if (!exec) {
+	if (exec_addr < 0) {
 		fprintf(f, ":00000001FF\n");
 	} else {
 		unsigned sum = exec_addr + (exec_addr >> 8) + 1;

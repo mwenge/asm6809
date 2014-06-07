@@ -18,18 +18,18 @@ option) any later version.
  */
 
 /* Output format: Binary. */
-void output_binary(const char *filename, const char *exec);
+void output_binary(const char *filename);
 
 /* Output format: DragonDOS binary. */
-void output_dragondos(const char *filename, const char *exec);
+void output_dragondos(const char *filename);
 
 /* Output format: CoCo RSDOS binary. */
-void output_coco(const char *filename, const char *exec);
+void output_coco(const char *filename);
 
 /* Output format: Motorola SREC. */
-void output_motorola_srec(const char *filename, const char *exec);
+void output_motorola_srec(const char *filename);
 
 /* Output format: Intel HEX. */
-void output_intel_hex(const char *filename, const char *exec);
+void output_intel_hex(const char *filename);
 
 #endif  /* ASM6809_OUTPUT_H_ */

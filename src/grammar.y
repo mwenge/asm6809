@@ -4,7 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "c-strcase.h"
+
 #include "error.h"
+#include "eval.h"
 #include "node.h"
 #include "program.h"
 #include "register.h"
@@ -21,6 +24,8 @@ extern FILE *yyin;
 static struct prog_ctx *cur_ctx = NULL;
 
 struct prog *grammar_parse_file(const char *filename);
+
+static void check_end_opcode(struct prog_line *line);
 %}
 
 %union {
@@ -64,7 +69,7 @@ struct prog *grammar_parse_file(const char *filename);
 %%
 
 program	:
-	| program line	{ prog_line_set_text($2, lex_fetch_line()); prog_ctx_add_line(cur_ctx, $2); }
+	| program line	{ prog_line_set_text($2, lex_fetch_line()); prog_ctx_add_line(cur_ctx, $2); check_end_opcode($2); }
 	| program error '\n'	{ raise_error(); yyerrok; }
 	;
 
@@ -174,7 +179,19 @@ struct prog *grammar_parse_file(const char *filename) {
 	yyparse();
 	prog_ctx_free(cur_ctx);
 	cur_ctx = NULL;
-	fclose(yyin);
+	if (yyin)
+		fclose(yyin);
 	lex_free_all();
 	return prog;
+}
+
+static void check_end_opcode(struct prog_line *line) {
+	struct node *n = eval_string(line->opcode);
+	if (n) {
+		if (0 == c_strcasecmp("end", n->data.as_string)) {
+			fclose(yyin);
+			yyin = NULL;
+		}
+		node_free(n);
+	}
 }

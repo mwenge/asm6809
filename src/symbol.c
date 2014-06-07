@@ -57,31 +57,44 @@ static void init_table(void) {
 }
 
 void symbol_set(const char *key, struct node *value, unsigned pass) {
+	_Bool is_inconsistent = symbol_force_set(key, value, pass);
+	if (is_inconsistent) {
+		error(error_type_inconsistent, "value of '%s' unstable", key);
+	}
+}
+
+_Bool symbol_force_set(const char *key, struct node *value, unsigned pass) {
 	if (!symbols)
 		init_table();
 	struct symbol *olds = dict_lookup(symbols, key);
 	if (olds && olds->pass == pass) {
 		error(error_type_syntax, "symbol '%s' redefined", key);
-		return;
+		return 0;
 	}
 	struct symbol *news = xmalloc(sizeof(*news));
 	news->pass = pass;
 	news->node = eval_node(value);
-	if (olds && !node_equal(olds->node, news->node))
-		error(error_type_inconsistent, "value of '%s' unstable", key);
+	_Bool is_inconsistent = (olds && !node_equal(olds->node, news->node));
 	char *key_copy = xstrdup(key);
 	dict_insert(symbols, key_copy, news);
+	return is_inconsistent;
 }
 
-struct node *symbol_get(const char *key) {
+struct node *symbol_try_get(const char *key) {
 	if (!symbols)
 		init_table();
 	struct symbol *s = dict_lookup(symbols, key);
-	if (!s) {
-		error(error_type_inconsistent, "symbol '%s' not defined", key);
+	if (!s)
 		return NULL;
-	}
 	return node_ref(s->node);
+}
+
+struct node *symbol_get(const char *key) {
+	struct node *n = symbol_try_get(key);
+	if (!n) {
+		error(error_type_inconsistent, "symbol '%s' not defined", key);
+	}
+	return n;
 }
 
 void symbol_free_all(void) {

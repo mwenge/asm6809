@@ -24,10 +24,15 @@ struct node;
 
 void symbol_set(const char *key, struct node *value, unsigned pass);
 
+/* As above but return 1 if inconsistent instead of raising error. */
+
+_Bool symbol_force_set(const char *key, struct node *value, unsigned pass);
+
 /*
  * Fetch a value from the symbol table.
  */
 
+struct node *symbol_try_get(const char *key);
 struct node *symbol_get(const char *key);
 
 void symbol_free_all(void);

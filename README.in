@@ -313,6 +313,14 @@ The main code generated is as follows:
 Pseudo-ops
 ----------
 
+### **END** [*address*]
+
+Signifies the end of input.  All further lines are disregarded.
+
+Optionally specifies an EXEC address to be included in the output, where
+supported by the output format.  An EXEC address specified on the command line
+will override any value specified here.
+
 ### **ENDM**
 
 Finish a macro definition started with **MACRO**.
