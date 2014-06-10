@@ -715,7 +715,7 @@ static void pseudo_end(struct prog_line *line) {
 	if (nargs < 1)
 		return;
 	struct node **arga = node_array_of(line->args);
-	symbol_set(".exec", node_ref(arga[0]), asm_pass);
+	symbol_set(".exec", arga[0], asm_pass);
 }
 
 /* Ignore certain historical pseudo-ops */
