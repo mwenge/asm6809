@@ -41,14 +41,12 @@ Pros:
 Cons:
 
  * No support for OS-9 modules or multiple object linking.
- * Assembly syntax may seem idiosyncratic (see the section on differences to
-   other assemblers below).
 
 
 Running
 -------
 
-<pre>
+~~~
 Usage: asm6809 [OPTION]... SOURCE-FILE...
 Assembles 6809/6309 source code.
 
@@ -72,21 +70,27 @@ Assembles 6809/6309 source code.
 
 If more than one SOURCE-FILE is specified, they are assembled as though
 they were all in one file.
-</pre>
+~~~
 
 
 Differences to other assemblers
 -------------------------------
 
-Motorola syntax is very rigid in some places (no spaces in expressions), and
-flexible in others (arbitrary delimiters for strings in **FCC**, some strings
-don't need delimiting).  This assembler tries to be that hobgoblin of little
-minds: consistent.
+Motorola syntax freely allows a comment to follow any operands, separated from
+them only by whitespace.  To an extent, this assembler accepts that, but be
+aware that as spaces are allowed within expressions, if the comment looks like
+it is continuing an expression it will generate bad code (or raise an error if
+the result is syntactically incorrect).  Example:
 
-End of line comments must be introduced with a ";" character.  Motorola syntax
-allows comments to immediately follow any operands, but this does not easily
-permit whitespace to occur within expressions, a feature I personally
-appreciate.  An asterisk ("\*") can introduce whole line comments.
+~~~
+0000  8605                    lda     #5
+0002  C614                    ldb     #10     * 2 times the first number
+~~~
+
+A strict Motorola assembler would generate bytes C6 0A for the second line, as
+the "* 2" would be ignored.  For consistency, it is best to introduce end of
+line comments with a ";" character.  An asterisk ("\*") can introduce whole
+line comments.
 
 Because a semicolon introduces a comment, the alternate syntax of the 6309
 instructions (**AIM**, **OIM**, etc.) that operate on memory and an immediate
@@ -95,16 +99,16 @@ value that uses a semicolon as a separator is not accepted.
 A symbol may be forward referenced; any time a reference is unresolvable,
 another pass is triggered, up to some defined maximum.
 
-In 6809 indexed addressing, the offset size should default to the fastest
-possible form.  If an instruction changes size due to new knowledge gained
-since a previous pass, this will likely flag an inconsistency later and trigger
-another pass.
+In 6809 indexed addressing, the offset size will default to the fastest
+possible form, e.g., if the offset is an expression that happens to evaluate to
+zero, the "no offset" form will be used.  Prepend "<<" to coerce a 5 bit
+offset, "<" to coerce 8 bits or ">" to coerce 16 bits.
 
-This project follows on from its Perl script predecessor (hence the version
-number), however many of its features are not yet supported.  An important
-difference in accepted syntax is the pasting of macro parameters to form symbol
-names.  Any parameter passed for this purpose must be quoted.  The method of
-coercing the width of an offset has changed to be more sensible, too.
+This project follows on from its Perl script predecessor, however some of its
+features are not yet supported.  An important difference in accepted syntax is
+the pasting of macro parameters to form symbol names.  Any parameter passed for
+this purpose must be quoted.  The method of coercing the width of an offset has
+changed to be more sensible, too.
 
 If you want a fast, capable assembler that follows the official syntax, see
 William Astle's *[LWTOOLS][]*.  It also supports OS-9 modules, linking, etc.
@@ -119,7 +123,8 @@ Program files are considered line by line.  Each line contains up to three
 fields, separated by whitespace: label, instruction and arguments.  At any
 point in a line outside a string, a semicolon (";") indicates that the rest of
 the line is to be considered a comment.  Whole line comments may be introduced
-with an asterisk ("\*").
+with an asterisk ("\*").  Motorola-style end of line comments without a ";" are
+accepted, but see the notes about assembler differences.
 
 Any label must appear at the very beginning of the line.  If a label is
 omitted, whitespace must appear before the operator field.  Certain pseudo-ops
@@ -171,7 +176,7 @@ Expressions are formed of:
 The following operators are available, listed in descending order of precedence
 (where operators share a precedence, left-to-right evaluation is performed):
 
-<pre>
+~~~
 +       unary plus
 -       unary minus
 ~       bitwise NOT
@@ -191,7 +196,7 @@ The following operators are available, listed in descending order of precedence
 ^       bitwise XOR
 ---------------------------
 |       bitwise OR
-</pre>
+~~~
 
 Division always results in a floating point result.  Other arithmetic operators
 result in integers if both operands are integers, otherwise floating point.
@@ -245,7 +250,7 @@ local label, as in some other assemblers.
 
 Example:
 
-<pre>
+~~~
 0000  8E0400          scroll          ldx     #$0400
 0003  EC8820          1               ldd     32,x
 0006  ED81                            std     ,x++
@@ -256,7 +261,7 @@ Example:
 0012  8C0600                          cmpx    #$0600
 0015  25F9                            blo     1B
 0017  39                              rts
-</pre>
+~~~
 
 The "1" label occurs twice, but each reference to "1B" refers to the
 closest one searching backwards.
@@ -271,7 +276,9 @@ instruction field.
 
 Use a macro by specifying its name in the instruction field.  Any arguments
 given will be available during expansion as a positional variable.  The first
-argument will be called *&1*, the second *&2*, etc.
+argument will be called *&1*, the second *&2*, etc.  This syntax comes from the
+TSC Flex assembler.  For compatibility with LWASM source, this assembler also
+accepts backslash as introducing a positional parameter: *\\1*, *\\2*, etc.
 
 Positional variables can be used within strings, or pasted to form symbol
 names.  In either case, they must be quoted or they will be passed by value
@@ -281,33 +288,33 @@ themselves).
 Here's a silly example demonstrating positional variables and symbol pasting.
 Consider the following macro definition and utilising code:
 
-<pre>
-direction_left  equ     -1
-direction_right equ     +1
+~~~
+go_left  equ     -1
+go_right equ     +1
 
 move            macro
                 lda     x_position
-                adda    #direction_&1
+                adda    #go_&1
                 sta     x_position
                 endm
 
-do_something
+do_move
                 move    "right"
                 rts
 
 x_position      rmb     1
-</pre>
+~~~
 
 The main code generated is as follows:
 
-<pre>
-0000                  do_something
-0000                                  move    "left"
+~~~
+0000                  do_move
+0000                                  move    "right"
 0000  B60009                          lda     x_position
-0003  8BFF                            adda    #direction_&1
+0003  8B01                            adda    #go_&1
 0005  B70009                          sta     x_position
 0008  39                              rts
-</pre>
+~~~
 
 
 Pseudo-ops
