@@ -201,6 +201,10 @@ static int read_line(char *buf, int max_size) {
 	}
 
 	int len = strlen(buf);
+	if (len > 1 && buf[len-1] == '\n' && buf[len-2] == '\r') {
+		buf[len-2] = '\n';
+		len--;
+	}
 	line = xrealloc(line, line_length + len + 1);
 	memcpy(line + line_length, buf, len + 1);
 	line_length = line_length + len;
