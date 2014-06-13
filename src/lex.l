@@ -183,21 +183,27 @@ static int id_or_reg(void) {
 static struct slist *lines = NULL;
 static char *line = NULL;
 static int line_length = 0;
+static _Bool need_eol = 1;
 
 static int read_line(char *buf, int max_size) {
 	if (!yyin)
 		return YY_NULL;
 	char *r = fgets(buf, max_size, yyin);
 	if (!r) {
-		if (line) {
-			free(line);
-			line = NULL;
-			line_length = 0;
-		}
 		if (!feof(yyin)) {
 			error(error_type_fatal, "scanner read failed");
 		}
-		return YY_NULL;
+		if (need_eol) {
+			buf[0] = '\n';
+			buf[1] = 0;
+		} else {
+			if (line) {
+				free(line);
+				line = NULL;
+				line_length = 0;
+			}
+			return YY_NULL;
+		}
 	}
 
 	int len = strlen(buf);
@@ -208,8 +214,10 @@ static int read_line(char *buf, int max_size) {
 	line = xrealloc(line, line_length + len + 1);
 	memcpy(line + line_length, buf, len + 1);
 	line_length = line_length + len;
+	need_eol = 1;
 
 	if (line_length > 0 && line[line_length-1] == '\n') {
+		need_eol = 0;
 		line[line_length-1] = 0;
 		lines = slist_append(lines, line);
 		line = NULL;
