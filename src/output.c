@@ -53,8 +53,10 @@ void output_binary(const char *filename) {
 		return;
 
 	struct section *sect = section_coalesce_all(1);
-	struct section_span *span = sect->spans->data;
-	write_single_binary(f, span);
+	if (sect->spans) {
+		struct section_span *span = sect->spans->data;
+		write_single_binary(f, span);
+	}
 
 	section_free(sect);
 	fclose(f);
@@ -70,9 +72,14 @@ void output_dragondos(const char *filename) {
 		return;
 
 	struct section *sect = section_coalesce_all(1);
-	struct section_span *span = sect->spans->data;
-	unsigned put = span->put;
-	unsigned size = span->size;
+	struct section_span *span = NULL;
+	unsigned put = 0;
+	unsigned size = 0;
+	if (sect->spans) {
+		span = sect->spans->data;
+		put = span->put;
+		size = span->size;
+	}
 	if (exec_addr < 0)
 		exec_addr = put & 0xffff;
 
@@ -85,7 +92,8 @@ void output_dragondos(const char *filename) {
 	fputc((exec_addr >> 8) & 0xff, f);
 	fputc(exec_addr  & 0xff, f);
 	fputc(0xaa, f);
-	write_single_binary(f, span);
+	if (span)
+		write_single_binary(f, span);
 
 	section_free(sect);
 	fclose(f);
