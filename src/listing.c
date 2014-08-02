@@ -33,6 +33,7 @@ struct listing_line {
 };
 
 static struct slist *listing_lines = NULL;
+static struct slist **listing_next = &listing_lines;
 
 void listing_add_line(int pc, int nbytes, struct section_span const *span, char const *text) {
 	struct listing_line *l = xmalloc(sizeof(*l));
@@ -40,7 +41,8 @@ void listing_add_line(int pc, int nbytes, struct section_span const *span, char 
 	l->nbytes = nbytes;
 	l->span = span;
 	l->text = text;
-	listing_lines = slist_append(listing_lines, l);
+	*listing_next = slist_append(*listing_next, l);
+	listing_next = &((*listing_next)->next);
 }
 
 void listing_print(FILE *f) {
@@ -84,4 +86,5 @@ void listing_free_all(void) {
 		listing_lines = slist_remove(listing_lines, l);
 		free(l);
 	}
+	listing_next = &listing_lines;
 }
