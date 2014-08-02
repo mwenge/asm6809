@@ -148,6 +148,7 @@ int main(int argc, char **argv) {
 	asm6809_options.max_program_depth = max_program_depth;
 	asm6809_options.setdp = setdp;
 	asm6809_options.verbosity = verbosity;
+	asm6809_options.listing_required = listing_filename ? 1 : 0;
 
 	/* Read in each file */
 	for (int i = optind; i < argc; i++) {

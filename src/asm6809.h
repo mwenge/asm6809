@@ -30,6 +30,9 @@ struct asm6809_options {
 
 	/* Can be positive or negative.  Affects error reporting. */
 	int verbosity;
+
+	/* If no listing file is required, don't keep a copy in memory. */
+	_Bool listing_required;
 };
 
 extern struct asm6809_options asm6809_options;

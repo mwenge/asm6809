@@ -19,6 +19,7 @@ option) any later version.
 
 #include "xalloc.h"
 
+#include "asm6809.h"
 #include "dict.h"
 #include "error.h"
 #include "eval.h"
@@ -134,10 +135,12 @@ struct prog_line *prog_line_ref(struct prog_line *line) {
 }
 
 void prog_line_set_text(struct prog_line *line, char *text) {
+	if (!asm6809_options.listing_required) {
+		free(text);
+		return;
+	}
 	if (line) {
 		line->text = text;
-	} else {
-		printf("no line...\n");
 	}
 }
 

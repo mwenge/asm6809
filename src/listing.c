@@ -20,6 +20,7 @@ option) any later version.
 
 #include "xalloc.h"
 
+#include "asm6809.h"
 #include "listing.h"
 #include "program.h"
 #include "section.h"
@@ -36,6 +37,8 @@ static struct slist *listing_lines = NULL;
 static struct slist **listing_next = &listing_lines;
 
 void listing_add_line(int pc, int nbytes, struct section_span const *span, char const *text) {
+	if (!asm6809_options.listing_required)
+		return;
 	struct listing_line *l = xmalloc(sizeof(*l));
 	l->pc = pc;
 	l->nbytes = nbytes;
