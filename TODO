@@ -12,6 +12,7 @@ to remember things that need doing.
  * Check all symbols are valid.  After variable substitution (e.g., in macros),
    they might end up containing invalid characters.
  * Structs.
+ * Functions.  I already have an expression evaluator, so why not?
 
 ### Low priority
 
@@ -20,8 +21,6 @@ to remember things that need doing.
    in-place somehow.
  * Should **DP** default to zero, not disabled?
  * Ability to specify maximum number of passes.
- * See if it's possible to support comments without a ";" in unambiguous
-   situation.  Check out Bison/YACC error recovery.
  * As it stands, section names need to be quoted - can this requirement be
    lifted?  Similarly when pasting macro args - maybe pass a simplified ID?
  * 6800, 6801, 6803 ISA support.

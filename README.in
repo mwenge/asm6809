@@ -1,17 +1,19 @@
 asm6809
 =======
 
-*asm6809* is a multiple pass 6809 & 6309 cross assembler.  Text is read in and
-parsed, then as many passes are made over the parsed source as necessary (up to
-a limit), until symbols are resolved and addresses are stable.
+*asm6809* is a portable macro cross assembler targetting the Motorola 6809 and
+Hitachi 6309.
 
-[asm6809-@PACKAGE_VERSION@.tar.gz][dl]
+Text is read in and parsed, then as many passes are made over the parsed source
+as necessary (up to a limit), until symbols are resolved and addresses are
+stable.  The fastest or smallest representation should always be chosen where
+there is ambiguity.
 
-[dl]: http://www.6809.org.uk/dragon/asm6809-@PACKAGE_VERSION@.tar.gz
+Output formats are: Raw binary, DragonDOS binary, CoCo RS-DOS (or "DECB")
+binary, Motorola SREC, Intel HEX.
 
 
-Licence
--------
+### Licence
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -28,23 +30,15 @@ this program.  If not, see <[http://www.gnu.org/licenses/][gpl]>.
 [gpl]: http://www.gnu.org/licenses/
 
 
-Summary
--------
+### Installation
 
-Pros:
+ * Source tarball: [http://www.6809.org.uk/dragon/asm6809-@PACKAGE_VERSION@.tar.gz][tar]
+ * Git repository: **git clone http://www.6809.org.uk/repos/asm6809**
 
- * Always tries to use most efficient indexed mode.
- * Output to DragonDOS binary, CoCo RS-DOS binary, Motorola SREC, Intel HEX or
-   raw binary.
- * Multiple passes used to resolve phasing errors.
-
-Cons:
-
- * No support for OS-9 modules or multiple object linking.
+[tar]: http://www.6809.org.uk/dragon/asm6809-@PACKAGE_VERSION@.tar.gz
 
 
-Running
--------
+### Running
 
 ~~~
 Usage: asm6809 [OPTION]... SOURCE-FILE...
@@ -58,43 +52,46 @@ Assembles 6809/6309 source code.
   -e, --exec=ADDR   EXEC address (for output formats that support one)
 
   -8,
-  -9, --6809        use 6809 ISA (default)
-  -3, --6309        use 6309 ISA (6809 with extensions)
+  -9, --6809          use 6809 ISA (default)
+  -3, --6309          use 6309 ISA (6809 with extensions)
+      --setdp=VALUE   initial value assumed for DP [undefined]
 
   -o, --output=FILE    set output filename
   -l, --listing=FILE   create listing file
   -s, --symbols=FILE   create symbol table
 
+  -q, --quiet     don't warn about illegal (but working) code
+  -v, --verbose   warn about explicitly inefficient code
+
       --help      show this help
       --version   show program version
+~~~
 
 If more than one SOURCE-FILE is specified, they are assembled as though
 they were all in one file.
-~~~
 
 
-Differences to other assemblers
--------------------------------
+### Differences to other assemblers
 
-Motorola syntax freely allows a comment to follow any operands, separated from
-them only by whitespace.  To an extent, this assembler accepts that, but be
-aware that as spaces are allowed within expressions, if the comment looks like
-it is continuing an expression it will generate bad code (or raise an error if
-the result is syntactically incorrect).  Example:
+Motorola syntax allows a comment to follow any operands, separated from them
+only by whitespace.  To an extent, this assembler accepts that, but be aware
+that as spaces are allowed within expressions, if the comment looks like it is
+continuing an expression it will generate bad code (or raise an error if the
+result is syntactically incorrect).  Example:
 
 ~~~
 0000  8605                    lda     #5
-0002  C614                    ldb     #10     * 2 times the first number
+0002  C60A                    ldb     #5 * 2    twice the first number
 ~~~
 
-A strict Motorola assembler would generate bytes C6 0A for the second line, as
+A strict Motorola assembler would generate bytes C6 05 for the second line, as
 the "* 2" would be ignored.  For consistency, it is best to introduce end of
 line comments with a ";" character.  An asterisk ("\*") can introduce whole
 line comments.
 
-Because a semicolon introduces a comment, the alternate syntax of the 6309
-instructions (**AIM**, **OIM**, etc.) that operate on memory and an immediate
-value that uses a semicolon as a separator is not accepted.
+An unquoted semicolon always introduces a comment.  The alternate form of the
+6309 instructions **AIM**, **OIM**, etc. listed in some documentation that uses
+a semicolon as a separator is not accepted.
 
 A symbol may be forward referenced; any time a reference is unresolvable,
 another pass is triggered, up to some defined maximum.
@@ -110,21 +107,18 @@ the pasting of macro parameters to form symbol names.  Any parameter passed for
 this purpose must be quoted.  The method of coercing the width of an offset has
 changed to be more sensible, too.
 
-If you want a fast, capable assembler that follows the official syntax, see
-William Astle's *[LWTOOLS][]*.  It also supports OS-9 modules, linking, etc.
-
-[LWTOOLS]: http://lwtools.projects.l-w.ca/
+**asm6809** has no support for OS-9 modules or multiple object linking.
 
 
 Program syntax
 --------------
 
 Program files are considered line by line.  Each line contains up to three
-fields, separated by whitespace: label, instruction and arguments.  At any
-point in a line outside a string, a semicolon (";") indicates that the rest of
-the line is to be considered a comment.  Whole line comments may be introduced
-with an asterisk ("\*").  Motorola-style end of line comments without a ";" are
-accepted, but see the notes about assembler differences.
+fields, separated by whitespace: label, instruction and arguments.  An unquoted
+semicolon (";") indicates that the rest of the line is to be considered a
+comment.  Whole line comments may be introduced with an asterisk ("\*").
+Motorola-style end of line comments without a ";" are accepted, but see the
+notes about assembler differences.
 
 Any label must appear at the very beginning of the line.  If a label is
 omitted, whitespace must appear before the operator field.  Certain pseudo-ops
@@ -154,8 +148,7 @@ In addition, any argument may be preceded by:
  * ">", force extended addressing, 16-bit value or 16-bit index offset.
 
 
-Expressions
------------
+### Expressions
 
 Expressions are formed of:
 
@@ -205,23 +198,7 @@ an integer.  Integer calculations are performed using the platform's *int64_t*
 type, floating point uses *double*.
 
 
-Assembly passes
----------------
-
-The assembler uses multiple passes to resolve expressions.  If an expression
-refers to a symbol that cannot currently be resolved, an extra pass is
-triggered.  Similarly, if a symbol is assigned a value (e.g., by an **EQU**
-pseudo-operation) that differs to its value on the previous pass, another is
-triggered until it becomes stable.
-
-As local labels can be repeated, their position is used to distinguish them.
-For this reason, all file inclusions and macro expansion must occur during the
-first pass so that the absolute line count at which each local label is
-encountered remains the same between passes.
-
-
-Sections
---------
+### Sections
 
 Code can be placed into named sections with the **SECTION** pseudo-op.  This
 can make breaking source into multiple input files more comfortable.  Without
@@ -234,8 +211,7 @@ DragonDOS), the spans are combined first, with the gaps between them padded
 with zero bytes.
 
 
-Local labels
-------------
+### Local labels
 
 Local labels are considered local to the current *section*.  A local label is
 any decimal number used in the label field.  An exclamation mark ("!") is
@@ -267,8 +243,7 @@ The "1" label occurs twice, but each reference to "1B" refers to the
 closest one searching backwards.
 
 
-Macros
-------
+### Macros
 
 Start a macro definition by specifying a name for it in the label field, and
 **MACRO** in the instruction field.  Finish the definition with **ENDM** in the
@@ -276,9 +251,10 @@ instruction field.
 
 Use a macro by specifying its name in the instruction field.  Any arguments
 given will be available during expansion as a positional variable.  The first
-argument will be called *&1*, the second *&2*, etc.  This syntax comes from the
-TSC Flex assembler.  For compatibility with LWASM source, this assembler also
-accepts backslash as introducing a positional parameter: *\\1*, *\\2*, etc.
+argument will be called *\\1*, the second *\\2*, etc.  For compatibility with
+the TSC Flex assembler, the alternate forms *&1*, *&2*, etc. are also accepted,
+but be aware that in many contexts, this syntax can conflict with the bitwise
+AND operator.
 
 Positional variables can be used within strings, or pasted to form symbol
 names.  In either case, they must be quoted or they will be passed by value
@@ -294,7 +270,7 @@ go_right equ     +1
 
 move            macro
                 lda     x_position
-                adda    #go_&1
+                adda    #go_\1
                 sta     x_position
                 endm
 
@@ -311,16 +287,15 @@ The main code generated is as follows:
 0000                  do_move
 0000                                  move    "right"
 0000  B60009                          lda     x_position
-0003  8B01                            adda    #go_&1
+0003  8B01                            adda    #go_\1
 0005  B70009                          sta     x_position
 0008  39                              rts
 ~~~
 
 
-Pseudo-ops
-----------
+### Pseudo-ops
 
-### **END** [*address*]
+#### **END** [*address*]
 
 Signifies the end of input.  All further lines are disregarded.
 
@@ -328,24 +303,24 @@ Optionally specifies an EXEC address to be included in the output, where
 supported by the output format.  An EXEC address specified on the command line
 will override any value specified here.
 
-### **ENDM**
+#### **ENDM**
 
 Finish a macro definition started with **MACRO**.
 
-### **EQU** *value*
+#### **EQU** *value*
 
 Short for "equate", this must be used with a label, and defines a symbol with
 the specified *value*.  This may be any single valid argument (e.g., an
 expression or a string) .
 
-### **EXPORT** *name*[, *name*]...
+#### **EXPORT** *name*[, *name*]...
 
 Each *name*, either the name of a macro or a symbol, is flagged to be exported.
 Exported macros and symbols will be listed in the symbols output file, if
 specified.
 
-### **FCB** *value*[, *value*]...
-### **FCC** *value*[, *value*]...
+#### **FCB** *value*[, *value*]...
+#### **FCC** *value*[, *value*]...
 
 Form Constant Byte.  Each *value* is evaluated either to a number or a string.
 Numbers are truncated to 8 bits and stored directly as bytes.  For strings, the
@@ -355,57 +330,57 @@ Historically, **FCB** handled bytes and **FCC** (Form Constant Character
 string) handled strings.  *asm6809* treats them as synonymous, but is rather
 more strict about what is allowed as a string delimiter.
 
-### **FDB** *value*[, *value*]...
+#### **FDB** *value*[, *value*]...
 
 Form Double Byte.  Each *value* is evaluated to a number, which is truncated to
 16 bits and stored as two successive bytes (big-endian, of course).
 
-### **FILL** *value*, *count*
+#### **FILL** *value*, *count*
 
 Insert *count* bytes of *value*.  This is effectively the same as the
 two-argument form of **RZB** with its arguments swapped.
 
-### **INCLUDE** *filename*
+#### **INCLUDE** *filename*
 
 Includes the contents of another file at this point in assembly.  The
 *filename* argument must be a string, i.e., delimited by quotes or "/"
 characters.
 
-### **INCLUDEBIN** *filename*
+#### **INCLUDEBIN** *filename*
 
 Includes the binary data from *filename* (which, as with **INCLUDE** must be a
 delimited string) directly.
 
-### **MACRO**
+#### **MACRO**
 
 Start defining a macro with a name specified by the line's label.  Subsequent
 lines up to the enclosing **ENDM** pseudo-op will not be assembled until the
 macro is expanded.  Macro definitions may be nested, that is a macro may define
 another macro.
 
-### **ORG** *address*
+#### **ORG** *address*
 
 Sets the Program Counter - the base address assumed for the next assembled
 instruction.  Unless followed by a **PUT** pseudo-op, this will also be the
 instruction's actual address in memory.  A label on the same line will define a
 symbol with a value of the specified address.
 
-### **PUT** *address*
+#### **PUT** *address*
 
 Modify the put address - the Program Counter is unaffected, so the assumed
 address for subsequent instructions remains the same, but the actual data will
 be located elsewhere.  Useful for assembling code that is going to be copied
 into place before executing.
 
-### **RMB** *count*
+#### **RMB** *count*
 
 Reserve Memory Bytes.  The Program Counter is advanced *count* bytes.  In some
 output formats this region may be padded with zeroes, in others a new loadable
 section may be created.
 
-### **RZB** *count*[, *value*]
-### **ZMB** *count*[, *value*]
-### **BSZ** *count*[, *value*]
+#### **RZB** *count*[, *value*]
+#### **ZMB** *count*[, *value*]
+#### **BSZ** *count*[, *value*]
 
 Reserve Zeroed Bytes.  Inserts a sequence of *count* bytes of zero, or *value*
 if specified.  The two-argument form is effectively the same as **FILL** with
@@ -414,12 +389,12 @@ its arguments swapped.
 **ZMB** and **BSZ** are alternate forms recognised for compatibility with other
 assemblers.
 
-### **SECTION** *name*
-### **CODE**
-### **DATA**
-### **BSS**
-### **RAM**
-### **AUTO**
+#### **SECTION** *name*
+#### **CODE**
+#### **DATA**
+#### **BSS**
+#### **RAM**
+#### **AUTO**
 
 Switch to the named section.  The Program Counter will continue from the last
 value it had while assembling this section, or follow the previous section if
@@ -429,7 +404,7 @@ Each of **CODE**, **DATA**, **BSS**, **RAM** and **AUTO** switches to a section
 named after the pseudo-op.  They are recognised for compatibility with other
 assemblers.
 
-### **SETDP** *page*
+#### **SETDP** *page*
 
 Set the assumed value of the Direct Page (**DP**) register to *page* for
 subsequent instructions.  Any non-negative *page* is truncated to 8 bits, or
@@ -438,15 +413,32 @@ specify a negative number to disable automatic direct addressing.
 See the section on Direct Page addressing for more information.
 
 
-Addressing modes
-----------------
+### Addressing modes
 
-### Direct Page
+#### Direct Page
 
 The 6809 extends the zero page concept by allowing fast accesses to whichever
 page is selected by the Direct Page register (**DP**).  An assembler is not
 able to keep track of what the code has set this register to, but the
 information is useful when deciding which addressing mode to use for an
-instruction.  The **SETDP** pseudo-op informs the assembler that the supplied
-value is to be assumed for **DP**.  Set this to a negative number to undefine
-it, and disable automatic use of direct addressing (this is the default).
+instruction.  The **SETDP** pseudo-op, or *\-\-setdp* option, informs the
+assembler that the supplied value is to be assumed for **DP**.  Set this to a
+negative number to undefine it, and disable automatic use of direct addressing
+(this is the default).
+
+
+Assembler operation
+-------------------
+
+### Assembly passes
+
+The assembler uses multiple passes to resolve expressions.  If an expression
+refers to a symbol that cannot currently be resolved, an extra pass is
+triggered.  Similarly, if a symbol is assigned a value (e.g., by an **EQU**
+pseudo-operation) that differs to its value on the previous pass, another is
+triggered until it becomes stable.
+
+As local labels can be repeated, their position is used to distinguish them.
+For this reason, all file inclusions and macro expansion must occur during the
+first pass so that the absolute line count at which each local label is
+encountered remains the same between passes.
