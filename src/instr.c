@@ -368,7 +368,7 @@ void instr_indexed(struct opcode const *op, struct node const *args, int imm8_va
 	int nargs = node_array_count(args);
 	struct node **arga = node_array_of(args);
 	int indirect = 0;
-	if (nargs == 1 && arga[0]->type == node_type_array) {
+	if (nargs == 1 && node_type_of(arga[0]) == node_type_array) {
 		indirect = 0x10;
 		nargs = node_array_count(arga[0]);
 		arga = arga[0]->data.as_array.args;
