@@ -107,7 +107,7 @@ the pasting of macro parameters to form symbol names.  Any parameter passed for
 this purpose must be quoted.  The method of coercing the width of an offset has
 changed to be more sensible, too.
 
-**asm6809** has no support for OS-9 modules or multiple object linking.
+*asm6809* has no support for OS-9 modules or multiple object linking.
 
 
 Program syntax
