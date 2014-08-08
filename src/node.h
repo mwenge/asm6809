@@ -138,7 +138,7 @@ static inline enum node_type node_type_of(struct node const *n) {
 	return n ? n->type : node_type_undef;
 }
 
-static inline enum node_type node_attr_of(struct node const *n) {
+static inline enum node_attr node_attr_of(struct node const *n) {
 	return n ? n->attr : node_attr_undef;
 }
 

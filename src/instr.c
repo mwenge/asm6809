@@ -184,7 +184,7 @@ static struct {
 
 static _Bool off_type_compatible(enum off_type off_type, _Bool pcr, struct node const *n) {
 	enum node_type ntype = node_type_of(n);
-	enum node_type nattr = node_attr_of(n);
+	enum node_attr nattr = node_attr_of(n);
 
 	switch (nattr) {
 	case node_attr_none:
