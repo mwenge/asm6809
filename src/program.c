@@ -158,6 +158,13 @@ struct prog_ctx *prog_ctx_new(struct prog *prog) {
 void prog_ctx_free(struct prog_ctx *ctx) {
 	/* It doesn't make sense to free a context partway up the stack */
 	assert(prog_ctx_stack != NULL);
+	if (prog_ctx_stack->data != ctx) {
+		struct prog_ctx *last_ctx = prog_ctx_stack->data;
+		if (last_ctx->prog->type == prog_type_macro) {
+			error(error_type_syntax, "unfinished macro");
+			prog_ctx_free(last_ctx);
+		}
+	}
 	assert(prog_ctx_stack->data == ctx);
 	prog_ctx_stack = slist_remove(prog_ctx_stack, ctx);
 	free(ctx);
