@@ -113,7 +113,6 @@ ${hexdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
 <arg,argnostr>{
 
 {word}		{ BEGIN(argnostr); return id_or_reg(); }
-&{decimal}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
 &\{{decimal}\}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 \\{decimal}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
 \\\{{decimal}\}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
