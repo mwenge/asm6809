@@ -1,7 +1,7 @@
 asm6809
 =======
 
-*asm6809* is a portable macro cross assembler targetting the Motorola 6809 and
+*asm6809* is a portable macro cross assembler targeting the Motorola 6809 and
 Hitachi 6309.
 
 Text is read in and parsed, then as many passes are made over the parsed source
@@ -52,9 +52,10 @@ Assembles 6809/6309 source code.
   -e, --exec=ADDR   EXEC address (for output formats that support one)
 
   -8,
-  -9, --6809          use 6809 ISA (default)
-  -3, --6309          use 6309 ISA (6809 with extensions)
-      --setdp=VALUE   initial value assumed for DP [undefined]
+  -9, --6809                  use 6809 ISA (default)
+  -3, --6309                  use 6309 ISA (6809 with extensions)
+  -d, --define=SYM[=NUMBER]   define a symbol
+      --setdp=VALUE           initial value assumed for DP [undefined]
 
   -o, --output=FILE    set output filename
   -l, --listing=FILE   create listing file
@@ -164,6 +165,7 @@ Expressions are formed of:
  * Any of the above prefixed with a unary minus ("-") or plus ("+").
  * Parenthesis to specify precedence.
 
+
 ### Arithmetic & bitwise operators
 
 The following operators are available, listed in descending order of precedence
@@ -172,30 +174,59 @@ The following operators are available, listed in descending order of precedence
 ~~~
 +       unary plus
 -       unary minus
-~       bitwise NOT
----------------------------
+! ~     logical, bitwise NOT
+----------------------------
 *       multiplication
 /       division
 %       modulo
----------------------------
+----------------------------
 +       addition
 -       subtraction
----------------------------
+----------------------------
 <<      bitwise shift left
 >>      bitwise shift right
----------------------------
+----------------------------
+< <=    relational operators
+> >=    relational operators
+----------------------------
+==      relational equal
+!=      relational not equal
+----------------------------
 &       bitwise AND
----------------------------
+----------------------------
 ^       bitwise XOR
----------------------------
+----------------------------
 |       bitwise OR
+----------------------------
+&&      logical AND
+----------------------------
+||      logical OR
+----------------------------
+?:      ternary operator
 ~~~
 
 Division always results in a floating point result.  Other arithmetic operators
 result in integers if both operands are integers, otherwise floating point.
 Bitwise operators and modulo all cast their operands to integers and result in
-an integer.  Integer calculations are performed using the platform's *int64_t*
-type, floating point uses *double*.
+an integer.  Relational and logical operators result in 0 if false, 1 if true.
+Integer calculations are performed using the platform's *int64_t* type,
+floating point uses *double*.
+
+
+### Conditional assembly
+
+The pseudo-ops **IF**, **ELSIF*, **ELSE* and **ENDIF** guide conditional
+assembly.  **IF** and **ELSIF** take one argument, which is evaluated as an
+integer.  If the result is non-zero, the following code will be assembled, else
+it will be skipped.
+
+While evaluating the expression to be tested, the usual "undefined reference"
+errors are suppressed, and instead any undefined expression is interpreted as a
+zero (false).
+
+Conditional assembly pseudo-ops are permitted within macro definitions and will
+be evaluated at the time of expansion, therefore positional variables can be
+used to affect macro expansion.
 
 
 ### Sections
@@ -252,9 +283,9 @@ instruction field.
 Use a macro by specifying its name in the instruction field.  Any arguments
 given will be available during expansion as a positional variable.  The first
 argument will be called *\\1*, the second *\\2*, etc.  For compatibility with
-the TSC Flex assembler, the alternate forms *&1*, *&2*, etc. are also accepted,
-but be aware that in many contexts, this syntax can conflict with the bitwise
-AND operator.
+the TSC Flex assembler, the alternate forms *&{1}*, *&{2}*, etc. are also
+accepted.  Within a string, the simpler *&1*, *&2*, etc. are still valid, but
+as this can be confused with bitwise AND, it is not permitted outside a string.
 
 Positional variables can be used within strings, or pasted to form symbol
 names.  In either case, they must be quoted or they will be passed by value
@@ -295,6 +326,17 @@ The main code generated is as follows:
 
 ### Pseudo-ops
 
+#### **ELSE**
+
+Subsequent lines are assembled only if all preceding **IF** and **ELSIF**
+pseudo-ops evaluated to false (zero).
+
+#### **ELSIF**
+
+Subsequent lines are assembled only if all preceding **IF** and **ELSIF**
+pseudo-ops evaluated to false (zero) and *condition* evaluates to true
+(non-zero).
+
 #### **END** [*address*]
 
 Signifies the end of input.  All further lines are disregarded.
@@ -302,6 +344,10 @@ Signifies the end of input.  All further lines are disregarded.
 Optionally specifies an EXEC address to be included in the output, where
 supported by the output format.  An EXEC address specified on the command line
 will override any value specified here.
+
+#### **ENDIF**
+
+Terminate an **IF** statement.
 
 #### **ENDM**
 
@@ -339,6 +385,11 @@ Form Double Byte.  Each *value* is evaluated to a number, which is truncated to
 
 Insert *count* bytes of *value*.  This is effectively the same as the
 two-argument form of **RZB** with its arguments swapped.
+
+#### **IF** *condition*
+
+Subsequent lines are assembled only if *condition* evaluates to true
+(non-zero).
 
 #### **INCLUDE** *filename*
 
