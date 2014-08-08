@@ -37,6 +37,8 @@ void lex_free_all(void);
 %}
 
 %option noyywrap
+%option noinput
+%option nounput
 
 %s opcode
 %s arg
