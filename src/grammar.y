@@ -58,6 +58,7 @@ static void check_end_opcode(struct prog_line *line);
 %token <as_reg> REGISTER
 %token <as_string> TEXT
 %token <as_token> SHL SHR
+%token <as_token> LE GE EQ NE
 %token DELIM
 %token DEC2 INC2
 
@@ -74,6 +75,8 @@ static void check_end_opcode(struct prog_line *line);
 %left '|'
 %left '^'
 %left '&'
+%left '<' LE '>' GE
+%left EQ NE
 %left SHL SHR
 %left '+' '-'
 %left '*' '/' '%'
@@ -146,6 +149,12 @@ expr	: '(' expr ')'		{ $$ = $2; }
 	| expr '-' expr		{ $$ = node_new_oper_2('-', $1, $3); }
 	| expr SHL expr		{ $$ = node_new_oper_2(SHL, $1, $3); }
 	| expr SHR expr		{ $$ = node_new_oper_2(SHR, $1, $3); }
+	| expr '<' expr		{ $$ = node_new_oper_2('<', $1, $3); }
+	| expr LE expr		{ $$ = node_new_oper_2(LE, $1, $3); }
+	| expr '>' expr		{ $$ = node_new_oper_2('>', $1, $3); }
+	| expr GE expr		{ $$ = node_new_oper_2(GE, $1, $3); }
+	| expr EQ expr		{ $$ = node_new_oper_2(EQ, $1, $3); }
+	| expr NE expr		{ $$ = node_new_oper_2(NE, $1, $3); }
 	| expr '&' expr		{ $$ = node_new_oper_2('&', $1, $3); }
 	| expr '^' expr		{ $$ = node_new_oper_2('^', $1, $3); }
 	| expr '|' expr		{ $$ = node_new_oper_2('|', $1, $3); }

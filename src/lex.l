@@ -138,6 +138,11 @@ ${hexdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+1, NULL, 16); r
 "<<"		{ BEGIN(argnostr); return SHL; }
 ">>"		{ BEGIN(argnostr); return SHR; }
 
+"<="		{ BEGIN(argnostr); return LE; }
+">="		{ BEGIN(argnostr); return GE; }
+"=="		{ BEGIN(argnostr); return EQ; }
+"!="		{ BEGIN(argnostr); return NE; }
+
 [-+&\|\~\*()#<>\%\[\]]	{ BEGIN(argnostr); return *yytext; }
 
 ,		{ BEGIN(arg); return *yytext; }

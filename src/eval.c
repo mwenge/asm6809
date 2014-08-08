@@ -316,6 +316,7 @@ static struct node *eval_node_oper_2(struct node *n) {
 	/* Operators that can be integer-only or cast to float */
 	case '*': case '/':
 	case '+': case '-':
+	case '<': case LE: case '>': case GE: case EQ: case NE:
 
 		if (int_only && n->data.as_oper.oper != '/') {
 			switch (n->data.as_oper.oper) {
@@ -327,6 +328,24 @@ static struct node *eval_node_oper_2(struct node *n) {
 				break;
 			case '-':
 				ret = node_new_int(leftn->data.as_int - rightn->data.as_int);
+				break;
+			case '<':
+				ret = node_new_int(leftn->data.as_int < rightn->data.as_int);
+				break;
+			case LE:
+				ret = node_new_int(leftn->data.as_int <= rightn->data.as_int);
+				break;
+			case '>':
+				ret = node_new_int(leftn->data.as_int > rightn->data.as_int);
+				break;
+			case GE:
+				ret = node_new_int(leftn->data.as_int >= rightn->data.as_int);
+				break;
+			case EQ:
+				ret = node_new_int(leftn->data.as_int == rightn->data.as_int);
+				break;
+			case NE:
+				ret = node_new_int(leftn->data.as_int != rightn->data.as_int);
 				break;
 			default:
 				ret = NULL;
@@ -358,6 +377,24 @@ static struct node *eval_node_oper_2(struct node *n) {
 			break;
 		case '-':
 			ret = node_new_float(leftn->data.as_float - rightn->data.as_float);
+			break;
+		case '<':
+			ret = node_new_int(leftn->data.as_float < rightn->data.as_float);
+			break;
+		case LE:
+			ret = node_new_int(leftn->data.as_float <= rightn->data.as_float);
+			break;
+		case '>':
+			ret = node_new_int(leftn->data.as_float > rightn->data.as_float);
+			break;
+		case GE:
+			ret = node_new_int(leftn->data.as_float >= rightn->data.as_float);
+			break;
+		case EQ:
+			ret = node_new_int(leftn->data.as_float == rightn->data.as_float);
+			break;
+		case NE:
+			ret = node_new_int(leftn->data.as_float != rightn->data.as_float);
 			break;
 		default:
 			ret = NULL;
