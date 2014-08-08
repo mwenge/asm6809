@@ -33,6 +33,7 @@ option) any later version.
 
 static struct node *eval_node_oper_1(struct node *n);
 static struct node *eval_node_oper_2(struct node *n);
+static struct node *eval_node_oper_3(struct node *n);
 
 /* Evaluate a node.  The return value will be a new node of a base type -
  * possibly just a reference to the argument node.  The exception is arrays,
@@ -97,6 +98,8 @@ struct node *eval_node(struct node *n) {
 
 	/* Apply operator to arguments */
 	case node_type_oper:
+		if (n->data.as_oper.nargs == 3)
+			return node_set_attr(eval_node_oper_3(n), attr);
 		if (n->data.as_oper.nargs == 2)
 			return node_set_attr(eval_node_oper_2(n), attr);
 		if (n->data.as_oper.nargs == 1)
@@ -452,4 +455,29 @@ static struct node *eval_node_oper_2(struct node *n) {
 	node_free(leftn);
 	node_free(rightn);
 	return NULL;
+}
+
+static struct node *eval_node_oper_3(struct node *n) {
+	struct node *condn;
+	struct node *ret;
+
+	if (n->data.as_oper.oper != '?') {
+		error(error_type_fatal, "internal: unknown 2-arg operator %d", n->data.as_oper.oper);
+		return NULL;
+	}
+
+	if (!(condn = eval_node(n->data.as_oper.args[0])))
+		return NULL;
+
+	if (!(condn = eval_int_free(condn)))
+		return NULL;
+
+	if (condn->data.as_int != 0) {
+		ret = eval_node(n->data.as_oper.args[1]);
+	} else {
+		ret = eval_node(n->data.as_oper.args[2]);
+	}
+
+	node_free(condn);
+	return ret;
 }

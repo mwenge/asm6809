@@ -143,7 +143,7 @@ ${hexdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+1, NULL, 16); r
 "=="		{ BEGIN(argnostr); return EQ; }
 "!="		{ BEGIN(argnostr); return NE; }
 
-[-+&\|\~\*()#<>\%\[\]]	{ BEGIN(argnostr); return *yytext; }
+[-+&\|\~\*()#<>\%\[\]\?\:]	{ BEGIN(argnostr); return *yytext; }
 
 ,		{ BEGIN(arg); return *yytext; }
 

@@ -72,6 +72,7 @@ static void check_end_opcode(struct prog_line *line);
 %type <as_node> expr reg
 %type <as_line> line
 
+%right '?' ':'
 %left '|'
 %left '^'
 %left '&'
@@ -158,6 +159,7 @@ expr	: '(' expr ')'		{ $$ = $2; }
 	| expr '&' expr		{ $$ = node_new_oper_2('&', $1, $3); }
 	| expr '^' expr		{ $$ = node_new_oper_2('^', $1, $3); }
 	| expr '|' expr		{ $$ = node_new_oper_2('|', $1, $3); }
+	| expr '?' expr ':' expr	{ $$ = node_new_oper_3('?', $1, $3, $5); }
 	| INTEGER		{ $$ = node_new_int($1); }
 	| FLOAT			{ $$ = node_new_float($1); }
 	| BACKREF		{ $$ = node_new_backref($1); }

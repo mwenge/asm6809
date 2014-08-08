@@ -257,6 +257,14 @@ struct node *node_new_oper_2(int oper, struct node *a1, struct node *a2) {
 	return n;
 }
 
+struct node *node_new_oper_3(int oper, struct node *a1, struct node *a2, struct node *a3) {
+	struct node *n = node_new_oper_n(oper, 3);
+	n->data.as_oper.args[0] = a1;
+	n->data.as_oper.args[1] = a2;
+	n->data.as_oper.args[2] = a3;
+	return n;
+}
+
 /* Array type */
 
 struct node *node_new_array(void) {

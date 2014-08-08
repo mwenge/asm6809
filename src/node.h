@@ -188,6 +188,7 @@ struct node *node_new_id(struct slist *v);
 struct node *node_new_text(struct slist *v);
 struct node *node_new_oper_1(int oper, struct node *a1);
 struct node *node_new_oper_2(int oper, struct node *a1, struct node *a2);
+struct node *node_new_oper_3(int oper, struct node *a1, struct node *a2, struct node *a3);
 
 /* Array type */
 
