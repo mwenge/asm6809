@@ -560,10 +560,6 @@ void instr_pair(struct opcode const *op, struct node const *args) {
 	section_emit_op(op->immediate);
 	section_emit_uint8(pbyte);
 	return;
-
-invalid_register:
-	error(error_type_syntax, "invalid register in inter-register op");
-	return;
 }
 
 /*
@@ -586,8 +582,10 @@ void instr_tfm(struct opcode const *op, struct node const *args) {
 		attr[i] = node_attr_of(arga[i]);
 		if (type[i] == node_type_reg) {
 			int v = reg_tfr_nibble[arga[i]->data.as_reg];
-			if (v < 0 || v > 4)
-				goto invalid_register;
+			if (v < 0 || v > 4) {
+				error(error_type_syntax, "invalid register in TFM op");
+				return;
+			}
 			nibble[i] = v;
 		} else if (type[i] == node_type_int) {
 			int v = arga[i]->data.as_int;
@@ -619,10 +617,6 @@ void instr_tfm(struct opcode const *op, struct node const *args) {
 
 	section_emit_op(op->immediate + mod);
 	section_emit_uint8(pbyte);
-	return;
-
-invalid_register:
-	error(error_type_syntax, "invalid register in TFM op");
 	return;
 }
 
