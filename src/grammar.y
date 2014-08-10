@@ -81,7 +81,7 @@ static void check_end_opcode(struct prog_line *line);
 %left SHL SHR
 %left '+' '-'
 %left '*' '/' '%'
-%nonassoc UMINUS '~'
+%nonassoc UMINUS '!' '~'
 %left '(' ')'
 
 %%
@@ -143,6 +143,7 @@ expr	: '(' expr ')'		{ $$ = $2; }
 	| '-' expr %prec UMINUS	{ $$ = node_new_oper_1('-', $2); }
 	| '+' expr %prec UMINUS	{ $$ = node_new_oper_1('+', $2); }
 	| '~' expr		{ $$ = node_new_oper_1('~', $2); }
+	| '!' expr		{ $$ = node_new_oper_1('!', $2); }
 	| expr '*' expr		{ $$ = node_new_oper_2('*', $1, $3); }
 	| expr '/' expr		{ $$ = node_new_oper_2('/', $1, $3); }
 	| expr '%' expr		{ $$ = node_new_oper_2('%', $1, $3); }

@@ -284,6 +284,15 @@ static struct node *eval_node_oper_1(struct node *n) {
 		}
 		break;
 
+	case '!':
+		arg = eval_int_free(arg);
+		if (arg) {
+			ret = node_new_int(!arg->data.as_int);
+		} else {
+			ret = node_new_int(1);
+		}
+		break;
+
 	case '~':
 		arg = eval_int_free(arg);
 		if (arg) {
