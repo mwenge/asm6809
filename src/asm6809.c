@@ -74,6 +74,7 @@ static struct slist *files = NULL;
 
 #define MAX_PASSES (10)
 
+static struct node *simple_parse_int(const char *);
 static void helptext(void);
 static void versiontext(void);
 static void tidy_up(void);
@@ -201,21 +202,8 @@ int main(int argc, char **argv) {
 	/* Special parsing of option exec address option.  Overrides any use of
 	 * the END pseudo-op. */
 	if (exec_option) {
-		struct node *n = NULL;
-		if (exec_option[0] == '$') {
-			n = node_new_int(strtol(exec_option+1, NULL, 16));
-		} else if (exec_option[0] == '@') {
-			n = node_new_int(strtol(exec_option+1, NULL, 8));
-		} else if (exec_option[0] == '%') {
-			n = node_new_int(strtol(exec_option+1, NULL, 2));
-		} else if (exec_option[0] == '0') {
-			if (exec_option[1] == 'x')
-				n = node_new_int(strtol(exec_option+2, NULL, 16));
-			if (exec_option[1] == 'b')
-				n = node_new_int(strtol(exec_option+2, NULL, 2));
-		} else if (exec_option[0] >= '0' && exec_option[0] <= '9') {
-			n = node_new_int(strtol(exec_option+1, NULL, 10));
-		} else {
+		struct node *n = simple_parse_int(exec_option);
+		if (!n) {
 			unsigned v = 0;
 			struct node *tmp = symbol_get(exec_option);
 			if (tmp) {
@@ -278,6 +266,30 @@ int main(int argc, char **argv) {
 	error_print_list();
 	tidy_up();
 	return EXIT_SUCCESS;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+/* Special parsing of arguments.  Integers only for now. */
+static struct node *simple_parse_int(const char *str) {
+	struct node *n = NULL;
+	if (str[0] == '$') {
+		n = node_new_int(strtol(str+1, NULL, 16));
+	} else if (str[0] == '@') {
+		n = node_new_int(strtol(str+1, NULL, 8));
+	} else if (str[0] == '%') {
+		n = node_new_int(strtol(str+1, NULL, 2));
+	} else if (str[0] == '0') {
+		if (str[1] == 'x')
+			n = node_new_int(strtol(str+2, NULL, 16));
+		else if (str[1] == 'b')
+			n = node_new_int(strtol(str+2, NULL, 2));
+		else
+			n = node_new_int(strtol(str, NULL, 10));
+	} else if (str[0] >= '0' && str[0] <= '9') {
+		n = node_new_int(strtol(str, NULL, 10));
+	}
+	return n;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
