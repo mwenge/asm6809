@@ -29,6 +29,12 @@ option) any later version.
 #include "symbol.h"
 
 /*
+ * When asserted, don't raise an error for undefined symbols.
+ */
+
+_Bool symbol_ignore_undefined = 0;
+
+/*
  * Record the pass in which each symbol was entered into the table.  This can
  * be used to detect multiple definitions without cycling through a new table
  * each pass.
@@ -92,7 +98,11 @@ struct node *symbol_try_get(const char *key) {
 struct node *symbol_get(const char *key) {
 	struct node *n = symbol_try_get(key);
 	if (!n) {
-		error(error_type_inconsistent, "symbol '%s' not defined", key);
+		if (symbol_ignore_undefined) {
+			return node_new_int(0);
+		} else {
+			error(error_type_inconsistent, "symbol '%s' not defined", key);
+		}
 	}
 	return n;
 }

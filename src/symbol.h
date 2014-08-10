@@ -17,6 +17,13 @@ struct dict;
 struct node;
 
 /*
+ * When processing conditional assembly pseudo-ops, it is necessary to ignore
+ * the fact that some symbols are undefined.  Set this to 1 for the duration.
+ */
+
+extern _Bool symbol_ignore_undefined;
+
+/*
  * Set a symbol in the current symbol table.  The value is evaluated to a
  * simple type before setting.  If the value already existed from a previous
  * pass, an inconsistency is raised if they do not match.

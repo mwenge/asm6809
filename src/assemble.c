@@ -257,7 +257,9 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 		if (n_line.opcode && 0 == c_strcasecmp("if", n_line.opcode->data.as_string)) {
 			listing_add_line(-1, 0, NULL, l->text);
 			if (!cond_excluded) {
+				symbol_ignore_undefined = 1;
 				n_line.args = eval_node(l->args);
+				symbol_ignore_undefined = 0;
 				if (verify_num_args(n_line.args, 1, 1, "IF") < 0)
 					goto next_line;
 			}
@@ -276,7 +278,9 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 				error(error_type_syntax, "repeated ELSE");
 			} else if (cond_excluded == cond_list) {
 				cond_excluded = NULL;
+				symbol_ignore_undefined = 1;
 				n_line.args = eval_node(l->args);
+				symbol_ignore_undefined = 0;
 				if (verify_num_args(n_line.args, 1, 1, "ELSIF") < 0)
 					goto next_line;
 				if (!have_int_required(n_line.args, 0, "ELSIF", 0)) {
