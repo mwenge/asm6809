@@ -33,6 +33,7 @@ option) any later version.
 #include "program.h"
 #include "register.h"
 #include "section.h"
+#include "slist.h"
 #include "symbol.h"
 
 static struct prog_ctx *defining_macro_ctx = NULL;
@@ -40,6 +41,11 @@ static int defining_macro_level = 0;
 
 static unsigned asm_pass;
 static unsigned prog_depth = 0;
+
+enum cond_state {
+	cond_state_if,
+	cond_state_else
+};
 
 static void set_label(struct node *label, struct node *value);
 static void args_float_to_int(struct node *args);
@@ -216,6 +222,12 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 	prog_depth++;
 	struct prog_ctx *ctx = prog_ctx_new(prog);
 
+	/* cond_excluded will point to the element in cond_list that started to
+	 * exclude code.  ENDIF will stop excluding code if back to that
+	 * position. */
+	struct slist *cond_list = NULL;
+	struct slist *cond_excluded = NULL;
+
 	while (!prog_ctx_end(ctx)) {
 		/* Dummy line to be populated with values evaluated or not, as
 		 * appropriate. */
@@ -239,6 +251,72 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 		n_line.opcode = eval_string(l->opcode);
 		n_line.args = NULL;
 		n_line.text = l->text;
+
+		/* Conditional assembly */
+
+		if (n_line.opcode && 0 == c_strcasecmp("if", n_line.opcode->data.as_string)) {
+			listing_add_line(-1, 0, NULL, l->text);
+			if (!cond_excluded) {
+				n_line.args = eval_node(l->args);
+				if (verify_num_args(n_line.args, 1, 1, "IF") < 0)
+					goto next_line;
+			}
+			cond_list = slist_prepend(cond_list, (void *)cond_state_if);
+			if (!cond_excluded && !have_int_required(n_line.args, 0, "IF", 0)) {
+				cond_excluded = cond_list;
+			}
+			goto next_line;
+		}
+
+		if (n_line.opcode && 0 == c_strcasecmp("elsif", n_line.opcode->data.as_string)) {
+			listing_add_line(-1, 0, NULL, l->text);
+			if (!cond_list) {
+				error(error_type_syntax, "ELSIF without IF");
+			} else if ((intptr_t)cond_list->data == cond_state_else) {
+				error(error_type_syntax, "repeated ELSE");
+			} else if (cond_excluded == cond_list) {
+				cond_excluded = NULL;
+				n_line.args = eval_node(l->args);
+				if (verify_num_args(n_line.args, 1, 1, "ELSIF") < 0)
+					goto next_line;
+				if (!have_int_required(n_line.args, 0, "ELSIF", 0)) {
+					cond_excluded = cond_list;
+				}
+			}
+			goto next_line;
+		}
+
+		if (n_line.opcode && 0 == c_strcasecmp("else", n_line.opcode->data.as_string)) {
+			listing_add_line(-1, 0, NULL, l->text);
+			if (!cond_list) {
+				error(error_type_syntax, "ELSE without IF");
+			} else if ((intptr_t)cond_list->data == cond_state_else) {
+				error(error_type_syntax, "repeated ELSE");
+			} else if (cond_excluded == cond_list) {
+				cond_list->data = (void *)cond_state_else;
+				cond_excluded = NULL;
+			} else if (!cond_excluded) {
+				cond_list->data = (void *)cond_state_else;
+				cond_excluded = cond_list;
+			}
+			goto next_line;
+		}
+
+		if (n_line.opcode && 0 == c_strcasecmp("endif", n_line.opcode->data.as_string)) {
+			listing_add_line(-1, 0, NULL, l->text);
+			if (!cond_list) {
+				error(error_type_syntax, "ENDIF without IF");
+			} else if (cond_excluded == cond_list) {
+				cond_excluded = NULL;
+			}
+			cond_list = slist_remove(cond_list, cond_list->data);
+			goto next_line;
+		}
+
+		if (cond_excluded) {
+			listing_add_line(-1, 0, NULL, l->text);
+			goto next_line;
+		}
 
 		/* Macro handling */
 
@@ -394,6 +472,11 @@ next_line:
 		node_free(n_line.label);
 		node_free(n_line.opcode);
 		node_free(n_line.args);
+	}
+
+	if (cond_list) {
+		slist_free(cond_list);
+		error(error_type_syntax, "IF not matched with ENDIF");
 	}
 
 	assert(prog_depth > 0);
