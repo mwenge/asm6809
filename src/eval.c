@@ -419,6 +419,7 @@ static struct node *eval_node_oper_2(struct node *n) {
 	/* Operators that only apply to integers */
 	case '%': case SHL: case SHR:
 	case '&': case '^': case '|':
+	case LAND: case LOR:
 
 		if (!(leftn = eval_int_free(leftn))) {
 			node_free(rightn);
@@ -447,6 +448,12 @@ static struct node *eval_node_oper_2(struct node *n) {
 			break;
 		case '|':
 			ret = node_new_int(leftn->data.as_int | rightn->data.as_int);
+			break;
+		case LAND:
+			ret = node_new_int(leftn->data.as_int && rightn->data.as_int);
+			break;
+		case LOR:
+			ret = node_new_int(leftn->data.as_int || rightn->data.as_int);
 			break;
 		default:
 			ret = NULL;

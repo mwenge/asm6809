@@ -59,6 +59,7 @@ static void check_end_opcode(struct prog_line *line);
 %token <as_string> TEXT
 %token <as_token> SHL SHR
 %token <as_token> LE GE EQ NE
+%token <as_token> LOR LAND
 %token DELIM
 %token DEC2 INC2
 
@@ -73,6 +74,8 @@ static void check_end_opcode(struct prog_line *line);
 %type <as_line> line
 
 %right '?' ':'
+%left LOR
+%left LAND
 %left '|'
 %left '^'
 %left '&'
@@ -160,6 +163,8 @@ expr	: '(' expr ')'		{ $$ = $2; }
 	| expr '&' expr		{ $$ = node_new_oper_2('&', $1, $3); }
 	| expr '^' expr		{ $$ = node_new_oper_2('^', $1, $3); }
 	| expr '|' expr		{ $$ = node_new_oper_2('|', $1, $3); }
+	| expr LAND expr	{ $$ = node_new_oper_2(LAND, $1, $3); }
+	| expr LOR expr		{ $$ = node_new_oper_2(LOR, $1, $3); }
 	| expr '?' expr ':' expr	{ $$ = node_new_oper_3('?', $1, $3, $5); }
 	| INTEGER		{ $$ = node_new_int($1); }
 	| FLOAT			{ $$ = node_new_float($1); }
