@@ -21,6 +21,8 @@ option) any later version.
 #include <stdlib.h>
 #include <string.h>
 
+#include "xalloc.h"
+
 #include "asm6809.h"
 #include "assemble.h"
 #include "error.h"
@@ -59,6 +61,7 @@ static struct option long_options[] = {
 	{ "exec", required_argument, NULL, 'e' },
 	{ "6809", no_argument, &isa, asm6809_isa_6809 },
 	{ "6309", no_argument, &isa, asm6809_isa_6309 },
+	{ "define", required_argument, NULL, 'd' },
 	{ "setdp", required_argument, &setdp, 0 },
 	{ "output", required_argument, NULL, 'o' },
 	{ "listing", required_argument, NULL, 'l' },
@@ -75,6 +78,7 @@ static struct slist *files = NULL;
 #define MAX_PASSES (10)
 
 static struct node *simple_parse_int(const char *);
+static void define_symbol(const char *);
 static void helptext(void);
 static void versiontext(void);
 static void tidy_up(void);
@@ -84,7 +88,7 @@ static void tidy_up(void);
 int main(int argc, char **argv) {
 
 	int c;
-	while ((c = getopt_long(argc, argv, "BDCSHe:893o:l:s:qv",
+	while ((c = getopt_long(argc, argv, "BDCSHe:893d:o:l:s:qv",
 				long_options, NULL)) != -1) {
 		switch (c) {
 		case 0:
@@ -112,6 +116,9 @@ int main(int argc, char **argv) {
 			break;
 		case '3':
 			isa = asm6809_isa_6309;
+			break;
+		case 'd':
+			define_symbol(optarg);
 			break;
 		case 'o':
 			output_filename = optarg;
@@ -292,6 +299,19 @@ static struct node *simple_parse_int(const char *str) {
 	return n;
 }
 
+static void define_symbol(const char *str) {
+	char *tmp = xstrdup(str);
+	char *value = strchr(tmp, '=');
+	struct node *n;
+	if (value) {
+		*(value++) = 0;
+		n = simple_parse_int(value);
+	} else {
+		n = node_new_int(1);
+	}
+	symbol_set(tmp, n, 0);
+}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 static void helptext(void) {
@@ -307,9 +327,10 @@ static void helptext(void) {
 "  -e, --exec=ADDR   EXEC address (for output formats that support one)\n"
 "\n"
 "  -8,\n"
-"  -9, --6809          use 6809 ISA (default)\n"
-"  -3, --6309          use 6309 ISA (6809 with extensions)\n"
-"      --setdp=VALUE   initial value assumed for DP [undefined]\n"
+"  -9, --6809                  use 6809 ISA (default)\n"
+"  -3, --6309                  use 6309 ISA (6809 with extensions)\n"
+"  -d, --define=SYM[=NUMBER]   define a symbol\n"
+"      --setdp=VALUE           initial value assumed for DP [undefined]\n"
 "\n"
 "  -o, --output=FILE    set output filename\n"
 "  -l, --listing=FILE   create listing file\n"
