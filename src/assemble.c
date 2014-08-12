@@ -253,6 +253,40 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 		n_line.args = NULL;
 		n_line.text = l->text;
 
+		/* Macro handling */
+
+		if (!cond_excluded && n_line.opcode && 0 == c_strcasecmp("macro", n_line.opcode->data.as_string)) {
+			defining_macro_level++;
+			if (defining_macro_level == 1) {
+				n_line.label = eval_string(l->label);
+				n_line.args = eval_node(l->args);
+				pseudo_macro(&n_line);
+				listing_add_line(-1, 0, NULL, l->text);
+				goto next_line;
+			}
+		}
+
+		if (!cond_excluded && n_line.opcode && 0 == c_strcasecmp("endm", n_line.opcode->data.as_string)) {
+			if (defining_macro_level == 0) {
+				error(error_type_syntax, "ENDM without beginning MACRO");
+				goto next_line;
+			}
+			defining_macro_level--;
+			if (defining_macro_level == 0) {
+				n_line.args = eval_node(l->args);
+				pseudo_endm(&n_line);
+				listing_add_line(-1, 0, NULL, l->text);
+				goto next_line;
+			}
+		}
+
+		if (defining_macro_level > 0) {
+			if (defining_macro_ctx)
+				prog_ctx_add_line(defining_macro_ctx, prog_line_ref(l));
+			listing_add_line(-1, 0, NULL, l->text);
+			goto next_line;
+		}
+
 		/* Conditional assembly */
 
 		if (n_line.opcode && 0 == c_strcasecmp("if", n_line.opcode->data.as_string)) {
@@ -329,40 +363,6 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 		}
 
 		if (cond_excluded) {
-			listing_add_line(-1, 0, NULL, l->text);
-			goto next_line;
-		}
-
-		/* Macro handling */
-
-		if (n_line.opcode && 0 == c_strcasecmp("macro", n_line.opcode->data.as_string)) {
-			defining_macro_level++;
-			if (defining_macro_level == 1) {
-				n_line.label = eval_string(l->label);
-				n_line.args = eval_node(l->args);
-				pseudo_macro(&n_line);
-				listing_add_line(-1, 0, NULL, l->text);
-				goto next_line;
-			}
-		}
-
-		if (n_line.opcode && 0 == c_strcasecmp("endm", n_line.opcode->data.as_string)) {
-			if (defining_macro_level == 0) {
-				error(error_type_syntax, "ENDM without beginning MACRO");
-				goto next_line;
-			}
-			defining_macro_level--;
-			if (defining_macro_level == 0) {
-				n_line.args = eval_node(l->args);
-				pseudo_endm(&n_line);
-				listing_add_line(-1, 0, NULL, l->text);
-				goto next_line;
-			}
-		}
-
-		if (defining_macro_level > 0) {
-			if (defining_macro_ctx)
-				prog_ctx_add_line(defining_macro_ctx, prog_line_ref(l));
 			listing_add_line(-1, 0, NULL, l->text);
 			goto next_line;
 		}
