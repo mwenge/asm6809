@@ -37,9 +37,9 @@ struct dict *dict_new_full(Hash_hasher hash_func,
 void dict_destroy(struct dict *);
 
 void *dict_lookup(struct dict *, const void *k);
-void dict_insert(struct dict *, const void *k, const void *v);
-void dict_replace(struct dict *d, const void *k, const void *v);
-void dict_add(struct dict *d, const void *k);
+void dict_insert(struct dict *, void *k, void *v);
+void dict_replace(struct dict *d, void *k, void *v);
+void dict_add(struct dict *d, void *k);
 bool dict_remove(struct dict *, const void *k);
 bool dict_steal(struct dict *, const void *k);
 void dict_foreach(struct dict *, dict_iter_func, void *);

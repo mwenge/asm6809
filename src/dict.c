@@ -18,7 +18,6 @@ option) any later version.
 #include <string.h>
 
 #include "hash.h"
-#include "hash-pjw.h"
 #include "xalloc.h"
 
 #include "dict.h"
@@ -34,8 +33,8 @@ struct dict {
 
 struct dict_ent {
 	struct dict *dict;
-	const void *key;
-	const void *value;
+	void *key;
+	void *value;
 };
 
 struct dict_foreach_data {
@@ -79,7 +78,7 @@ void dict_destroy(struct dict *d) {
 /* Find an entry by key. */
 
 static struct dict_ent *dict_find_ent(struct dict *d, const void *k) {
-	struct dict_ent q = {
+	const struct dict_ent q = {
 		.key = (void *)k,
 		.dict = d
 	};
@@ -98,19 +97,19 @@ void *dict_lookup(struct dict *d, const void *k) {
 	return (void *)ent->value;
 }
 
-static void dict_add_ent(struct dict *d, const void *k, const void *v, bool replace_key) {
+static void dict_add_ent(struct dict *d, void *k, void *v, bool replace_key) {
 	struct dict_ent *ent = dict_find_ent(d, k);
 	if (ent) {
 		if (replace_key) {
 			if (d->key_destroy_func && ent->key)
-				d->key_destroy_func((void *)ent->key);
+				d->key_destroy_func(ent->key);
 			ent->key = k;
 		} else {
 			if (d->key_destroy_func && k)
-				d->key_destroy_func((void *)k);
+				d->key_destroy_func(k);
 		}
 		if (d->value_destroy_func && ent->value)
-			d->value_destroy_func((void *)ent->value);
+			d->value_destroy_func(ent->value);
 		ent->value = v;
 		return;
 	}
@@ -125,20 +124,20 @@ static void dict_add_ent(struct dict *d, const void *k, const void *v, bool repl
 /* Insert an entry into the dictionary.  If an entry already exists with the
  * supplied key, the old value is freed (if possible) then overwritten. */
 
-void dict_insert(struct dict *d, const void *k, const void *v) {
+void dict_insert(struct dict *d, void *k, void *v) {
 	dict_add_ent(d, k, v, false);
 }
 
 /* Insert an entry into the dictionary.  If an entry already exists with the
  * supplied key, the old key and value are freed then overwritten. */
 
-void dict_replace(struct dict *d, const void *k, const void *v) {
+void dict_replace(struct dict *d, void *k, void *v) {
 	dict_add_ent(d, k, v, true);
 }
 
 /* Convenience function for when k == v. */
 
-void dict_add(struct dict *d, const void *k) {
+void dict_add(struct dict *d, void *k) {
 	dict_add_ent(d, k, k, true);
 }
 
@@ -146,7 +145,7 @@ void dict_add(struct dict *d, const void *k) {
  * destructors are defined.  Returns true if an entry was found and removed. */
 
 bool dict_remove(struct dict *d, const void *k) {
-	struct dict_ent q = {
+	const struct dict_ent q = {
 		.key = (void *)k,
 		.dict = d
 	};
@@ -161,7 +160,7 @@ bool dict_remove(struct dict *d, const void *k) {
  * true if an entry was found and removed. */
 
 bool dict_steal(struct dict *d, const void *k) {
-	struct dict_ent q = {
+	const struct dict_ent q = {
 		.key = (void *)k,
 		.dict = d
 	};
@@ -192,10 +191,12 @@ void dict_foreach(struct dict *d, dict_iter_func func, void *data) {
 }
 
 static void add_key(void *k, void *v, struct slist **lp) {
+	(void)v;  // unused
 	*lp = slist_prepend(*lp, k);
 }
 
 static void add_value(void *k, void *v, struct slist **lp) {
+	(void)k;  // unused
 	*lp = slist_prepend(*lp, v);
 }
 
