@@ -1,0 +1,47 @@
+## asm6809 NEWS
+
+### Changes in version 2.3, unreleased
+
+  * Conditional assembly with IF/ELSIF/ELSE/ENDIF.
+  * New -d, --define=SYM[=NUMBER] option.
+  * New logical operators: !, &&, ||
+  * New ternary operator: ?:
+  * New relational operators: < <= > >= == !=
+  * &n positional arg no longer accepted outside a string.
+
+### Changes in version 2.2, Thu  7 Aug 2014
+
+  * Speed improvements.
+  * Fix crash on empty input.
+  * Fix crash on bad indexed operand.
+  * Minor memory leak fixes.
+  * Added simple manpage.
+
+### Changes in version 2.1, Fri 13 Jun 2014
+
+  * Memory leak fixes.
+  * Add --setdp option.
+  * Add FZB as alias for RZB.
+  * Cope with free comments.
+  * Support END pseudo-op.
+  * Accept backslash as macro argument character.
+  * Strip trailing CR on input.
+  * Cope with no EOL before EOF.
+
+### Changes in version 2.0, Wed 30 Apr 2014
+
+  * Initial release.
+
+### Changes in version 2.0pre5, Wed 26 Mar 2014
+
+### Changes in version 2.0pre4, Mon 24 Mar 2014
+
+  * Dependency on GLib removed.
+
+### Changes in version 2.0pre3, Tue 20 Aug 2013
+
+### Changes in version 2.0pre2, Fri 16 Aug 2013
+
+### Changes in version 2.0pre1, Tue 13 Aug 2013
+
+  * First prerelease.
