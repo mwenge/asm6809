@@ -116,7 +116,7 @@ void error_print_list(void) {
 	while (error_list) {
 		struct error *err = error_list->data;
 		error_list = slist_remove(error_list, err);
-		if (err->type >= min_error) {
+		if ((int)err->type >= min_error) {
 			switch (err->type) {
 			case error_type_none:
 				break;

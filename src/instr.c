@@ -299,7 +299,7 @@ static void instr_indexed2(_Bool indirect, struct node const *arg0, struct node 
 	enum off_type off_type;
 	enum idx_indirect idx_indirect;
 	int postbyte = -1;
-	for (int i = 0; i < NUM_INDEXED_MODES; i++) {
+	for (unsigned i = 0; i < NUM_INDEXED_MODES; i++) {
 		if (indexed_modes[i].idx_type != idx_type)
 			continue;
 		if (indexed_modes[i].idx_attr != arg1_attr)

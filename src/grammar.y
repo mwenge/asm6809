@@ -26,7 +26,7 @@ option) any later version.
 #include "slist.h"
 
 static void raise_error(void);
-static void yyerror(char *);
+static void yyerror(const char *);
 void yylex_destroy(void);
 int yylex(void);
 char *lex_fetch_line(void);
@@ -195,7 +195,7 @@ static void raise_error(void) {
 	error(error_type_syntax, "");
 }
 
-static void yyerror(char *s) {
+static void yyerror(const char *s) {
 	(void)s;
 }
 
