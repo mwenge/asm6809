@@ -40,5 +40,5 @@ AC_FUNC_REALLOC
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([memset strerror strndup strtol])
 
-AC_CONFIG_FILES([README Makefile gnulib/Makefile src/Makefile man/Makefile tests/Makefile])
+AC_CONFIG_FILES([Makefile gnulib/Makefile src/Makefile man/Makefile tests/Makefile])
 AC_OUTPUT
