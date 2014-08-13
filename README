@@ -32,10 +32,10 @@ this program.  If not, see <[http://www.gnu.org/licenses/][gpl]>.
 
 ### Installation
 
- * Source tarball: [http://www.6809.org.uk/dragon/asm6809-2.2.tar.gz][tar]
+ * Source tarball: [http://www.6809.org.uk/dragon/asm6809-2.3.tar.gz][tar]
  * Git repository: **git clone http://www.6809.org.uk/repos/asm6809**
 
-[tar]: http://www.6809.org.uk/dragon/asm6809-2.2.tar.gz
+[tar]: http://www.6809.org.uk/dragon/asm6809-2.3.tar.gz
 
 
 ### Running
