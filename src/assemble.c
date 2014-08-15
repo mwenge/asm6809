@@ -355,6 +355,7 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 			listing_add_line(-1, 0, NULL, l->text);
 			if (!cond_list) {
 				error(error_type_syntax, "ENDIF without IF");
+				goto next_line;
 			} else if (cond_excluded == cond_list) {
 				cond_excluded = NULL;
 			}
