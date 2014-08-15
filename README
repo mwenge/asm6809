@@ -1,6 +1,10 @@
 asm6809
 =======
 
+
+About
+-----
+
 *asm6809* is a portable macro cross assembler targeting the Motorola 6809 and
 Hitachi 6309.
 
@@ -12,6 +16,9 @@ there is ambiguity.
 Output formats are: Raw binary, DragonDOS binary, CoCo RS-DOS (or "DECB")
 binary, Motorola SREC, Intel HEX.
 
+ * Home page: [http://www.6809.org.uk/asm6809/][asm6809]
+
+[asm6809]: http://www.6809.org.uk/asm6809/
 
 ### Licence
 
@@ -28,14 +35,6 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <[http://www.gnu.org/licenses/][gpl]>.
 
 [gpl]: http://www.gnu.org/licenses/
-
-
-### Installation
-
- * Source tarball: [http://www.6809.org.uk/dragon/asm6809-2.3.1.tar.gz][tar]
- * Git repository: **git clone http://www.6809.org.uk/repos/asm6809**
-
-[tar]: http://www.6809.org.uk/dragon/asm6809-2.3.1.tar.gz
 
 
 ### Running
@@ -161,12 +160,13 @@ Expressions are formed of:
  * A single quote followed by any ASCII character (yielding the ASCII value of
    that character).
  * A symbol name, local forward reference or local back reference.
- * A combination of any of the above with arithmetic or bitwise operators.
+ * A combination of any of the above with arithmetic, bitwise or logical
+   operators.
  * Any of the above prefixed with a unary minus ("-") or plus ("+").
  * Parenthesis to specify precedence.
 
 
-### Arithmetic & bitwise operators
+### Operators
 
 The following operators are available, listed in descending order of precedence
 (where operators share a precedence, left-to-right evaluation is performed):
@@ -215,7 +215,7 @@ floating point uses *double*.
 
 ### Conditional assembly
 
-The pseudo-ops **IF**, **ELSIF*, **ELSE* and **ENDIF** guide conditional
+The pseudo-ops **IF**, **ELSIF**, **ELSE** and **ENDIF** guide conditional
 assembly.  **IF** and **ELSIF** take one argument, which is evaluated as an
 integer.  If the result is non-zero, the following code will be assembled, else
 it will be skipped.
