@@ -1,5 +1,9 @@
 ## asm6809 changes
 
+### Changes in version 2.4, unreleased
+
+  * Speed improvements.
+
 ### Changes in version 2.3, Wed 13 Aug 2014
 
   * Conditional assembly with IF/ELSIF/ELSE/ENDIF.
