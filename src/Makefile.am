@@ -18,6 +18,7 @@ asm6809_SOURCES = \
 	error.c error.h \
 	eval.c eval.h \
 	grammar.y \
+	hash-djb2.c hash-djb2.h \
 	instr.c instr.h \
 	interp.c interp.h \
 	lex.l \
