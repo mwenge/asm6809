@@ -28,6 +28,7 @@ option) any later version.
 #include "error.h"
 #include "listing.h"
 #include "node.h"
+#include "opcode.h"
 #include "output.h"
 #include "program.h"
 #include "section.h"
@@ -157,6 +158,8 @@ int main(int argc, char **argv) {
 	asm6809_options.setdp = setdp;
 	asm6809_options.verbosity = verbosity;
 	asm6809_options.listing_required = listing_filename ? 1 : 0;
+
+	opcode_init();
 
 	/* Read in each file */
 	for (int i = optind; i < argc; i++) {
@@ -369,4 +372,5 @@ static void tidy_up(void) {
 	prog_free_all();
 	symbol_free_all();
 	section_free_all();
+	opcode_free_all();
 }

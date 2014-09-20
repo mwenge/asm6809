@@ -14,10 +14,9 @@ option) any later version.
 
 #include <stdlib.h>
 
-#include "c-strcase.h"
-
 #include "array.h"
 #include "asm6809.h"
+#include "dict.h"
 #include "opcode.h"
 
 /* Shorten these macros for a more readable table: */
@@ -304,22 +303,33 @@ static struct opcode const opcodes_6309[] = {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct opcode const *opcode_by_name(const char *name) {
+static struct dict *opcodes = NULL;
+
+void opcode_init(void) {
+	opcodes = dict_new(dict_str_hash_case, dict_str_equal_case);
 	switch (asm6809_options.isa) {
 	case asm6809_isa_6309:
 		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(opcodes_6309); i++) {
-			if (0 == c_strcasecmp(name, opcodes_6309[i].op))
-				return &opcodes_6309[i];
+			dict_insert(opcodes, (void *)opcodes_6309[i].op, (void *)&opcodes_6309[i]);
 		}
 		/* fall through */
 	case asm6809_isa_6809:
 		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(opcodes_6809); i++) {
-			if (0 == c_strcasecmp(name, opcodes_6809[i].op))
-				return &opcodes_6809[i];
+			dict_insert(opcodes, (void *)opcodes_6809[i].op, (void *)&opcodes_6809[i]);
 		}
 		break;
 	default:
 		break;
 	}
-	return NULL;
+}
+
+void opcode_free_all(void) {
+	if (!opcodes)
+		return;
+	dict_destroy(opcodes);
+	opcodes = NULL;
+}
+
+struct opcode const *opcode_by_name(const char *name) {
+	return dict_lookup(opcodes, name);
 }

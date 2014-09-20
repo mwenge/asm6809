@@ -53,6 +53,9 @@ struct opcode {
 #define OPCODE_REG_MEM  (11 << 3)
 #define OPCODE_TFM      (12 << 3)
 
+void opcode_init(void);
+void opcode_free_all(void);
+
 struct opcode const *opcode_by_name(const char *name);
 
 #endif  /* ASM6809_OPCODES_H_ */
