@@ -19,7 +19,7 @@ The hash table interface is expected to be as per Gnulib.
 #include <stdbool.h>
 
 #include "hash.h"
-#include "hash-pjw.h"
+#include "hash-djb2.h"
 
 struct dict;
 struct slist;
@@ -51,7 +51,9 @@ struct slist *dict_get_values(struct dict *);
 size_t dict_direct_hash(const void *, size_t);
 bool dict_direct_equal(const void *k1, const void *k2);
 
-#define dict_str_hash (hash_pjw)
+#define dict_str_hash (hash_djb2)
+#define dict_str_hash_case (hash_djb2_case)
 bool dict_str_equal(const void *k1, const void *k2);
+bool dict_str_equal_case(const void *k1, const void *k2);
 
 #endif  /* DICT_H__Kf6gSbxCcf8vw */
