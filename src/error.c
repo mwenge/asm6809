@@ -36,6 +36,7 @@ struct error {
 	char *message;
 };
 static struct slist *error_list = NULL;
+static struct slist **error_list_next = &error_list;
 
 /*
  * Report an error.
@@ -63,7 +64,8 @@ static void verror(enum error_type type, const char *fmt, va_list ap) {
 		err->message = xvasprintf(fmt, ap);
 	}
 	if (err) {
-		error_list = slist_append(error_list, err);
+		*error_list_next = slist_append(*error_list_next, err);
+		error_list_next = &((*error_list_next)->next);
 	}
 }
 
@@ -99,6 +101,7 @@ void error_clear_all(void) {
 		free(err->message);
 		free(err);
 	}
+	error_list_next = &error_list;
 	error_level = error_type_none;
 }
 
@@ -145,5 +148,6 @@ void error_print_list(void) {
 			free(err->message);
 		free(err);
 	}
+	error_list_next = &error_list;
 	error_level = error_type_none;
 }
