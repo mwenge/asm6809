@@ -54,7 +54,6 @@ AC_DEFUN([gl_EARLY],
   # Code from module getopt-posix:
   # Code from module gettext-h:
   # Code from module hash:
-  # Code from module hash-pjw:
   # Code from module include_next:
   # Code from module intprops:
   # Code from module memchr:
@@ -381,8 +380,6 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/getopt1.c
   lib/getopt_int.h
   lib/gettext.h
-  lib/hash-pjw.c
-  lib/hash-pjw.h
   lib/hash.c
   lib/hash.h
   lib/intprops.h
