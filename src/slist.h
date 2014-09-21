@@ -76,4 +76,4 @@ struct slist *slist_find(struct slist *, const void *);
 /* Find element using compare function against supplied data. */
 struct slist *slist_find_custom(struct slist *, const void *, slist_cmp_func);
 
-#endif  /* SLIST_H__chqkIizgkKbjw */
+#endif

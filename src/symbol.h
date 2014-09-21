@@ -50,4 +50,4 @@ struct node *symbol_local_fwdref(struct dict *table, long key, unsigned line_num
 void symbol_local_set(struct dict *table, long key, unsigned line_number, struct node *value,
 		      unsigned pass);
 
-#endif  /* ASM6809_SYMBOL_H_ */
+#endif

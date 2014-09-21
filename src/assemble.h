@@ -27,4 +27,4 @@ void assemble_prog(struct prog *file, unsigned pass);
 
 void assemble_free_all(void);
 
-#endif  /* ASM6809_ASSEMBLE_H_ */
+#endif

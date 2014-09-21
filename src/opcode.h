@@ -58,4 +58,4 @@ void opcode_free_all(void);
 
 struct opcode const *opcode_by_name(const char *name);
 
-#endif  /* ASM6809_OPCODES_H_ */
+#endif

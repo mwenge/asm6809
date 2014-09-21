@@ -88,4 +88,4 @@ void prog_export(const char *name);
 void prog_free_exports(void);
 void prog_print_exports(FILE *f);
 
-#endif  /* ASM6809_PROGRAM_H_ */
+#endif

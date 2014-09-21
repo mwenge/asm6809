@@ -34,4 +34,4 @@ void instr_pair(struct opcode const *op, struct node const *args);
 void instr_tfm(struct opcode const *op, struct node const *args);
 void instr_reg_mem(struct opcode const *op, struct node const *args);
 
-#endif  /* ASM6809_INSTR_H_ */
+#endif

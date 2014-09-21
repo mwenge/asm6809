@@ -17,4 +17,4 @@ Just the one macro for now.
 
 #define ARRAY_N_ELEMENTS(a) (sizeof(a) / sizeof((a)[0]))
 
-#endif  /* ARRAY_H__DJnCHtnGSsoak */
+#endif

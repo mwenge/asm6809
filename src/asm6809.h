@@ -37,4 +37,4 @@ struct asm6809_options {
 
 extern struct asm6809_options asm6809_options;
 
-#endif  /* ASM6809_ASM6809_H_ */
+#endif

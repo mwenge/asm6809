@@ -28,4 +28,4 @@ void listing_add_line(int pc, int nbytes, struct section_span const *span, char 
 void listing_print(FILE *f);
 void listing_free_all(void);
 
-#endif  /* ASM6809_LISTING_H_ */
+#endif

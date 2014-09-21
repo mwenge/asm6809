@@ -204,4 +204,4 @@ struct node *node_array_push(struct node *a, struct node *n);
 void node_print(FILE *f, struct node const *n);
 void node_print_array(FILE *f, struct node const *n);  // print array without []
 
-#endif  /* ASM6809_NODE_H_ */
+#endif

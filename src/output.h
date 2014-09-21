@@ -32,4 +32,4 @@ void output_motorola_srec(const char *filename);
 /* Output format: Intel HEX. */
 void output_intel_hex(const char *filename);
 
-#endif  /* ASM6809_OUTPUT_H_ */
+#endif

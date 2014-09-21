@@ -56,4 +56,4 @@ bool dict_direct_equal(const void *k1, const void *k2);
 bool dict_str_equal(const void *k1, const void *k2);
 bool dict_str_equal_case(const void *k1, const void *k2);
 
-#endif  /* DICT_H__Kf6gSbxCcf8vw */
+#endif

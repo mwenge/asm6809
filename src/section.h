@@ -140,4 +140,4 @@ void section_emit_uint32(uint32_t v);
 
 void section_skip(int nbytes);
 
-#endif  /* ASM6809_SECTION_H_ */
+#endif

@@ -24,4 +24,4 @@ void interp_pop(void);
 /* Fetch positional variable from the current array. */
 struct node *interp_get(int index);
 
-#endif  /* ASM6809_INTERP_H_ */
+#endif

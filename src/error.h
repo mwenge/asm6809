@@ -99,4 +99,4 @@ void error_clear_all(void);
  */
 void error_print_list(void);
 
-#endif  /* ASM6809_ERROR_H_ */
+#endif

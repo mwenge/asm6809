@@ -52,4 +52,4 @@ extern uint8_t const reg_stack_bit[REG_MAX];  // 0 indicates invalid, else singl
 enum reg_id reg_name_to_id(const char *name);
 const char *reg_id_to_name(enum reg_id id);
 
-#endif  /* ASM6809_REGISTERS_H_ */
+#endif
