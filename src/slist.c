@@ -19,7 +19,7 @@ option) any later version.
 
 /* Wrap data in a new list container */
 static struct slist *slist_new(void *data) {
-	struct slist *new = malloc(sizeof(*new));
+	struct slist *new = xmalloc(sizeof(*new));
 	if (!new) return NULL;
 	new->next = NULL;
 	new->data = data;
