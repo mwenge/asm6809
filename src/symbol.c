@@ -46,7 +46,6 @@ struct symbol {
 };
 
 struct symbol_local {
-	unsigned pass;
 	unsigned line_number;
 	struct node *node;
 };
@@ -191,7 +190,6 @@ void symbol_local_set(struct dict *table, long key, unsigned line_number, struct
 		sym->line_number = line_number;
 	}
 	sym->node = newn;
-	sym->pass = pass;
 	sym_list = slist_prepend(sym_list, sym);
 	dict_insert(table, (void *)key, sym_list);
 }
