@@ -12,8 +12,8 @@ Just the one macro for now.
 
 */
 
-#ifndef ARRAY_H__DJnCHtnGSsoak
-#define ARRAY_H__DJnCHtnGSsoak
+#ifndef DT101_ARRAY_H__DJnCHtnGSsoak
+#define DT101_ARRAY_H__DJnCHtnGSsoak
 
 #define ARRAY_N_ELEMENTS(a) (sizeof(a) / sizeof((a)[0]))
 

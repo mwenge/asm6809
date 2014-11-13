@@ -13,8 +13,8 @@ The hash table interface is expected to be as per Gnulib.
 
 */
 
-#ifndef DICT_H__Kf6gSbxCcf8vw
-#define DICT_H__Kf6gSbxCcf8vw
+#ifndef DT101_DICT_H__Kf6gSbxCcf8vw
+#define DT101_DICT_H__Kf6gSbxCcf8vw
 
 #include <stdbool.h>
 

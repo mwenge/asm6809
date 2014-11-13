@@ -16,8 +16,8 @@ been performed.  Exceptions to this include copying.
 
 */
 
-#ifndef SLIST_H__chqkIizgkKbjw
-#define SLIST_H__chqkIizgkKbjw
+#ifndef DT101_SLIST_H__chqkIizgkKbjw
+#define DT101_SLIST_H__chqkIizgkKbjw
 
 /* Each list element is of this deliberately transparent type. */
 struct slist {

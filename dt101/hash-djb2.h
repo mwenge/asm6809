@@ -4,8 +4,8 @@ DJB2 string hash function implementation
 
 */
 
-#ifndef HASH_DJB2_H__InoWnIRELNBjE
-#define HASH_DJB2_H__InoWnIRELNBjE
+#ifndef DT101_HASH_DJB2_H__InoWnIRELNBjE
+#define DT101_HASH_DJB2_H__InoWnIRELNBjE
 
 #include <stddef.h>
 
