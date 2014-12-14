@@ -269,7 +269,7 @@ static void section_emit(uint8_t const *buf, int nbytes) {
 	}
 	span->size += nbytes;
 
-	if (cur_section->pc > 0xffff) {
+	if (cur_section->pc > 0x10000) {
 		error(error_type_out_of_range, "assembling beyond addressable memory");
 	}
 }
