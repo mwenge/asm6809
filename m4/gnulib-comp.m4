@@ -40,6 +40,7 @@ AC_DEFUN([gl_EARLY],
   AC_REQUIRE([gl_PROG_AR_RANLIB])
   # Code from module absolute-header:
   # Code from module alloca-opt:
+  # Code from module avltree-list:
   # Code from module bitrotate:
   # Code from module c-ctype:
   # Code from module c-strcase:
@@ -56,6 +57,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module hash:
   # Code from module include_next:
   # Code from module intprops:
+  # Code from module list:
   # Code from module memchr:
   # Code from module msvc-inval:
   # Code from module msvc-nothrow:
@@ -92,6 +94,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module xalloc:
   # Code from module xalloc-die:
   # Code from module xalloc-oversized:
+  # Code from module xlist:
   # Code from module xsize:
   # Code from module xvasprintf:
 ])
@@ -380,6 +383,16 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/getopt1.c
   lib/getopt_int.h
   lib/gettext.h
+  lib/gl_anyavltree_list1.h
+  lib/gl_anyavltree_list2.h
+  lib/gl_anytree_list1.h
+  lib/gl_anytree_list2.h
+  lib/gl_avltree_list.c
+  lib/gl_avltree_list.h
+  lib/gl_list.c
+  lib/gl_list.h
+  lib/gl_xlist.c
+  lib/gl_xlist.h
   lib/hash.c
   lib/hash.h
   lib/intprops.h

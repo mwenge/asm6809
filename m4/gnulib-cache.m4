@@ -27,17 +27,19 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=. --no-conditional-dependencies --no-libtool --macro-prefix=gl --no-vc-files c-strcase getopt-gnu hash strndup xalloc xalloc-die xvasprintf
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=. --no-conditional-dependencies --no-libtool --macro-prefix=gl --no-vc-files avltree-list c-strcase getopt-gnu hash strndup xalloc xalloc-die xlist xvasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
 gl_MODULES([
+  avltree-list
   c-strcase
   getopt-gnu
   hash
   strndup
   xalloc
   xalloc-die
+  xlist
   xvasprintf
 ])
 gl_AVOID([])
