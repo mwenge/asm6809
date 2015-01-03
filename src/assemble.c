@@ -308,7 +308,7 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 			defining_macro_level++;
 			if (defining_macro_level == 1) {
 				n_line.label = eval_string(l->label);
-				n_line.args = eval_node(l->args);
+				n_line.args = node_ref(l->args);
 				pseudo_macro(&n_line);
 				listing_add_line(-1, 0, NULL, l->text);
 				goto next_line;
@@ -821,20 +821,17 @@ static void pseudo_includebin(struct prog_line *line) {
 	fclose(f);
 }
 
-/* MACRO.  Start defining a named macro.  The macro name can either be
- * specified as an argument or as the label for the line the directive appears
- * on. */
+/* MACRO.  Start defining a named macro.  The line's label field is used as the
+ * macro name.  Arguments are ignored. */
 
 static void pseudo_macro(struct prog_line *line) {
-	int nargs = node_array_count(line->args);
-	struct node **arga = node_array_of(line->args);
 	const char *name;
-	if (nargs == 1 && !line->label) {
-		name = arga[0]->data.as_string;
-	} else if (nargs == 0 && node_type_of(line->label) == node_type_string) {
+	switch (node_type_of(line->label)) {
+	case node_type_string:
 		name = line->label->data.as_string;
-	} else {
-		error(error_type_syntax, "macro name must either be label OR argument");
+		break;
+	default:
+		error(error_type_syntax, "missing or invalid macro name");
 		return;
 	}
 	struct prog *macro = prog_macro_by_name(name);
