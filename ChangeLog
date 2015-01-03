@@ -3,6 +3,7 @@
 ### Changes in version 2.4, unreleased
 
   * Speed improvements.
+  * New SET pseudo-op.
 
 ### Changes in version 2.3, Wed 13 Aug 2014
 

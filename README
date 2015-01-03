@@ -455,6 +455,13 @@ Each of **CODE**, **DATA**, **BSS**, **RAM** and **AUTO** switches to a section
 named after the pseudo-op.  They are recognised for compatibility with other
 assemblers.
 
+#### **SET** *value*
+
+Similar to **EQU**, this must be used with a label, and defines a symbol with
+the specified *value*.  Unlike **EQU**, you can use **SET** multiple times to
+assign different values to the same symbol without error.  TODO: this should be
+incompatible with other forms of assignment.
+
 #### **SETDP** *page*
 
 Set the assumed value of the Direct Page (**DP**) register to *page* for
