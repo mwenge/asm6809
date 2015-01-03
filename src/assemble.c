@@ -68,6 +68,7 @@ static void pseudo_section(struct prog_line *);
 static void pseudo_section_name(struct prog_line *line);
 
 static void pseudo_fcc(struct prog_line *);
+static void pseudo_fcn(struct prog_line *);
 static void pseudo_fdb(struct prog_line *);
 static void pseudo_rzb(struct prog_line *);
 static void pseudo_fill(struct prog_line *);
@@ -104,6 +105,7 @@ static struct pseudo_op pseudo_label_ops[] = {
 static struct pseudo_op pseudo_data_ops[] = {
 	{ .name = "fcc", .handler = &pseudo_fcc },
 	{ .name = "fcb", .handler = &pseudo_fcc },  // treat the same
+	{ .name = "fcn", .handler = &pseudo_fcn },
 	{ .name = "fdb", .handler = &pseudo_fdb },
 	{ .name = "rzb", .handler = &pseudo_rzb },
 	{ .name = "fzb", .handler = &pseudo_rzb },
@@ -722,6 +724,13 @@ static void pseudo_fcc(struct prog_line *line) {
 			break;
 		}
 	}
+}
+
+/* FCN.  As FCC, but zero-terminate. */
+
+static void pseudo_fcn(struct prog_line *line) {
+	pseudo_fcc(line);
+	section_emit_uint8(0);
 }
 
 /* FDB.  Embed 16-bit constants. */
