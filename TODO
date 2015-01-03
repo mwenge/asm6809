@@ -14,9 +14,6 @@ to remember things that need doing.
  * Functions.  I already have an expression evaluator, so why not?
  * Replace simple opcode strings with a new opcode node type - eliminate many
    strcasecmp()s.
- * Store local label line numbers in a binary search tree.  Currently in an
-   slist, which leads to a pretty bad schlemiel if lots of labels with the same
-   ID are used.
  * **SET** should perhaps be incompatible with other assignments.
 
 ### Low priority
