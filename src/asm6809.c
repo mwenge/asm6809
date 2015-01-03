@@ -160,6 +160,7 @@ int main(int argc, char **argv) {
 	asm6809_options.listing_required = listing_filename ? 1 : 0;
 
 	opcode_init();
+	assemble_init();
 
 	/* Read in each file */
 	for (int i = optind; i < argc; i++) {
@@ -373,4 +374,5 @@ static void tidy_up(void) {
 	symbol_free_all();
 	section_free_all();
 	opcode_free_all();
+	assemble_free_all();
 }

@@ -16,15 +16,21 @@ option) any later version.
 struct prog;
 
 /*
- * Assemble a file or macro.
- * */
+ * Required initialisation.
+ */
 
-void assemble_prog(struct prog *file, unsigned pass);
+void assemble_init(void);
 
 /*
  * Tidy up.
  */
 
 void assemble_free_all(void);
+
+/*
+ * Assemble a file or macro.
+ */
+
+void assemble_prog(struct prog *file, unsigned pass);
 
 #endif

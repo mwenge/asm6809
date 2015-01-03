@@ -18,9 +18,11 @@ option) any later version.
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "c-strcase.h"
-
 #include "array.h"
+#include "c-strcase.h"
+#include "dict.h"
+#include "slist.h"
+
 #include "asm6809.h"
 #include "assemble.h"
 #include "error.h"
@@ -33,7 +35,6 @@ option) any later version.
 #include "program.h"
 #include "register.h"
 #include "section.h"
-#include "slist.h"
 #include "symbol.h"
 
 static struct prog_ctx *defining_macro_ctx = NULL;
@@ -86,7 +87,7 @@ struct pseudo_op {
 
 /* Pseudo-ops that override any label meaning */
 
-static struct pseudo_op label_ops[] = {
+static struct pseudo_op pseudo_label_ops[] = {
 	{ .name = "equ", .handler = &pseudo_equ },
 	{ .name = "set", .handler = &pseudo_set },
 	{ .name = "org", .handler = &pseudo_org },
@@ -127,6 +128,50 @@ static struct pseudo_op pseudo_ops[] = {
 	{ .name = "nam", .handler = &pseudo_nop },
 	{ .name = "name", .handler = &pseudo_nop },
 };
+
+/* Speed psuedo-op lookups using dictionaries */
+
+static struct dict *pseudo_label_dict = NULL;
+static struct dict *pseudo_data_dict = NULL;
+static struct dict *pseudo_dict = NULL;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+void assemble_init(void) {
+	if (!pseudo_label_dict) {
+		pseudo_label_dict = dict_new(dict_str_hash_case, dict_str_equal_case);
+		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(pseudo_label_ops); i++) {
+			dict_insert(pseudo_label_dict, (void *)pseudo_label_ops[i].name, (void *)pseudo_label_ops[i].handler);
+		}
+	}
+	if (!pseudo_data_dict) {
+		pseudo_data_dict = dict_new(dict_str_hash_case, dict_str_equal_case);
+		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(pseudo_data_ops); i++) {
+			dict_insert(pseudo_data_dict, (void *)pseudo_data_ops[i].name, (void *)pseudo_data_ops[i].handler);
+		}
+	}
+	if (!pseudo_dict) {
+		pseudo_dict = dict_new(dict_str_hash_case, dict_str_equal_case);
+		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(pseudo_ops); i++) {
+			dict_insert(pseudo_dict, (void *)pseudo_ops[i].name, (void *)pseudo_ops[i].handler);
+		}
+	}
+}
+
+void assemble_free_all(void) {
+	if (pseudo_label_dict) {
+		dict_destroy(pseudo_label_dict);
+		pseudo_label_dict = NULL;
+	}
+	if (pseudo_data_dict) {
+		dict_destroy(pseudo_data_dict);
+		pseudo_data_dict = NULL;
+	}
+	if (pseudo_dict) {
+		dict_destroy(pseudo_dict);
+		pseudo_dict = NULL;
+	}
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -213,6 +258,8 @@ static int64_t have_int_required(struct node *args, int aindex, const char *op, 
 	}
 	return have_int_optional(args, aindex, op, in);
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 /* Perform an assembly pass on a program. */
 
@@ -388,12 +435,12 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 		n_line.args = eval_node(l->args);
 
 		/* Pseudo-ops which determine a label's value */
+		void (*op_handler)(struct prog_line *);
 		if (n_line.opcode) {
-			for (unsigned i = 0; i < ARRAY_N_ELEMENTS(label_ops); i++) {
-				if (0 == c_strcasecmp(label_ops[i].name, n_line.opcode->data.as_string)) {
-					label_ops[i].handler(&n_line);
-					goto next_line;
-				}
+			op_handler = dict_lookup(pseudo_label_dict, n_line.opcode->data.as_string);
+			if (op_handler) {
+				op_handler(&n_line);
+				goto next_line;
 			}
 		}
 
@@ -410,26 +457,24 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 		}
 
 		/* Pseudo-ops that emit or reserve data */
-		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(pseudo_data_ops); i++) {
-			if (0 == c_strcasecmp(pseudo_data_ops[i].name, n_line.opcode->data.as_string)) {
-				int old_pc = cur_section->pc;
-				pseudo_data_ops[i].handler(&n_line);
-				int nbytes = cur_section->pc - old_pc;
-				if (cur_section->span && cur_section->pc == (int)(cur_section->span->put + cur_section->span->size))
-					listing_add_line(old_pc & 0xffff, nbytes, cur_section->span, l->text);
-				else
-					listing_add_line(old_pc & 0xffff, nbytes, NULL, l->text);
-				goto next_line;
-			}
+		op_handler = dict_lookup(pseudo_data_dict, n_line.opcode->data.as_string);
+		if (op_handler) {
+			int old_pc = cur_section->pc;
+			op_handler(&n_line);
+			int nbytes = cur_section->pc - old_pc;
+			if (cur_section->span && cur_section->pc == (int)(cur_section->span->put + cur_section->span->size))
+				listing_add_line(old_pc & 0xffff, nbytes, cur_section->span, l->text);
+			else
+				listing_add_line(old_pc & 0xffff, nbytes, NULL, l->text);
+			goto next_line;
 		}
 
 		/* Other pseudo-ops */
-		for (unsigned i = 0; i < ARRAY_N_ELEMENTS(pseudo_ops); i++) {
-			if (0 == c_strcasecmp(pseudo_ops[i].name, n_line.opcode->data.as_string)) {
-				listing_add_line(-1, 0, NULL, l->text);
-				pseudo_ops[i].handler(&n_line);
-				goto next_line;
-			}
+		op_handler = dict_lookup(pseudo_dict, n_line.opcode->data.as_string);
+		if (op_handler) {
+			listing_add_line(-1, 0, NULL, l->text);
+			op_handler(&n_line);
+			goto next_line;
 		}
 
 		/* Real instructions */
