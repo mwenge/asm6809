@@ -376,6 +376,11 @@ Historically, **FCB** handled bytes and **FCC** (Form Constant Character
 string) handled strings.  *asm6809* treats them as synonymous, but is rather
 more strict about what is allowed as a string delimiter.
 
+#### **FCN** *value*[, *value*]...
+
+Identical to **FCC**, but a terminating zero byte is stored after the data.
+Included to increase compatibility with other assemblers.
+
 #### **FDB** *value*[, *value*]...
 
 Form Double Byte.  Each *value* is evaluated to a number, which is truncated to
