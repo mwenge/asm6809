@@ -1,7 +1,7 @@
 /*
 
 asm6809, a Motorola 6809 cross assembler
-Copyright 2013-2014 Ciaran Anscomb
+Copyright 2013-2015 Ciaran Anscomb
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -354,7 +354,7 @@ static void helptext(void) {
 static void versiontext(void) {
 	puts(
 "asm6809 " PACKAGE_VERSION "\n"
-"Copyright (C) 2014 Ciaran Anscomb\n"
+"Copyright (C) 2015 Ciaran Anscomb\n"
 "License: GNU GPL version 3 or later <http://www.gnu.org/licenses/gpl-3.0.html>.\n"
 "This is free software: you are free to change and redistribute it.\n"
 "There is NO WARRANTY, to the extent permitted by law."
