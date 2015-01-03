@@ -17,6 +17,7 @@ to remember things that need doing.
  * Store local label line numbers in a binary search tree.  Currently in an
    slist, which leads to a pretty bad schlemiel if lots of labels with the same
    ID are used.
+ * **SET** should perhaps be incompatible with other assignments.
 
 ### Low priority
 

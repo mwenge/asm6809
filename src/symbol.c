@@ -61,18 +61,18 @@ static void init_table(void) {
 	symbols = dict_new_full(dict_str_hash, dict_str_equal, free, (Hash_data_freer)symbol_free);
 }
 
-void symbol_set(const char *key, struct node *value, unsigned pass) {
-	_Bool is_inconsistent = symbol_force_set(key, value, pass);
-	if (is_inconsistent) {
+void symbol_set(const char *key, struct node *value, _Bool changeable, unsigned pass) {
+	_Bool is_inconsistent = symbol_force_set(key, value, changeable, pass);
+	if (is_inconsistent && !changeable) {
 		error(error_type_inconsistent, "value of '%s' unstable", key);
 	}
 }
 
-_Bool symbol_force_set(const char *key, struct node *value, unsigned pass) {
+_Bool symbol_force_set(const char *key, struct node *value, _Bool changeable, unsigned pass) {
 	if (!symbols)
 		init_table();
 	struct symbol *olds = dict_lookup(symbols, key);
-	if (olds && olds->pass == pass) {
+	if (!changeable && olds && olds->pass == pass) {
 		error(error_type_syntax, "symbol '%s' redefined", key);
 		return 0;
 	}

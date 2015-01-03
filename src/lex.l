@@ -66,6 +66,7 @@ word	[A-Za-z_][A-Za-z0-9_\.]*
 {decimal}	{ yylval.as_int = strtoimax(yytext, NULL, 10); return INTEGER; }
 ${hexdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
 0x{hexdigit}+	{ yylval.as_int = strtoimax(yytext+2, NULL, 16); return INTEGER; }
+'.'		{ yylval.as_int = *(yytext+1); return INTEGER; }
 '.		{ yylval.as_int = *(yytext+1); return INTEGER; }
 \!		{ yylval.as_int = 0; return INTEGER; }
 
@@ -130,6 +131,7 @@ ${hexdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
 {decimal}	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext, NULL, 10); return INTEGER; }
 ${hexdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
 0x{hexdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+2, NULL, 16); return INTEGER; }
+'.'		{ BEGIN(argnostr); yylval.as_int = *(yytext+1); return INTEGER; }
 '.		{ BEGIN(argnostr); yylval.as_int = *(yytext+1); return INTEGER; }
 [0-9]*\.[0-9]+	|
 {decimal}\.	{ BEGIN(argnostr); yylval.as_float = strtod(yytext, NULL); return FLOAT; }

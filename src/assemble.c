@@ -48,7 +48,7 @@ enum cond_state {
 	cond_state_else
 };
 
-static void set_label(struct node *label, struct node *value);
+static void set_label(struct node *label, struct node *value, _Bool changeable);
 static void args_float_to_int(struct node *args);
 static int verify_num_args(struct node *args, int min, int max, const char *op);
 static int64_t have_int_optional(struct node *args, int aindex, const char *op, int64_t in);
@@ -61,6 +61,7 @@ static void pseudo_endm(struct prog_line *);
 static void pseudo_export(struct prog_line *);
 
 static void pseudo_equ(struct prog_line *);
+static void pseudo_set(struct prog_line *);
 static void pseudo_org(struct prog_line *);
 static void pseudo_section(struct prog_line *);
 static void pseudo_section_name(struct prog_line *line);
@@ -87,6 +88,7 @@ struct pseudo_op {
 
 static struct pseudo_op label_ops[] = {
 	{ .name = "equ", .handler = &pseudo_equ },
+	{ .name = "set", .handler = &pseudo_set },
 	{ .name = "org", .handler = &pseudo_org },
 	{ .name = "section", .handler = &pseudo_section },
 	{ .name = "code", .handler = &pseudo_section_name },
@@ -397,7 +399,7 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 
 		/* Otherwise, any label on the line gets PC as its value */
 		if (n_line.label) {
-			set_label(n_line.label, node_new_int(cur_section->pc));
+			set_label(n_line.label, node_new_int(cur_section->pc), 0);
 		}
 
 		/* No opcode?  Next line. */
@@ -505,7 +507,7 @@ next_line:
 /* A disposable node must be passed in as value.  symbol_set() performs an eval
  * and stores the result, not the original node. */
 
-static void set_label(struct node *label, struct node *value) {
+static void set_label(struct node *label, struct node *value, _Bool changeable) {
 	switch (node_type_of(label)) {
 	default:
 		error(error_type_syntax, "invalid label type");
@@ -516,7 +518,7 @@ static void set_label(struct node *label, struct node *value) {
 		symbol_local_set(cur_section->local_labels, label->data.as_int, cur_section->line_number, value, asm_pass);
 		break;
 	case node_type_string:
-		symbol_set(label->data.as_string, value, asm_pass);
+		symbol_set(label->data.as_string, value, changeable, asm_pass);
 		break;
 	}
 	node_free(value);
@@ -532,7 +534,23 @@ static void pseudo_equ(struct prog_line *line) {
 	if (verify_num_args(line->args, 1, 1, "EQU") < 0)
 		return;
 	struct node **arga = node_array_of(line->args);
-	set_label(line->label, node_ref(arga[0]));
+	set_label(line->label, node_ref(arga[0]), 0);
+	struct node *n = eval_int(arga[0]);
+	if (n) {
+		listing_add_line(n->data.as_int & 0xffff, 0, NULL, line->text);
+		node_free(n);
+	} else {
+		listing_add_line(-1, 0, NULL, line->text);
+	}
+}
+
+/* SET.  As EQU, but symbol is permitted to change value. */
+
+static void pseudo_set(struct prog_line *line) {
+	if (verify_num_args(line->args, 1, 1, "SET") < 0)
+		return;
+	struct node **arga = node_array_of(line->args);
+	set_label(line->label, node_ref(arga[0]), 1);
 	struct node *n = eval_int(arga[0]);
 	if (n) {
 		listing_add_line(n->data.as_int & 0xffff, 0, NULL, line->text);
@@ -551,7 +569,7 @@ static void pseudo_org(struct prog_line *line) {
 	cur_section->pc = new_pc;
 	if (new_pc >= 0)
 		cur_section->put = new_pc;
-	set_label(line->label, node_new_int(new_pc));
+	set_label(line->label, node_new_int(new_pc), 0);
 	listing_add_line(new_pc & 0xffff, 0, NULL, line->text);
 }
 
@@ -814,7 +832,7 @@ static void pseudo_end(struct prog_line *line) {
 	if (nargs < 1)
 		return;
 	struct node **arga = node_array_of(line->args);
-	symbol_set(".exec", arga[0], asm_pass);
+	symbol_set(".exec", arga[0], asm_pass, 0);
 }
 
 /* Ignore certain historical pseudo-ops */

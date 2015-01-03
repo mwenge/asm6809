@@ -29,11 +29,11 @@ extern _Bool symbol_ignore_undefined;
  * pass, an inconsistency is raised if they do not match.
  */
 
-void symbol_set(const char *key, struct node *value, unsigned pass);
+void symbol_set(const char *key, struct node *value, _Bool changeable, unsigned pass);
 
 /* As above but return 1 if inconsistent instead of raising error. */
 
-_Bool symbol_force_set(const char *key, struct node *value, unsigned pass);
+_Bool symbol_force_set(const char *key, struct node *value, _Bool changeable, unsigned pass);
 
 /*
  * Fetch a value from the symbol table.

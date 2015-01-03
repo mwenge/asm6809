@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
 			}
 			n = node_new_int(v);
 		}
-		symbol_force_set(".exec", n, MAX_PASSES);
+		symbol_force_set(".exec", n, 0, MAX_PASSES);
 	}
 
 	// XXX At the moment listing generation must precede output, as
@@ -312,7 +312,7 @@ static void define_symbol(const char *str) {
 	} else {
 		n = node_new_int(1);
 	}
-	symbol_set(tmp, n, 0);
+	symbol_set(tmp, n, 0, 0);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
