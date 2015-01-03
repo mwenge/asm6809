@@ -4,6 +4,7 @@
 
   * Speed improvements.
   * New SET pseudo-op.
+  * MACRO name must now be defined in label field (as per docs).
 
 ### Changes in version 2.3, Wed 13 Aug 2014
 
