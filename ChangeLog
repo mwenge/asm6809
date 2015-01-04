@@ -6,6 +6,8 @@
   * New SET pseudo-op.
   * New FCN pseudo-op.
   * MACRO name must now be defined in label field (as per docs).
+  * Permit ASCII strings form integer values 8 bits per character.
+  * Support relational operators between string values.
 
 ### Changes in version 2.3, Wed 13 Aug 2014
 

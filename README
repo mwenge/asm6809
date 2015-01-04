@@ -136,7 +136,6 @@ or pseudo-op, but in general they may be:
 
  * An expression.
  * A register name, with optional pre-decrement or post-increment.
- * A string delimited either by double quotes or "/".
  * A nested list surrounded by "[" and "]".  This is generally only used to
    indicate indirect indexed addressing.
 
@@ -160,10 +159,19 @@ Expressions are formed of:
  * A single quote followed by any ASCII character (yielding the ASCII value of
    that character).
  * A symbol name, local forward reference or local back reference.
- * A combination of any of the above with arithmetic, bitwise or logical
-   operators.
  * Any of the above prefixed with a unary minus ("-") or plus ("+").
+ * A string delimited either by double quotes or "/".
+ * A combination of any of the above with arithmetic, bitwise, logical or
+   relational operators.
  * Parenthesis to specify precedence.
+
+When not directly used for their contents (e.g., by **FCC**), strings can be
+used in place of integer values.  The ASCII value of each character is used to
+represent 8 bits of the integer result up to 32 bits.  Example:
+
+~~~
+0000  CC443A                  ldd     #"D:"
+~~~
 
 
 ### Operators
