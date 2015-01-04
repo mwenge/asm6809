@@ -183,6 +183,10 @@ ${hexdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+1, NULL, 16); r
 \\{digit}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
 \\\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
+\\n		{ yylval.as_string = strndup("\n", 1); return TEXT; }
+\\r		{ yylval.as_string = strndup("\r", 1); return TEXT; }
+\\.		{ yylval.as_string = strndup(yytext+1, 1); return TEXT; }
+
 [^\n\r"&\/\\]+	{ yylval.as_string = strndup(yytext, yyleng); return TEXT; }
 
 \r		/* skip CR */
