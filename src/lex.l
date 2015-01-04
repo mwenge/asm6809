@@ -177,7 +177,7 @@ ${hexdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+1, NULL, 16); r
 \\{digit}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
 \\\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
-[^&/"\n\r]+	{ yylval.as_string = strndup(yytext, yyleng); return TEXT; }
+[^\n\r"&\/\\]+	{ yylval.as_string = strndup(yytext, yyleng); return TEXT; }
 
 \r		/* skip CR */
 \n		{ BEGIN(INITIAL); return '\n'; }
