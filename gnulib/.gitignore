@@ -4,6 +4,7 @@
 /c++defs.h
 /getopt.h
 /libgnu.a
+/stddef.h
 /stdio.h
 /stdlib.h
 /string.h
