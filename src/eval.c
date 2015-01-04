@@ -259,6 +259,14 @@ static struct node *eval_node_oper_1(struct node *n) {
 	if (!(arg = eval_node(n->data.as_oper.args[0])))
 		return NULL;
 
+	/* All these operations only act on numbers, so convert any strings */
+
+	if (node_type_of(arg) == node_type_string) {
+		struct node *new = eval_int(arg);
+		node_free(arg);
+		arg = new;
+	}
+
 	switch (n->data.as_oper.oper) {
 
 	case '-':
@@ -319,6 +327,38 @@ static struct node *eval_node_oper_2(struct node *n) {
 	if (!(rightn = eval_node(n->data.as_oper.args[1]))) {
 		node_free(leftn);
 		return NULL;
+	}
+
+	_Bool string_op = (leftn->type == node_type_string && rightn->type == node_type_string);
+
+	if (string_op) {
+		/* Certain operations can be performed on strings */
+		switch (n->data.as_oper.oper) {
+		case '<':
+			ret = node_new_int(strcmp(leftn->data.as_string, rightn->data.as_string) < 0);
+			break;
+		case LE:
+			ret = node_new_int(strcmp(leftn->data.as_string, rightn->data.as_string) <= 0);
+			break;
+		case '>':
+			ret = node_new_int(strcmp(leftn->data.as_string, rightn->data.as_string) > 0);
+			break;
+		case GE:
+			ret = node_new_int(strcmp(leftn->data.as_string, rightn->data.as_string) >= 0);
+			break;
+		case EQ:
+			ret = node_new_int(strcmp(leftn->data.as_string, rightn->data.as_string) == 0);
+			break;
+		case NE:
+			ret = node_new_int(strcmp(leftn->data.as_string, rightn->data.as_string) != 0);
+			break;
+		default:
+			ret = NULL;
+			break;
+		}
+		node_free(leftn);
+		node_free(rightn);
+		return ret;
 	}
 
 	_Bool int_only = (leftn->type == node_type_int && rightn->type == node_type_int);
