@@ -71,9 +71,9 @@ ${hexdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
 \!		{ yylval.as_int = 0; return INTEGER; }
 
 {word}		{ return id_or_reg(); }
-&{decimal}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+&{digit}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
 &\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
-\\{decimal}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+\\{digit}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
 \\\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
 {ws}*[;\*].*	/* ";" or "*" introduces comment to end of line */
@@ -87,9 +87,9 @@ ${hexdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
 <opcode>{
 
 {word}		{ return id_or_reg(); }
-&{decimal}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+&{digit}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
 &\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
-\\{decimal}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+\\{digit}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
 \\\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
 
@@ -115,7 +115,7 @@ ${hexdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
 
 {word}		{ BEGIN(argnostr); return id_or_reg(); }
 &\{{decimal}\}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
-\\{decimal}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+\\{digit}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
 \\\{{decimal}\}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
 \+\+		{ BEGIN(argnostr); return INC2; }
@@ -170,11 +170,11 @@ ${hexdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+1, NULL, 16); r
 			}
 		}
 
-&{decimal}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+&{digit}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
 &\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 &&		|
 &		{ yylval.as_string = strndup("&", 1); return TEXT; }
-\\{decimal}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+\\{digit}	{ yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
 \\\{{decimal}\}	{ yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
 [^&/"\n\r]+	{ yylval.as_string = strndup(yytext, yyleng); return TEXT; }
