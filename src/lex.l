@@ -111,6 +111,12 @@ ${hexdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
 
 }
 
+<argnostr>{
+
+\/		{ BEGIN(argnostr); return *yytext; }
+
+}
+
 <arg,argnostr>{
 
 {word}		{ BEGIN(argnostr); return id_or_reg(); }
