@@ -142,17 +142,18 @@ ${hexdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+1, NULL, 16); r
 [0-9]*\.[0-9]+	|
 {decimal}\.	{ BEGIN(argnostr); yylval.as_float = strtod(yytext, NULL); return FLOAT; }
 
-"<<"		{ BEGIN(argnostr); return SHL; }
-">>"		{ BEGIN(argnostr); return SHR; }
+"<<"		{ BEGIN(arg); return SHL; }
+">>"		{ BEGIN(arg); return SHR; }
 
-"<="		{ BEGIN(argnostr); return LE; }
-">="		{ BEGIN(argnostr); return GE; }
-"=="		{ BEGIN(argnostr); return EQ; }
-"!="		{ BEGIN(argnostr); return NE; }
-"&&"		{ BEGIN(argnostr); return LAND; }
-"||"		{ BEGIN(argnostr); return LOR; }
+"<="		{ BEGIN(arg); return LE; }
+">="		{ BEGIN(arg); return GE; }
+"=="		{ BEGIN(arg); return EQ; }
+"!="		{ BEGIN(arg); return NE; }
+"&&"		{ BEGIN(arg); return LAND; }
+"||"		{ BEGIN(arg); return LOR; }
 
-[-+&\|\!\~\*()#<>\%\[\]\?\:]	{ BEGIN(argnostr); return *yytext; }
+[\!#\%&(\*+\-\:<>\?\[\^\|\~]	{ BEGIN(arg); return *yytext; }
+[)\]]		{ BEGIN(argnostr); return *yytext; }
 
 ,		{ BEGIN(arg); return *yytext; }
 
@@ -168,7 +169,7 @@ ${hexdigit}+	{ BEGIN(argnostr); yylval.as_int = strtoimax(yytext+1, NULL, 16); r
 
 [/"]		{
 			if (*yytext == delim) {
-				BEGIN(arg);
+				BEGIN(argnostr);
 				return DELIM;
 			} else {
 				yylval.as_string = strndup(yytext, yyleng);

@@ -136,7 +136,6 @@ arg	:			{ $$ = node_new_empty(); }
 	| reg '-'		{ $$ = node_set_attr($1, node_attr_postdec); }
 	| reg			{ $$ = $1; }
 	| expr			{ $$ = $1; }
-	| string		{ $$ = $1; }
 	;
 
 reg	: REGISTER		{ $$ = node_new_reg($1); }
@@ -171,6 +170,7 @@ expr	: '(' expr ')'		{ $$ = $2; }
 	| BACKREF		{ $$ = node_new_backref($1); }
 	| FWDREF		{ $$ = node_new_fwdref($1); }
 	| '*'			{ $$ = node_new_pc(); }
+	| string		{ $$ = $1; }
 	| id			{ $$ = $1; }
 	;
 

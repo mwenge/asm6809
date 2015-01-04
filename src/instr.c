@@ -53,21 +53,18 @@ void instr_immediate(struct opcode const *op, struct node const *args) {
 		return;
 	}
 	section_emit_op(op->immediate);
-	if (node_type_of(arga[0]) == node_type_int) {
-		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM8)
-			section_emit_uint8(arga[0]->data.as_int);
-		else if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM16)
-			section_emit_uint16(arga[0]->data.as_int);
-		else
-			section_emit_uint32(arga[0]->data.as_int);
-	} else {
-		if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM8)
-			section_emit_pad(1);
-		else if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM16)
-			section_emit_pad(2);
-		else
-			section_emit_pad(4);
+	struct node *tmp = eval_int(arga[0]);
+	uint32_t value = 0;
+	if (tmp) {
+		value = tmp->data.as_int;
+		node_free(tmp);
 	}
+	if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM8)
+		section_emit_uint8(value);
+	else if ((op->type & OPCODE_EXT_TYPE) == OPCODE_IMM16)
+		section_emit_uint16(value);
+	else
+		section_emit_uint32(value);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -380,6 +377,12 @@ void instr_indexed(struct opcode const *op, struct node const *args, int imm8_va
 	section_emit_op(op->indexed);
 	if (imm8_val >= 0)
 		section_emit_uint8(imm8_val);
+
+	if (node_type_of(arga[0]) == node_type_string) {
+		struct node *tmp = eval_int(arga[0]);
+		node_free(arga[0]);
+		arga[0] = tmp;
+	}
 
 	if (nargs == 1) {
 		int pbyte = indirect ? 0x9f : 0x8f;

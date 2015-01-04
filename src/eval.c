@@ -202,6 +202,13 @@ struct node *eval_int(struct node *n) {
 		return node_set_attr(node_new_int(n->data.as_float), n->attr);
 	case node_type_int:
 		return node_ref(n);
+	case node_type_string:
+		{
+			uint32_t value = 0;
+			for (const char *s = n->data.as_string; *s; s++)
+				value = (value << 8) | *s;
+			return node_set_attr(node_new_int(value), n->attr);
+		}
 	default:
 		break;
 	}
@@ -327,6 +334,21 @@ static struct node *eval_node_oper_2(struct node *n) {
 	if (!(rightn = eval_node(n->data.as_oper.args[1]))) {
 		node_free(leftn);
 		return NULL;
+	}
+
+	/* If only one arg is a string, convert it to an integer using byte
+	 * values */
+
+	if (node_type_of(leftn) == node_type_string && node_type_of(rightn) != node_type_string) {
+		struct node *new = eval_int(leftn);
+		node_free(leftn);
+		leftn = new;
+	}
+
+	if (node_type_of(rightn) == node_type_string && node_type_of(leftn) != node_type_string) {
+		struct node *new = eval_int(rightn);
+		node_free(rightn);
+		rightn = new;
 	}
 
 	_Bool string_op = (leftn->type == node_type_string && rightn->type == node_type_string);
