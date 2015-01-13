@@ -69,6 +69,7 @@ static void pseudo_section_name(struct prog_line *line);
 
 static void pseudo_fcc(struct prog_line *);
 static void pseudo_fcn(struct prog_line *);
+static void pseudo_fcs(struct prog_line *);
 static void pseudo_fdb(struct prog_line *);
 static void pseudo_rzb(struct prog_line *);
 static void pseudo_fill(struct prog_line *);
@@ -106,6 +107,7 @@ static struct pseudo_op pseudo_data_ops[] = {
 	{ .name = "fcc", .handler = &pseudo_fcc },
 	{ .name = "fcb", .handler = &pseudo_fcc },  // treat the same
 	{ .name = "fcn", .handler = &pseudo_fcn },
+	{ .name = "fcs", .handler = &pseudo_fcs },
 	{ .name = "fdb", .handler = &pseudo_fdb },
 	{ .name = "rzb", .handler = &pseudo_rzb },
 	{ .name = "fzb", .handler = &pseudo_rzb },
@@ -690,6 +692,37 @@ static void pseudo_export(struct prog_line *line) {
 	}
 }
 
+static void emit_formatted(char const *ins, int argn, struct node *n, _Bool basic_token) {
+	uint8_t or_last = basic_token ? 0x80 : 0;
+	switch (node_type_of(n)) {
+	default:
+		error(error_type_syntax,
+		      "argument %d of '%s' invalid: expected string or integer value",
+		      argn, ins);
+		break;
+	case node_type_undef:
+		section_emit_pad(1);
+		break;
+	case node_type_empty:
+		section_emit_uint8(0);
+		break;
+	case node_type_int:
+		section_emit_uint8(n->data.as_int | or_last);
+		break;
+	case node_type_float:
+		section_emit_uint8((int32_t)n->data.as_float | or_last);
+		break;
+	case node_type_string:
+		for (char const *c = n->data.as_string; *c; c++) {
+			uint8_t cc = *c;
+			if (!*(c+1))
+				cc |= or_last;
+			section_emit_uint8(cc);
+		}
+		break;
+	}
+}
+
 /* FCC, FCB.  Embed string and byte constants. */
 
 static void pseudo_fcc(struct prog_line *line) {
@@ -698,39 +731,33 @@ static void pseudo_fcc(struct prog_line *line) {
 		return;
 	struct node **arga = node_array_of(line->args);
 	for (int i = 0; i < nargs; i++) {
-		struct node *arg = arga[i];
-		switch (node_type_of(arg)) {
-		default:
-			error(error_type_syntax,
-			      "argument %d of 'FCC' invalid: expected string or integer value",
-			      i+1);
-			break;
-		case node_type_undef:
-			section_emit_pad(1);
-			break;
-		case node_type_empty:
-			section_emit_uint8(0);
-			break;
-		case node_type_int:
-			section_emit_uint8(arg->data.as_int);
-			break;
-		case node_type_float:
-			section_emit_uint8((int32_t)arg->data.as_float);
-			break;
-		case node_type_string:
-			for (char const *c = arg->data.as_string; *c; c++) {
-				section_emit_uint8(*c);
-			}
-			break;
-		}
+		emit_formatted("FCC", i, arga[i], 0);
 	}
 }
 
 /* FCN.  As FCC, but zero-terminate. */
 
 static void pseudo_fcn(struct prog_line *line) {
-	pseudo_fcc(line);
+	int nargs = verify_num_args(line->args, 1, -1, "FCN");
+	if (nargs < 0)
+		return;
+	struct node **arga = node_array_of(line->args);
+	for (int i = 0; i < nargs; i++) {
+		emit_formatted("FCN", i, arga[i], 0);
+	}
 	section_emit_uint8(0);
+}
+
+/* FCS.  As FCC, but last byte gets top bit set. */
+
+static void pseudo_fcs(struct prog_line *line) {
+	int nargs = verify_num_args(line->args, 1, -1, "FCS");
+	if (nargs < 0)
+		return;
+	struct node **arga = node_array_of(line->args);
+	for (int i = 0; i < nargs; i++) {
+		emit_formatted("FCS", i, arga[i], 1);
+	}
 }
 
 /* FDB.  Embed 16-bit constants. */
