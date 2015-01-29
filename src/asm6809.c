@@ -82,7 +82,7 @@ static struct node *simple_parse_int(const char *);
 static void define_symbol(const char *);
 static void helptext(void);
 static void versiontext(void);
-static void tidy_up(void);
+static void tidy_up_and_exit(int status);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -138,23 +138,19 @@ int main(int argc, char **argv) {
 			break;
 		case 'h':
 			helptext();
-			tidy_up();
-			exit(EXIT_SUCCESS);
+			tidy_up_and_exit(EXIT_SUCCESS);
 		case 'V':
 			versiontext();
-			tidy_up();
-			exit(EXIT_SUCCESS);
+			tidy_up_and_exit(EXIT_SUCCESS);
 		default:
-			tidy_up();
-			exit(EXIT_FAILURE);
+			tidy_up_and_exit(EXIT_FAILURE);
 		}
 	}
 
 	if (optind >= argc) {
 		error(error_type_fatal, "no input files");
 		error_print_list();
-		tidy_up();
-		exit(EXIT_FAILURE);
+		tidy_up_and_exit(EXIT_FAILURE);
 	}
 
 	asm6809_options.isa = isa;
@@ -175,8 +171,7 @@ int main(int argc, char **argv) {
 	/* Fatal errors? */
 	if (error_level >= error_type_syntax) {
 		error_print_list();
-		tidy_up();
-		exit(EXIT_FAILURE);
+		tidy_up_and_exit(EXIT_FAILURE);
 	}
 
 	/* Attempt to assemble files until consistent */
@@ -197,8 +192,7 @@ int main(int argc, char **argv) {
 	/* Fatal errors? */
 	if (error_level >= error_type_inconsistent) {
 		error_print_list();
-		tidy_up();
-		exit(EXIT_FAILURE);
+		tidy_up_and_exit(EXIT_FAILURE);
 	}
 	/* Otherwise print any warnings */
 	error_print_list();
@@ -274,13 +268,11 @@ int main(int argc, char **argv) {
 	/* Any errors in all that? */
 	if (error_level >= error_type_syntax) {
 		error_print_list();
-		tidy_up();
-		exit(EXIT_FAILURE);
+		tidy_up_and_exit(EXIT_FAILURE);
 	}
 
 	error_print_list();
-	tidy_up();
-	return EXIT_SUCCESS;
+	tidy_up_and_exit(EXIT_SUCCESS);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -368,10 +360,10 @@ static void versiontext(void) {
 	);
 }
 
-/* Call the various free_all routines to tidy up memory.  Allows us to see
- * what's been missed with valgrind. */
+/* Call the various free_all routines to tidy up memory, then exit.  Allows us
+ * to see what's been missed with valgrind. */
 
-static void tidy_up(void) {
+static void tidy_up_and_exit(int status) {
 	if (files) {
 		slist_free(files);
 		files = NULL;
@@ -382,4 +374,5 @@ static void tidy_up(void) {
 	section_free_all();
 	opcode_free_all();
 	assemble_free_all();
+	exit(status);
 }
