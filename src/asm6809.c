@@ -138,11 +138,14 @@ int main(int argc, char **argv) {
 			break;
 		case 'h':
 			helptext();
+			tidy_up();
 			exit(EXIT_SUCCESS);
 		case 'V':
 			versiontext();
+			tidy_up();
 			exit(EXIT_SUCCESS);
 		default:
+			tidy_up();
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -150,6 +153,7 @@ int main(int argc, char **argv) {
 	if (optind >= argc) {
 		error(error_type_fatal, "no input files");
 		error_print_list();
+		tidy_up();
 		exit(EXIT_FAILURE);
 	}
 
