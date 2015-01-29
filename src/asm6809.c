@@ -304,16 +304,19 @@ static struct node *simple_parse_int(const char *str) {
 }
 
 static void define_symbol(const char *str) {
-	char *tmp = xstrdup(str);
-	char *value = strchr(tmp, '=');
-	struct node *n;
-	if (value) {
-		*(value++) = 0;
-		n = simple_parse_int(value);
+	char *key = xstrdup(str);
+	char *tmp = strchr(key, '=');
+	struct node *value;
+	if (tmp) {
+		*(tmp++) = 0;
+		value = simple_parse_int(tmp);
 	} else {
-		n = node_new_int(1);
+		value = node_new_int(1);
 	}
-	symbol_set(tmp, n, 0, 0);
+	// TODO: check that key is a valid symbol name
+	symbol_set(key, value, 0, 0);
+	free(key);
+	node_free(value);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
