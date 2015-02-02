@@ -1,66 +1,652 @@
-.TH ASM6809 1 "September 2014" "asm6809 2.4\-dev"
-.SH NAME
-asm6809 \- 6809 cross\-assembler
-.SH SYNOPSIS
-\fBasm6809\fR [\fIOPTION\fR]... [\fISOURCE\-FILE\fR]...
-.SH DESCRIPTION
-Assembles 6809/6309 source code.
-.PP
-.SH OPTIONS
-.TP
+'\" t
+.
+.\" ASCII for Unicode ellipsis is three dots
+.schar \[u2026] ...
+.\" New escape [...] maps to Unicode ellipsis
+.char \[...] \[u2026]
+.
+.\" an-ext.tmac: Check whether we are using grohtml.
+.nr mH 0
+.if \n(.g \
+.  if '\*(.T'html' \
+.    nr mH 1
+.
+.\" What about gropdf?
+.nr mP 0
+.if \n(.g \
+.  if '\*(.T'pdf' \
+.    nr mP 1
+.
+.\" an-ext.tmac: Start example.
+.de EX
+.  nr mE \\n(.f
+.  nf
+.  nh
+.  ft CW
+..
+.
+.\" an-ext.tmac: End example.
+.de EE
+.  ft \\n(mE
+.  fi
+.  hy \\n(HY
+..
+.
+.\" Top level heading; wraps .SH
+.de H1
+.  if \\n(mP .pdfhref O 1 \\$*
+.  SH \\$*
+..
+.
+.\" 2nd level heading; wraps .SS
+.de H2
+.  if \\n(mP .pdfhref O 2 \\$*
+.  SS \\$*
+..
+.
+.\" 3rd level heading; bold font, no indent
+.de H3
+.  if \\n(.$ \{\
+.    if \\n(mP .pdfhref O 3 \\$*
+.    .B \&\\$*
+.  \}
+.  br
+..
+.
+.\" Render URL
+.de UU
+.  ie \\n(mH \{\
+\\$1\c
+.    do HTML-NS "<a href='\\$2'>"
+\\$2\c
+.    do HTML-NS "</a>"
+\\$3
+.  \}
+.  el \{\
+.    ie \\n(mP \{\
+.      pdfhref -W -P "\\$1" -A "\\$3" "\\$2"
+.    \}
+.    el \{\
+\\$1\\$2\\$3
+.    \}
+.  \}
+..
+.
+.nr PDFOUTLINE.FOLDLEVEL 2
+.\"
+.pdfview /PageMode /UseOutlines
+.pdfinfo /Title asm6809 2.4-dev
+.pdfinfo /Author Ciaran Anscomb
+.
+.TH asm6809 1 "February 2015" "asm6809 2.4-dev"
+.
+.H1 NAME
+asm6809 \- 6809 cross-assembler
+.
+.H1 SYNOPSIS
+.B asm6809
+.RI [ OPTION "]\[...] [" SOURCE-FILE "]\[...]"
+.
+.H1 DESCRIPTION
+.B asm6809
+is a portable macro cross assembler targeting the Motorola 6809 and Hitachi
+6309 processors.  These processors are most commonly encountered in the Dragon
+and Tandy Colour Computer.
+.
+.H1 OPTIONS
 \fB\-B\fR, \fB\-\-bin\fR
+.RS 4n
 output raw binary file (default)
-.TP
+.RE
+.LP
 \fB\-D\fR, \fB\-\-dragondos\fR
+.RS 4n
 output DragonDOS binary file
-.TP
+.RE
+.LP
 \fB\-C\fR, \fB\-\-coco\fR
+.RS 4n
 output CoCo segmented binary file (DECB)
-.TP
+.RE
+.LP
 \fB\-S\fR, \fB\-\-srec\fR
+.RS 4n
 output Motorola SREC file
-.TP
+.RE
+.LP
 \fB\-H\fR, \fB\-\-hex\fR
+.RS 4n
 output Intel hex record file
-.TP
+.RE
+.LP
 \fB\-e\fR, \fB\-\-exec\fR \fIaddr\fR
+.RS 4n
 EXEC address (for output formats that support one)
-.TP
-\fB\-9\fR, \fB\-\-6809\fR
+.RE
+.LP
+\fB\-8\fR, \fB\-9\fR, \fB\-\-6809\fR
+.RS 4n
 use 6809 ISA (default)
-.TP
+.RE
+.LP
 \fB\-3\fR, \fB\-\-6309\fR
+.RS 4n
 use 6309 ISA (6809 with extensions)
-.TP
+.RE
+.LP
 \fB\-d\fR, \fB\-\-define\fR \fIsym\fR[=\fInumber\fR]
+.RS 4n
 define a symbol
-.TP
+.RE
+.LP
 \fB\-\-setdp\fR \fIvalue\fR
+.RS 4n
 initial value assumed for DP [undefined]
-.TP
+.RE
+.LP
 \fB\-o\fR, \fB\-\-output\fR \fIfile\fR
+.RS 4n
 output filename
-.TP
+.RE
+.LP
 \fB\-l\fR, \fB\-\-listing\fR \fIfile\fR
+.RS 4n
 create listing file
-.TP
+.RE
+.LP
 \fB\-s\fR, \fB\-\-symbols\fR \fIfile\fR
+.RS 4n
 create symbol table
-.TP
+.RE
+.LP
 \fB\-q\fR, \fB\-\-quiet\fR
+.RS 4n
 don't warn about illegal (but working) code
-.TP
+.RE
+.LP
 \fB\-v\fR, \fB\-\-verbose\fR
+.RS 4n
 warn about explicitly inefficient code
-.TP
+.RE
+.LP
 \fB\-\-help\fR
+.RS 4n
 show help
-.TP
+.RE
+.LP
 \fB\-\-version\fR
+.RS 4n
 show program version
-.PP
-If more than one \fISOURCE\-FILE\fR is specified, they are assembled as though
+.RE
+.LP
+If more than one \fISOURCE-FILE\fR is specified, they are assembled as though
 they were all in one file.
+.
+.H1 USAGE
+Text is read in and parsed, then as many passes are made over the parsed source
+as necessary (up to a limit), until symbols are resolved and addresses are
+stable.  The fastest or smallest representation should always be chosen where
+there is ambiguity.
+.LP
+Output formats are: Raw binary, DragonDOS binary, CoCo RS-DOS (or \(lqDECB\(rq)
+binary, Motorola SREC, Intel HEX.
+.LP
+Home page:
+.UU < http://www.6809.org.uk/asm6809/ >
+.
+.H2 Differences to other assemblers
+Motorola syntax allows a comment to follow any operands, separated from them
+only by whitespace.  To an extent, this assembler accepts that, but be aware
+that as spaces are allowed within expressions, if the comment looks like it is
+continuing an expression it will generate bad code (or raise an error if the
+result is syntactically incorrect).  Example:
+.LP
+.EX
+0000  8605                    lda     #5
+0002  C60A                    ldb     #5 * 2    twice the first number
+.EE
+.LP
+A strict Motorola assembler would generate bytes C6 05 for the second line, as
+the \(lq* 2\(rq would be ignored.  For consistency, it is best to introduce end
+of line comments with a \(lq;\(rq character.  An asterisk (\(lq*\(rq) can
+introduce whole line comments.
+.LP
+An unquoted semicolon always introduces a comment.  The alternate form of the
+6309 instructions \fBAIM\fR, \fBOIM\fR, etc. listed in some documentation that
+uses a semicolon as a separator is not accepted.
+.LP
+A symbol may be forward referenced; any time a reference is unresolvable,
+another pass is triggered, up to some defined maximum.
+.LP
+In 6809 indexed addressing, the offset size will default to the fastest
+possible form, e.g., if the offset is an expression that happens to evaluate to
+zero, the \(lqno offset\(rq form will be used.  Prepend \(lq<<\(rq to coerce a 5 bit
+offset, \(lq<\(rq to coerce 8 bits or \(lq>\(rq to coerce 16 bits.
+.LP
+\fBasm6809\fR currently has no support for OS-9 modules or multiple object
+linking.
+.
+.H2 Program syntax
+Program files are considered line by line.  Each line contains up to three
+fields, separated by whitespace: label, instruction and arguments.  An unquoted
+semicolon (\(lq;\(rq) indicates that the rest of the line is to be considered a
+comment.  Whole line comments may be introduced with an asterisk (\(lq*\(rq).
+Motorola-style end of line comments without a \(lq;\(rq are accepted, but see
+the notes about assembler differences.
+.LP
+Any label must appear at the very beginning of the line.  If a label is
+omitted, whitespace must appear before the operator field.  Certain pseudo-ops
+affect a label's meaning, but their usual purpose is to define a symbol
+referring to the current position in the code (Program Counter, or PC).  The
+next most common use is with the \fBEQU\fR pseudo-op, which assigns a
+particular value to a symbol.
+.LP
+The instruction field contains either instruction op-codes (mnemonics),
+pseudo-ops (assembler directives) or macro names for expansion.
+.LP
+Arguments are a comma-separated list, either instruction operands or arguments
+to a pseudo-op or macro.  Permitted arguments are specific to the instruction
+or pseudo-op, but in general they may be:
+.IP \(bu 2
+An expression.
+.IP \(bu 2
+A register name, with optional pre-decrement or post-increment.
+.IP \(bu 2
+A nested list surrounded by \(lq[\(rq and \(lq]\(rq.  This is generally only
+used to indicate indirect indexed addressing.
+.LP
+In addition, any argument may be preceded by:
+.IP \(bu 2
+\(lq#\(rq, indicate immediate value.
+.IP \(bu 2
+\(lq<<\(rq, force 5-bit index offset.
+.IP \(bu 2
+\(lq<\(rq, force direct addressing, 8-bit value or 8-bit index offset.
+.IP \(bu 2
+\(lq>\(rq, force extended addressing, 16-bit value or 16-bit index offset.
+.
+.H2 Expressions
+Expressions are formed of:
+.IP \(bu 2
+A decimal number.
+.IP \(bu 2
+An octal number preceded by \(lq@\(rq.
+.IP \(bu 2
+A binary number preceded by \(lq%\(rq or \(lq0b\(rq.
+.IP \(bu 2
+A hexadecimal number preceded by \(lq$\(rq or \(lq0x\(rq.
+.IP \(bu 2
+A floating point number (decimal digits surrounding exactly one \(lq.\(rq).
+.IP \(bu 2
+A single quote followed by any ASCII character (yielding the ASCII value of
+that character).
+.IP \(bu 2
+A symbol name, local forward reference or local back reference.
+.IP \(bu 2
+Any of the above prefixed with a unary minus (\(lq\-\(rq) or plus (\(lq+\(rq).
+.IP \(bu 2
+A string delimited either by double quotes or \(lq/\(rq.
+.IP \(bu 2
+A combination of any of the above with arithmetic, bitwise, logical or
+relational operators.
+.IP \(bu 2
+Parenthesis to specify precedence.
+.LP
+The assembler uses multiple passes to resolve expressions.  If an expression
+refers to a symbol that cannot currently be resolved, an extra pass is
+triggered.  Similarly, if a symbol is assigned a value (e.g., by an \fBEQU\fR
+pseudo-op) that differs to its value on the previous pass, another is
+triggered until it becomes stable.
+.LP
+When not directly used for their contents (e.g., by \fBFCC\fR), strings can be
+used in place of integer values.  The ASCII value of each character is used to
+represent 8 bits of the integer result up to 32 bits.  Example:
+.LP
+.EX
+0000  CC443A                  ldd     #"D:"
+.EE
+.
+.H2 Operators
+The following operators are available, listed in descending order of precedence
+(where operators share a precedence, left-to-right evaluation is performed):
+.RS
+.TS
+tab(;);
+c | l.
++;unary plus
+\-;unary minus
+! \(ti;logical, bitwise NOT
+.T&
+_ | _
+c | l.
+*;multiplication
+/;division
+%;modulo
+.T&
+_ | _
+c | l.
++;addition
+\-;subtraction
+.T&
+_ | _
+c | l.
+<<;bitwise shift left
+>>;bitwise shift right
+.T&
+_ | _
+c | l.
+< <=;relational operators
+> >=;relational operators
+.T&
+_ | _
+c | l.
+==;relational equal
+!=;relational not equal
+.T&
+_ | _
+c | l.
+&;bitwise AND
+.T&
+_ | _
+c | l.
+\(ha;bitwise XOR
+.T&
+_ | _
+c | l.
+|;bitwise OR
+.T&
+_ | _
+c | l.
+&&;logical AND
+.T&
+_ | _
+c | l.
+||;logical OR
+.T&
+_ | _
+c | l.
+?:;ternary operator
+.TE
+.RE
+.LP
+Division always returns a floating point result.  Other arithmetic operators
+return integers if both operands are integers, otherwise floating point.
+Bitwise operators and modulo all cast their operands to integers and return an
+integer.  Relational and logical operators result in 0 if false, 1 if true.
+Integer calculations are performed using the platform's \fIint64_t\fR type,
+floating point uses \fIdouble\fR.
+.
+.H2 Conditional assembly
+The pseudo-ops \fBIF\fR, \fBELSIF\fR, \fBELSE\fR and \fBENDIF\fR guide
+conditional assembly.  \fBIF\fR and \fBELSIF\fR take one argument, which is
+evaluated as an integer.  If the result is non-zero, the following code will be
+assembled, else it will be skipped.  Undefined symbols encountered while
+evaluating the condition are interpreted as zero (false) rather than raising an
+error.
+.LP
+Conditional assembly pseudo-ops are permitted within macro definitions and will
+be evaluated at the time of expansion, therefore positional variables can be
+used to affect macro expansion.
+.
+.H2 Sections
+Code can be placed into named sections with the \fBSECTION\fR pseudo-op.  This
+can make breaking source into multiple input files more comfortable.  Without
+\fBORG\fR or \fBPUT\fR directives, sections will follow each other in memory in the
+order they are first defined.
+.LP
+Within each section, there may exist multiple spans of discontiguous data.
+Certain output formats are able to represent this, for the others (e.g.,
+DragonDOS), the spans are combined first, with the gaps between them padded
+with zero bytes.
+.
+.H2 Local labels
+Local labels are considered local to the current \fIsection\fR.  A local label
+is any decimal number used in the label field.  An exclamation mark (\(lq!\(rq)
+is considered the same as decimal zero.  Identical numerical labels may occur
+more than once, other labels may not.
+.LP
+As an operand, a decimal number followed by \(lqB\(rq or \(lqF\(rq is
+considered to be a back or forward reference to the previous or next occurrence
+of that numerical local label in the section.  Operands of \(lq<\(rq and
+\(lq>\(rq are considered equivalent to \(lq0B\(rq and \(lq0F\(rq respectively,
+and can therefore be used to refer to the  \(lq!\(rq local label, as in some
+other assemblers.
+.LP
+Example:
+.LP
+.EX
+0000  8E0400          scroll          ldx     #$0400
+0003  EC8820          1               ldd     32,x
+0006  ED81                            std     ,x++
+0008  8C05E0                          cmpx    #$05e0
+000B  25F6                            blo     1B
+000D  CC6060                          ldd     #$6060
+0010  ED81            1               std     ,x++
+0012  8C0600                          cmpx    #$0600
+0015  25F9                            blo     1B
+0017  39                              rts
+.EE
+.LP
+The \(lq1\(rq label occurs twice, but each reference to \(lq1B\(rq refers to the closest
+one searching backwards.
+.
+.H2 Macros
+Start a macro definition by specifying a name for it in the label field, and
+\fBMACRO\fR in the instruction field.  Finish the definition with \fBENDM\fR in
+the instruction field.
+.LP
+Use a macro by specifying its name in the instruction field.  Any arguments
+given will be available during expansion as a positional variable.  The first
+argument will be called \fI\\1\fR, the second \fI\\2\fR, etc.  For
+compatibility with the TSC Flex assembler, the alternate forms \fI&{1}\fR,
+\fI&{2}\fR, etc. are also accepted.  Within a string, the simpler \fI&1\fR,
+\fI&2\fR, etc. are still valid, but as this can be confused with bitwise AND,
+it is not permitted outside a string.
+.LP
+Positional variables can be used within strings, or pasted to form symbol
+names.  In either case, they must be quoted or they will be passed by value
+(and an error will occur if they do not correspond to valid symbols by
+themselves).
+.LP
+Here's a silly example demonstrating positional variables and symbol pasting.
+Consider the following macro definition and utilising code:
+.LP
+.EX
+go_left  equ     \-1
+go_right equ     +1
 
-.SH AUTHOR
-Ciaran Anscomb <xroar@6809.org.uk>
+move            macro
+                lda     x_position
+                adda    #go_\\1
+                sta     x_position
+                endm
+
+do_move
+                move    "right"
+                rts
+
+x_position      rmb     1
+.EE
+.LP
+The main code generated is as follows:
+.LP
+.EX
+0000                  do_move
+0000                                  move    "right"
+0000  B60009                          lda     x_position
+0003  8B01                            adda    #go_\\1
+0005  B70009                          sta     x_position
+0008  39                              rts
+.EE
+.
+.H2 Pseudo-ops
+.TP
+.B ELSE
+Subsequent lines are assembled only if all preceding \fBIF\fR and \fBELSIF\fR
+pseudo-ops evaluated to false (zero).
+.TP
+.B ELSIF
+Subsequent lines are assembled only if all preceding \fBIF\fR and \fBELSIF\fR
+pseudo-ops evaluated to false (zero) and \fIcondition\fR evaluates to true
+(non-zero).
+.TP
+\fBEND\fR \fIaddress\fR
+Signifies the end of input.  All further lines are disregarded.
+.IP
+Optionally specifies an EXEC address to be included in the output, where
+supported by the output format.  An EXEC address specified on the command line
+will override any value specified here.
+.TP
+\fBENDIF\fR
+Terminate an \fBIF\fR statement.
+.TP
+\fBENDM\fR
+Finish a macro definition started with \fBMACRO\fR.
+.TP
+\fBEQU\fR \fIvalue\fR
+Short for \(lqequate\(rq, this must be used with a label, and defines a symbol with
+the specified \fIvalue\fR.  This may be any single valid argument (e.g., an
+expression or a string) .
+.TP
+\fBEXPORT\fR \fIname\fR
+.RI [, name ]\[...]
+Each \fIname\fR, either the name of a macro or a symbol, is flagged to be
+exported.  Exported macros and symbols will be listed in the symbols output
+file, if specified.
+.TP
+\fBFCB\fR \fIvalue\fR[,\fIvalue\fR]\[...]
+.TQ
+\fBFCC\fR \fIvalue\fR[,\fIvalue\fR]\[...]
+Form Constant Byte.  Each \fIvalue\fR is evaluated either to a number or a
+string.  Numbers are truncated to 8 bits and stored directly as bytes.  For
+strings, the ASCII value of each character is stored in sequential bytes.
+.IP
+Historically, \fBFCB\fR handled bytes and \fBFCC\fR (Form Constant Character
+string) handled strings.  \fBasm6809\fR treats them as synonymous, but is
+rather more strict about what is allowed as a string delimiter.
+.TP
+\fBFCN\fR \fIvalue\fR[,\fIvalue\fR]\[...]
+Identical to \fBFCC\fR, but a terminating zero byte is stored after the data.
+Included to increase compatibility with other assemblers.
+.TP
+\fBFDB\fR \fIvalue\fR[,\fIvalue\fR]\[...]
+Form Double Byte.  Each \fIvalue\fR is evaluated to a number, which is
+truncated to 16 bits and stored as two successive bytes (big-endian, of
+course).
+.TP
+\fBFILL\fR \fIvalue\fR,\fIcount\fR
+Insert \fIcount\fR bytes of \fIvalue\fR.  This is effectively the same as the
+two-argument form of \fBRZB\fR with its arguments swapped.
+.TP
+\fBIF\fR \fIcondition\fR
+Subsequent lines are assembled only if \fIcondition\fR evaluates to true
+(non-zero).
+.TP
+\fBINCLUDE\fR \fIfilename\fR
+Includes the contents of another file at this point in assembly.  The
+\fIfilename\fR argument must be a string, i.e., delimited by quotes or \(lq/\(rq
+characters.
+.TP
+\fBINCLUDEBIN\fR \fIfilename\fR
+Includes the binary data from \fIfilename\fR (which, as with \fBINCLUDE\fR must be a
+delimited string) directly.
+.TP
+\fBMACRO\fR
+Start defining a macro with a name specified by the line's label.  Subsequent
+lines up to the enclosing \fBENDM\fR pseudo-op will not be assembled until the
+macro is expanded.  Macro definitions may be nested, that is a macro may define
+another macro.
+.TP
+\fBORG\fR \fIaddress\fR
+Sets the Program Counter\(emthe base address assumed for the next assembled
+instruction.  Unless followed by a \fBPUT\fR pseudo-op, this will also be the
+instruction's actual address in memory.  A label on the same line will define a
+symbol with a value of the specified address.
+.TP
+\fBPUT\fR \fIaddress\fR
+Modify the put address\(emthe Program Counter is unaffected, so the assumed
+address for subsequent instructions remains the same, but the actual data will
+be located elsewhere.  Useful for assembling code that is going to be copied
+into place before executing.
+.TP
+\fBRMB\fR \fIcount\fR
+Reserve Memory Bytes.  The Program Counter is advanced \fIcount\fR bytes.  In some
+output formats this region may be padded with zeroes, in others a new loadable
+section may be created.
+.TP
+\fBRZB\fR \fIcount\fR[,\fIvalue\fR]
+.TQ
+\fBZMB\fR \fIcount\fR[,\fIvalue\fR]
+.TQ
+\fBBSZ\fR \fIcount\fR[,\fIvalue\fR]
+Reserve Zeroed Bytes.  Inserts a sequence of \fIcount\fR bytes of zero, or
+\fIvalue\fR if specified.  The two-argument form is effectively the same as
+\fBFILL\fR with its arguments swapped.
+.IP
+\fBZMB\fR and \fBBSZ\fR are alternate forms recognised for compatibility with
+other assemblers.
+.TP
+\fBSECTION\fR \fIname\fR
+.TQ
+\fBCODE\fR
+.TQ
+\fBDATA\fR
+.TQ
+\fBBSS\fR
+.TQ
+\fBRAM\fR
+.TQ
+\fBAUTO\fR
+Switch to the named section.  The Program Counter will continue from the last
+value it had while assembling this section, or follow the previous section if
+had not previously been seen.
+.IP
+Each of
+.BR CODE ", " DATA ", " BSS ", " RAM " and " AUTO
+switches to a section named after the pseudo-op.  They are recognised for
+compatibility with other assemblers.
+.TP
+\fBSET\fR \fIvalue\fR
+Similar to \fBEQU\fR, this must be used with a label, and defines a symbol with
+the specified \fIvalue\fR.  Unlike \fBEQU\fR, you can use \fBSET\fR multiple
+times to assign different values to the same symbol without error.  TODO: this
+should be incompatible with other forms of assignment.
+.TP
+\fBSETDP\fR \fIpage\fR
+Set the assumed value of the Direct Page (\fBDP\fR) register to \fIpage\fR for
+subsequent instructions.  Any non-negative \fIpage\fR is truncated to 8 bits,
+or specify a negative number to disable automatic direct addressing.
+.IP
+See the section on Direct Page addressing for more information.
+.
+.H2 Direct Page addressing
+The 6809 extends the zero page concept from other processors by allowing fast
+accesses to whichever page is selected by the Direct Page register (\fBDP\fR).
+An assembler is not able to keep track of what the code has set this register
+to, but the information is useful when deciding which addressing mode to use
+for an instruction.  The \fBSETDP\fR pseudo-op, or \fI\-\-setdp\fR option,
+informs the assembler that the supplied value is to be assumed for \fBDP\fR.
+Set this to a negative number to undefine it, and disable automatic use of
+direct addressing (this is the default).
+.
+.LP
+As local labels can be repeated, their position is used to distinguish them.
+For this reason, all file inclusions and macro expansion must occur during the
+first pass so that the absolute line count at which each local label is
+encountered remains the same between passes.
+.
+.H1 LICENCE
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+.LP
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+.LP
+You should have received a copy of the GNU General Public License along with
+this program.  If not, see
+.UU < http://www.gnu.org/licenses/ >.
+.
+.TOC
