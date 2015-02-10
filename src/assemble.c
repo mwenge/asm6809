@@ -637,6 +637,7 @@ static void pseudo_section(struct prog_line *line) {
 	}
 	section_set(n->data.as_string, asm_pass);
 	node_free(n);
+	listing_add_line(-1, 0, NULL, line->text);
 }
 
 /*
