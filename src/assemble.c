@@ -828,10 +828,12 @@ static void pseudo_include(struct prog_line *line) {
 		error(error_type_syntax, "invalid argument to INCLUDE");
 		return;
 	}
+	struct section *old_section = cur_section;
 	struct prog *file = prog_new_file(arga[0]->data.as_string);
 	if (!file)
 		return;
 	assemble_prog(file, asm_pass);
+	cur_section = old_section;
 }
 
 /* INCLUDEBIN.  Include a binary object in-place.  Unlike INCLUDE, the filename
