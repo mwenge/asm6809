@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
 	for (unsigned pass = 0; pass < MAX_PASSES; pass++) {
 		error_clear_all();
 		listing_free_all();
-		section_set("", pass);
+		section_set("CODE", pass);
 		for (struct slist *l = files; l; l = l->next) {
 			struct prog *f = l->data;
 			assemble_prog(f, pass);
