@@ -399,6 +399,7 @@ void instr_indexed(struct opcode const *op, struct node const *args, int imm8_va
 			return;
 		}
 		switch (node_attr_of(arga[0])) {
+		case node_attr_undef:
 		case node_attr_none:
 		case node_attr_16bit:
 			break;
