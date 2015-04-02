@@ -1,6 +1,9 @@
 '\" t
 .
+.\" ASCII for Unicode ellipsis is three dots
 .schar \[u2026] ...
+.\" New escape [...] maps to Unicode ellipsis
+.char \[...] \[u2026]
 .
 .\" an-ext.tmac: Check whether we are using grohtml.
 .nr mH 0

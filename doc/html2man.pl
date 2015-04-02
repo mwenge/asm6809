@@ -589,6 +589,13 @@ sub to_man {
 		$t =~ s/%5d/\\[rB]/g;
 		$t =~ s/%([0-9a-f]{2})/pack("c",hex($1))/ge;
 
+		$t =~ s/—/\\[em]/g;
+		$t =~ s/“/\\[lq]/g;
+		$t =~ s/”/\\[rq]/g;
+		$t =~ s/‘/\\[oq]/g;
+		$t =~ s/’/\\[cq]/g;
+		$t =~ s/…/\\[...]/g;
+
 		$t =~ s/'/\\[aq]/g;  # apostrophe quote, not curly
 		$t =~ s/\^/\\[ha]/g;  # different glyph for hat
 		$t =~ s/~/\\[ti]/g;  # different glyph for tilde

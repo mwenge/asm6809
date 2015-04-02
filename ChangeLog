@@ -7,8 +7,12 @@
   * New FCN pseudo-op.
   * New FCS pseudo-op.
   * MACRO name must now be defined in label field (as per docs).
+  * Strings may contain \r and \n (\\ to escape a backslash).
   * Permit ASCII strings to be used as integer values (8 bits per char).
   * Support relational operators between string values.
+  * Default section name is now "CODE".
+  * Fix listing file line output for SECTION.
+  * Fix indirect single-arg forward references.
 
 ### Changes in version 2.3, Wed 13 Aug 2014
 
