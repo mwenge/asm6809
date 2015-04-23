@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+
+<style type='text/css' media='screen'>
+
+body { max-width: 48rem; }
+
+</style>
+
+<style type='text/css' media='print'>
+
+body { font-size: 12pt; }
+pre { font-size: 12pt; letter-spacing: 0.1em; }
+code { font-size: 11pt; letter-spacing: 0.1em; }
+a { color: inherit; text-decoration: none; }
+
+</style>
+
+<style type='text/css' media='screen,print'>
+
+body { font-family: "Liberation Serif", serif; }
+code,pre { font-family: "Inconsolata", monospace; }
+code { font-weight: bold; }
+var { font-style: italic; }
+
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.1875rem; }
+h3 { font-size: 1rem; } 
+code,pre { font-size: small; }
+
+body { margin-left: 3rem; padding-left: 0.75rem; padding-right: 0.75rem; }
+h1 { margin-left: -3rem; }
+h2 { margin-left: -3rem; }
+h3 { margin-left: -1.5rem; }
+pre { margin-left: 1.5rem; }
+table { margin-left: 1.5rem; }
+
+h1 { margin-top: 1.3125rem; margin-bottom: 1.3125rem; }
+h2 { margin-top: 1.1875rem; margin-bottom: 0.1875rem; }
+h3 { margin-top: 1.125rem; margin-bottom: 0.125rem; }
+p { margin-top: 1rem; margin-bottom: 1rem; }
+pre { margin-top: 1rem; margin-bottom: 1rem; }
+
+h1+* { margin-top: 0.3125rem; }
+h2+* { margin-top: 0.1875rem; }
+h3+* { margin-top: 0.125rem; }
+
+dd { margin-top: none; margin-bottom: 1rem; }
+dl.compact dd { margin-bottom: 0.0625rem; }
+
+h1,h2,h3 { page-break-after: avoid; }
+h1+*,h2+*,h3+* { page-break-before: avoid; }
+dt+dd { page-break-before: avoid; }
+
+p { text-align: justify; }
+dd { text-align: justify; }
+
+table { border-collapse: collapse; border-style: hidden hidden none hidden; }
+table thead { border-bottom: solid; }
+table thead th { text-align: left; }
+table tbody { border-bottom: solid thin; }
+table tbody th { text-align: left; }
+table td, table th { border-left: solid thin; border-right: solid thin; border-bottom: none; vertical-align: top; padding: 0 0.1875rem 0.0625rem; }
+
+</style>
+
+</head>
+
+<body>
+
+<h1 man:date='April 2015' man:section='1' man:dist='asm6809-2.4'>asm6809</h1>
+
+<h2 id='name'>NAME</h2>
+
+<p>asm6809—6809 cross-assembler
+
+<h2 id='synopsis'>SYNOPSIS</h2>
+
+<p><strong>asm6809</strong> [<var>OPTION</var>]… [<var>SOURCE-FILE</var>]…
+
+<h2 id='description'>DESCRIPTION</h2>
+
+<p><strong>asm6809</strong> is a portable macro cross assembler targeting the
+Motorola 6809 and Hitachi 6309 processors. These processors are most commonly
+encountered in the Dragon and Tandy Colour Computer.
+
+<h2 id='options'>OPTIONS</h2>
+
+<dl class='compact'>
+
+<dt><code>-B</code>, <code>--bin</code>
+
+<dd>output raw binary file (default)
+
+<dt><code>-D</code>, <code>--dragondos</code>
+
+<dd>output DragonDOS binary file
+
+<dt><code>-C</code>, <code>--coco</code>
+
+<dd>output CoCo RS-DOS (“DECB”) segmented binary file
+
+<dt><code>-S</code>, <code>--srec</code>
+
+<dd>output Motorola SREC file
+
+<dt><code>-H</code>, <code>--hex</code>
+
+<dd>output Intel hex record file
+
+<dt><code>-e</code>, <code>--exec</code> <var>addr</var>
+
+<dd>EXEC address (for output formats that support one)
+
+</dl>
+
+<dl class='compact'>
+
+<dt><code>-8</code>, <code>-9</code>, <code>--6809</code>
+
+<dd>use 6809 ISA (default)
+
+<dt><code>-3</code>, <code>--6309</code>
+
+<dd>use 6309 ISA (6809 with extensions)
+
+<dt><code>-d</code>, <code>--define</code> <var>sym</var>[=<var>number</var>]
+
+<dd>define a symbol
+
+<dt><code>--setdp</code> <var>value</var>
+
+<dd>initial value assumed for DP [undefined]
+
+</dl>
+
+<dl class='compact'>
+
+<dt><code>-o</code>, <code>--output</code> <var>file</var>
+
+<dd>output filename
+
+<dt><code>-l</code>, <code>--listing</code> <var>file</var>
+
+<dd>create listing file
+
+<dt><code>-s</code>, <code>--symbols</code> <var>file</var>
+
+<dd>create symbol table
+
+</dl>
+
+<dl class='compact'>
+
+<dt><code>-q</code>, <code>--quiet</code>
+
+<dd>don't warn about illegal (but working) code
+
+<dt><code>-v</code>, <code>--verbose</code>
+
+<dd>warn about explicitly inefficient code
+
+<dt><code>--help</code>
+
+<dd>show help
+
+<dt><code>--version</code>
+
+<dd>show program version
+
+</dl>
+
+<p>If more than one <var>SOURCE-FILE</var> is specified, they are assembled as
+though they were all in one file.
+
+<h2 id='usage'>USAGE</h2>
+
+<p>Text is read in and parsed, then as many passes are made over the parsed
+source as necessary (up to a limit), until symbols are resolved and addresses
+are stable. The fastest or smallest representation should always be chosen
+where there is ambiguity.
+
+<p>Output formats are: Raw binary, DragonDOS binary, CoCo RS-DOS (or “DECB”)
+binary, Motorola SREC, Intel HEX.
+
+<p>Home page:
+&lt;<a href='http://www.6809.org.uk/asm6809/'>http://www.6809.org.uk/asm6809/</a>&gt;
+
+<h3 id='differences'>Differences to other assemblers</h3>
+
+<p>Motorola syntax allows a comment to follow any operands, separated from them
+only by whitespace. To an extent, this assembler accepts that, but be aware
+that as spaces are allowed within expressions, if the comment looks like it is
+continuing an expression it will generate bad code (or raise an error if the
+result is syntactically incorrect). Example:
+
+<pre><samp>
+0000  8605                  lda     #5
+0002  C60A                  ldb     #5 * 2  twice first number
+</samp></pre>
+
+<p>A strict Motorola assembler would generate bytes C6 05 for the second line,
+as the “*&nbsp;2” would be ignored. For consistency, it is best to introduce end of
+line comments with a <code>;</code> character. An asterisk (<code>*</code>)
+can introduce whole line comments.
+
+<p>An unquoted semicolon always introduces a comment. The alternate form of the
+6309 instructions <code>AIM</code>, <code>OIM</code>, etc. listed in
+some documentation that uses a semicolon as a separator is not accepted.
+
+<p>A symbol may be forward referenced; any time a reference is unresolvable,
+another pass is triggered, up to some defined maximum.
+
+<p>In 6809 indexed addressing, the offset size will default to the fastest
+possible form, e.g., if the offset is an expression that happens to evaluate to
+zero, the “no offset” form will be used. Prepend <code>&lt;&lt;</code> to
+coerce a 5 bit offset, <code>&lt;</code> to coerce 8 bits or
+<code>&gt;</code> to coerce 16 bits.
+
+<p><strong>asm6809</strong> currently has no support for OS-9 modules or
+multiple object linking.
+
+<h3 id='syntax'>Program syntax</h3>
+
+<p>Program files are considered line by line. Each line contains up to three
+fields, separated by whitespace: label, instruction and arguments. An unquoted
+semicolon (<code>;</code>) indicates that the rest of the line is to be
+considered a comment. Whole line comments may be introduced with an asterisk
+(<code>*</code>). Motorola-style end of line comments without a
+<code>;</code> are accepted, but see the notes about assembler differences.
+
+<p>Any label must appear at the very beginning of the line. If a label is
+omitted, whitespace must appear before the operator field. Certain pseudo-ops
+affect a label's meaning, but their usual purpose is to define a symbol
+referring to the current position in the code (Program Counter, or PC). The
+next most common use is with the <code>EQU</code> pseudo-op, which assigns
+a particular value to a symbol.
+
+<p>The instruction field contains either an instruction op-codes (mnemonic), a
+pseudo-ops (assembler directive), or a macro name for expansion.
+
+<p>Pseudo-ops allow code placement to be varied, formatted data to be included, conditional assembly, macro definition,
+
+<p>Arguments are a comma-separated list, either instruction operands or
+arguments to a pseudo-op or macro. Permitted arguments are specific to the
+instruction or pseudo-op, but in general they may be:
+
+<ul>
+
+<li>An expression.
+
+<li>A register name, with optional pre-decrement or post-increment.
+
+<li>A nested list surrounded by <code>[</code> and <code>]</code>. This is
+generally only used to indicate indirect indexed addressing.
+
+</ul>
+
+<p>
+In addition, any argument may be preceded by:
+
+<ul>
+
+<li><code>#</code>, indicate immediate value.
+
+<li><code>&lt;&lt;</code>, force 5-bit index offset.
+
+<li><code>&lt;</code>, force direct addressing, 8-bit value or 8-bit index offset.
+
+<li><code>&gt;</code>, force extended addressing, 16-bit value or 16-bit index offset.
+
+</ul>
+
+<h3 id='expressions'>Expressions</h3>
+
+<p>Expressions are formed of:
+
+<ul>
+
+<li>A decimal number.
+
+<li>An octal number preceded by <code>@</code>.
+
+<li>A binary number preceded by <code>%</code> or <code>0b</code>.
+
+<li>A hexadecimal number preceded by <code>$</code> or <code>0x</code>.
+
+<li>A floating point number: decimal digits surrounding exactly one full stop (<code>.</code>).
+
+<li>A single quote followed by any ASCII character (yielding the ASCII value of
+that character).
+
+<li>A symbol name, local forward reference or local back reference.
+
+<li>Any of the above prefixed with a unary minus (<code>-</code>) or plus (<code>+</code>).
+
+<li>A string delimited either by double quotes or <code>/</code>.
+
+<li>A combination of any of the above with arithmetic, bitwise, logical or
+relational operators.
+
+<li>Parenthesis to specify precedence.
+
+</ul>
+
+<p>The assembler uses multiple passes to resolve expressions. If an expression
+refers to a symbol that cannot currently be resolved, an extra pass is
+triggered. Similarly, if a symbol is assigned a value (e.g., by an
+<code>EQU</code> pseudo-op) that differs to its value on the previous pass,
+another is triggered until it becomes stable.
+
+<p>When not directly used for their contents (e.g., by <code>FCC</code>),
+strings can be used in place of integer values. The ASCII value of each
+character is used to represent 8 bits of the integer result up to 32 bits.
+Example:
+
+<pre><samp>
+0000  CC443A                ldd     #"D:"
+</samp></pre>
+
+<h3 id='operators'>Operators</h3>
+
+<p>The following operators are available, listed in descending order of
+precedence (where operators share a precedence, left-to-right evaluation is
+performed):
+
+<table tab=';' align='c,l'>
+<thead>
+<tr><th>Operator<th>Description
+<tbody>
+<tr><td><code>+</code><td>unary plus
+<tr><td><code>-</code><td>unary minus
+<tr><td><code>!</code> <code>~</code><td>logical, bitwise NOT
+<tbody>
+<tr><td><code>*</code><td>multiplication
+<tr><td><code>/</code><td>division
+<tr><td><code>%</code><td>modulo
+<tbody>
+<tr><td><code>+</code><td>addition
+<tr><td><code>-</code><td>subtraction
+<tbody>
+<tr><td><code>&lt;&lt;</code><td>bitwise shift left
+<tr><td><code>&gt;&gt;</code><td>bitwise shift right
+<tbody>
+<tr><td><code>&lt;</code> <code>&lt;=</code><td>relational operators
+<tr><td><code>&gt;</code> <code>&gt;=</code><td>relational operators
+<tbody>
+<tr><td><code>==</code><td>relational equal
+<tr><td><code>!=</code><td>relational not equal
+<tbody>
+<tr><td><code>&amp;</code><td>bitwise AND
+<tbody>
+<tr><td><code>^</code><td>bitwise XOR
+<tbody>
+<tr><td><code>|</code><td>bitwise OR
+<tbody>
+<tr><td><code>&amp;&amp;</code><td>logical AND
+<tbody>
+<tr><td><code>||</code></code><td>logical OR
+<tbody>
+<tr><td><code>?:</code><td>ternary operator
+</table>
+
+<p>Division always returns a floating point result. Other arithmetic operators
+return integers if both operands are integers, otherwise floating point.
+Bitwise operators and modulo all cast their operands to integers and return an
+integer. Relational and logical operators result in 0 if false, 1 if true.
+Integer calculations are performed using the platform's <em>int64_t</em> type,
+floating point uses <em>double</em>.
+
+<h3 id='conditional'>Conditional assembly</h3>
+
+<p>The pseudo-ops <code>IF</code>, <code>ELSIF</code>,
+<code>ELSE</code> and <code>ENDIF</code> guide conditional assembly.
+<code>IF</code> and <code>ELSIF</code> take one argument, which is
+evaluated as an integer. If the result is non-zero, the following code will be
+assembled, else it will be skipped. Undefined symbols encountered while
+evaluating the condition are interpreted as zero (false) rather than raising an
+error.
+
+<p>Conditional assembly pseudo-ops are permitted within macro definitions and
+will be evaluated at the time of expansion, therefore positional variables can
+be used to affect macro expansion.
+
+<h3 id='sections'>Sections</h3>
+
+<p>Code can be placed into named sections with the <code>SECTION</code>
+pseudo-op. This can make breaking source into multiple input files more
+comfortable. Without <code>ORG</code> or <code>PUT</code> directives,
+sections will follow each other in memory in the order they are first defined.
+
+<p>Within each section, there may exist multiple spans of discontiguous data.
+Certain output formats are able to represent this, for the others (e.g.,
+DragonDOS), the spans are combined first, with the gaps between them padded
+with zero bytes.
+
+<h3 id='local-labels'>Local labels</h3>
+
+<p>Local labels are considered local to the current <em>section</em>. A local
+label is any decimal number used in the label field. An exclamation mark
+(<code>!</code>) is considered the same as decimal zero. Identical numerical
+labels may occur more than once, other labels may not.
+
+<p>As an operand, a decimal number followed by <code>B</code> or
+<code>F</code> is considered to be a back or forward reference to the
+previous or next occurrence of that numerical local label in the section.
+Operands of <code>&lt;</code> and <code>&gt;</code> are considered
+equivalent to <code>0B</code> and <code>0F</code> respectively, and can
+therefore be used to refer to the <code>!</code> local label, as in some
+other assemblers. Example:
+
+<pre><samp>
+0000  8E0400    scroll      ldx     #$0400
+0003  EC8820    1           ldd     32,x
+0006  ED81                  std     ,x++
+0008  8C05E0                cmpx    #$05e0
+000B  25F6                  blo     1B
+000D  CC6060                ldd     #$6060
+0010  ED81      1           std     ,x++
+0012  8C0600                cmpx    #$0600
+0015  25F9                  blo     1B
+0017  39                    rts
+</samp></pre>
+
+<p>The <code>1</code> label occurs twice, but each reference to
+<code>1B</code> refers to the closest one searching backwards.
+
+<h3 id='macros'>Macros</h3>
+
+<p>Start a macro definition by specifying a name for it in the label field, and
+<code>MACRO</code> in the instruction field. Finish the definition with
+<code>ENDM</code> in the instruction field.
+
+<p>Use a macro by specifying its name in the instruction field. Any arguments
+given will be available during expansion as a positional variable.
+
+<p>Positional variables can be used within strings, or pasted to form symbol
+names. In either case, they must be quoted or they will be passed by value,
+which will result in an error if they do not correspond to valid symbols by
+themselves.
+
+<p>The positional variables are referred to with <code>\{1}</code>,
+<code>\{2}</code>, …, <code>\{<em>n</em>}</code>. For the first nine
+arguments, the braces are not required, so <code>\1</code>, <code>\2</code>,
+…, <code>\9</code> are valid alternatives. For compatibility with the
+TSC Flex assembler, another form is accepted: <code>&amp;{1}</code>,
+<code>&amp;{2}</code>, …, <code>&amp;{<em>n</em>}</code>. Within a
+string, the simpler <code>&amp;1</code>, <code>&amp;2</code>, …,
+<code>&amp;9</code> is still valid, but as this can be confused with bitwise
+AND, it is not permitted elsewhere.
+
+<p>Here's a silly example demonstrating positional variables and symbol
+pasting. Consider the following macro definition and utilising code:
+
+<pre><samp>
+go_left         equ     -1
+go_right        equ     +1
+
+move            macro
+                lda     x_position
+                adda    #go_\1
+                sta     x_position
+                endm
+
+do_move
+                move    "right"
+                rts
+
+x_position      rmb     1
+</samp></pre>
+
+<p>The main code generated is as follows:
+
+<pre><samp>
+0000            do_move
+0000                        move    "right"
+0000  B60009                lda     x_position
+0003  8B01                  adda    #go_\1
+0005  B70009                sta     x_position
+0008  39                    rts
+</samp></pre>
+
+<h3 id='pseudo-ops'>Pseudo-ops</h3>
+
+<p>Conditional assembly:</p>
+
+<dl>
+
+<dt><code>IF</code> <var>condition</var>
+
+<dd>Subsequent lines are assembled only if <var>condition</var> evaluates to
+true (non-zero).
+
+<dt><code>ELSIF</code> <var>condition</var>
+
+<dd>Subsequent lines are assembled only if all preceding <code>IF</code> and
+<code>ELSIF</code> pseudo-ops evaluated to false (zero) and
+<var>condition</var> evaluates to true (non-zero).
+
+<dt><code>ELSE</code>
+
+<dd>Subsequent lines are assembled only if all preceding <code>IF</code>
+and <code>ELSIF</code> pseudo-ops evaluated to false (zero).
+
+<dt><code>ENDIF</code>
+
+<dd>Terminate an <code>IF</code> statement.
+
+</dl>
+
+<p>Macro definition:</p>
+
+<dl>
+
+<dt><code>MACRO</code>
+
+<dd>Start defining a macro with a name specified by the line's label.
+Subsequent lines up to the enclosing <code>ENDM</code> pseudo-op will not
+be assembled until the macro is expanded. Macro definitions may be nested; that
+is, a macro may define another macro.
+
+<dt><code>ENDM</code>
+
+<dd>Finish a macro definition started with <code>MACRO</code>.
+
+</dl>
+
+<p>Inline data:</p>
+
+<dl>
+
+<dt><code>FCB</code> <var>value</var>[,<var>value</var>]…
+
+<dt><code>FCC</code> <var>value</var>[,<var>value</var>]…
+
+<dd>Form Constant Byte. Each <var>value</var> is evaluated either to a number
+or a string. Numbers are truncated to 8 bits and stored directly as bytes. For
+strings, the ASCII value of each character is stored in sequential bytes.
+
+<p>Historically, <code>FCB</code> handled bytes and <code>FCC</code> (Form
+Constant Character string) handled strings. <strong>asm6809</strong> treats
+them as synonymous, but is rather more strict about what is allowed as a string
+delimiter.
+
+<dt><code>FCN</code> <var>value</var>[,<var>value</var>]…
+
+<dd>Identical to <code>FCC</code>, but a terminating zero byte is stored
+after the data. Included to increase compatibility with other assemblers.
+
+<dt><code>FDB</code> <var>value</var>[,<var>value</var>]…
+
+<dd>Form Double Byte. Each <var>value</var> is evaluated to a number, which is
+truncated to 16 bits and stored as two successive bytes (big- endian, of
+course).
+
+<dt><code>FILL</code> <var>value</var>,<var>count</var>
+
+<dd>Insert <var>count</var> bytes of <var>value</var>. This is effectively the
+same as the two-argument form of <code>RZB</code> with its arguments swapped.
+
+<dt><code>RZB</code> <var>count</var>[,<var>value</var>]
+
+<dt><code>ZMB</code> <var>count</var>[,<var>value</var>]
+
+<dt><code>BSZ</code> <var>count</var>[,<var>value</var>]
+
+<dd>Reserve Zeroed Bytes. Inserts a sequence of <var>count</var> bytes of zero,
+or <var>value</var> if specified. The two-argument form is effectively the same
+as <code>FILL</code> with its arguments swapped.
+
+<p><code>ZMB</code> and <code>BSZ</code> are alternate forms
+recognised for compatibility with other assemblers.
+
+</dl>
+
+<p>Code placement &amp; addressing:</p>
+
+<dl>
+
+<dt><code>ORG</code> <var>address</var>
+
+<dd>Sets the Program Counter—the base address assumed for the next assembled
+instruction. Unless followed by a <code>PUT</code> pseudo-op, this will also be
+the instruction's actual address in memory. A label on the same line will
+define a symbol with a value of the specified address.
+
+<dt><code>PUT</code> <var>address</var>
+
+<dd>Modify the put address—the Program Counter is unaffected, so the assumed
+address for subsequent instructions remains the same, but the actual data will
+be located elsewhere. Useful for assembling code that is going to be copied
+into place before executing.
+
+<dt><code>RMB</code> <var>count</var>
+
+<dd>Reserve Memory Bytes. The Program Counter is advanced <var>count</var>
+bytes. In some output formats this region may be padded with zeroes, in others
+a new loadable section may be created.
+
+<dt><code>SECTION</code> <var>name</var>
+
+<dt><code>CODE</code>
+
+<dt><code>DATA</code>
+
+<dt><code>BSS</code>
+
+<dt><code>RAM</code>
+
+<dt><code>AUTO</code>
+
+<dd>Switch to the named section. The Program Counter will continue from the
+last value it had while assembling this section, or follow the previous section
+if had not previously been seen.
+
+<p>Each of <code>CODE</code>, <code>DATA</code>, <code>BSS</code>,
+<code>RAM</code>, and <code>AUTO</code> switches to a section named
+after the pseudo-op. They are recognised for compatibility with other
+assemblers.
+
+<dt><code>SETDP</code> <var>page</var>
+
+<dd>Set the assumed value of the Direct Page (<code>DP</code>) register to
+<var>page</var> for subsequent instructions. Any non-negative <var>page</var>
+is truncated to 8 bits, or specify a negative number to disable automatic
+direct addressing.
+
+<p>See the section on <a href='#direct-page'>Direct Page addressing</a> for
+more information.
+
+</dl>
+
+<p>Symbols:</p>
+
+<dl>
+
+<dt><code>EQU</code> <var>value</var>
+
+<dd>Short for “equate”, this must be used with a label, and defines a symbol
+with the specified <var>value</var>. This may be any single valid argument
+(e.g., an expression or a string) .
+
+<dt><code>EXPORT</code> <var>name</var>[,<var>name</var>]…
+
+<dd>Each <var>name</var>—either the name of a macro or a symbol—is flagged to
+be exported. Exported macros and symbols will be listed in the symbols output
+file, if specified.
+
+<dt><code>SET</code> <var>value</var>
+
+<dd>Similar to <code>EQU</code>, this must be used with a label, and defines a
+symbol with the specified <var>value</var>. Unlike <code>EQU</code>, you can
+use <code>SET</code> multiple times to assign different values to the same
+symbol without error.
+
+</dl>
+
+<p>Files:</p>
+
+<dl>
+
+<dt><code>END</code> <var>address</var>
+
+<dd>Signifies the end of input. All further lines are disregarded.
+
+<p>Optionally specifies an EXEC address to be included in the output, where
+supported by the output format. An EXEC address specified on the command line
+will override any value specified here.
+
+<dt><code>INCLUDE</code> <var>filename</var>
+
+<dd>Includes the contents of another file at this point in assembly. The
+<var>filename</var> argument must be a string, i.e., delimited by quotes or
+<code>/</code> characters.
+
+<dt><code>INCLUDEBIN</code> <var>filename</var>
+
+<dd>Includes the binary data from <var>filename</var> (which, as with
+<code>INCLUDE</code> must be a delimited string) directly.
+
+</dl>
+
+<h3 id='direct-page'>Direct Page addressing</h3>
+
+<p>The 6809 extends the zero page concept from other processors by allowing
+fast accesses to whichever page is selected by the Direct Page register
+(<code>DP</code>). An assembler is not able to keep track of what the code has
+set this register to, but the information is useful when deciding which
+addressing mode to use for an instruction. The <code>SETDP</code> pseudo-op, or
+<code>--setdp</code> option, informs the assembler that the supplied value is
+to be assumed for <code>DP</code>. Set this to a negative number to undefine
+it, and disable automatic use of direct addressing (this is the default).
+
+<p>As local labels can be repeated, their position is used to distinguish
+them. For this reason, all file inclusions and macro expansion must occur
+during the first pass so that the absolute line count at which each local label
+is encountered remains the same between passes.
+
+<h2 id='licence'>LICENCE</h2>
+
+<p>This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version.
+
+<p>This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+<p>You should have received a copy of the GNU General Public License along
+with this program. If not, see
+&lt;<a href='http://www.gnu.org/licenses/'>http://www.gnu.org/licenses/</a>&gt;.
+
+</body>
+</html>
