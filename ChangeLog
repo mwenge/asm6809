@@ -1,6 +1,6 @@
 ## asm6809 changes
 
-### Changes in version 2.4, unreleased
+### Changes in version 2.4, Thu 23 Apr 2015
 
   * Speed improvements.
   * New SET pseudo-op.
