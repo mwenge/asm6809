@@ -204,6 +204,7 @@ struct node *symbol_local_fwdref(struct dict *table, long key, unsigned line_num
 
 void symbol_local_set(struct dict *table, long key, unsigned line_number, struct node *value,
 		      unsigned pass) {
+	(void)pass;
 	gl_list_t sym_list = dict_lookup(table, (void *)key);
 	gl_list_node_t old_lnode = NULL;
 	struct symbol_local const *old_sym = NULL;
