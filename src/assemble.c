@@ -367,20 +367,19 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 			} else if ((intptr_t)cond_list->data == cond_state_else) {
 				error(error_type_syntax, "repeated ELSE");
 			} else {
-				if (cond_excluded == cond_list) {
-					if ((intptr_t)cond_list->data != cond_state_if_done)
-						cond_excluded = NULL;
-				} else if (!cond_excluded) {
-					cond_excluded = cond_list;
-				}
 				if (!cond_excluded) {
+					cond_excluded = cond_list;
+				} else if (cond_excluded == cond_list &&
+					   (intptr_t)cond_list->data != cond_state_if_done) {
 					symbol_ignore_undefined = 1;
 					n_line.args = eval_node(l->args);
 					symbol_ignore_undefined = 0;
 					if (verify_num_args(n_line.args, 1, 1, "ELSIF") < 0)
 						goto next_line;
-					if (!have_int_required(n_line.args, 0, "ELSIF", 0))
-						cond_excluded = cond_list;
+					if (have_int_required(n_line.args, 0, "ELSIF", 0)) {
+						cond_excluded = NULL;
+						cond_list->data = (void *)cond_state_if_done;
+					}
 				}
 			}
 			goto next_line;
