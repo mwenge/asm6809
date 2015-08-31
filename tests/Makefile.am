@@ -5,28 +5,17 @@ CLEANFILES = *.lis
 EXTRA_DIST = \
 	test-isa6309.sh \
 	test-isa6809.sh \
-	isa6309-direct.cmp \
-	isa6309-direct.s \
-	isa6309-extended.cmp \
-	isa6309-extended.s \
-	isa6309-immediate.cmp \
-	isa6309-immediate.s \
-	isa6309-indexed.cmp \
-	isa6309-indexed.s \
-	isa6309-inherent.cmp \
-	isa6309-inherent.s \
-	isa6809-direct.cmp \
-	isa6809-direct.s \
-	isa6809-extended.cmp \
-	isa6809-extended.s \
-	isa6809-immediate.cmp \
-	isa6809-immediate.s \
-	isa6809-indexed.cmp \
-	isa6809-indexed.s \
-	isa6809-inherent.cmp \
-	isa6809-inherent.s \
-	isa6809-relative.cmp \
-	isa6809-relative.s
+	isa6309-direct.s isa6309-direct.cmp \
+	isa6309-extended.s isa6309-extended.cmp \
+	isa6309-immediate.s isa6309-immediate.cmp \
+	isa6309-indexed.s isa6309-indexed.cmp \
+	isa6309-inherent.s isa6309-inherent.cmp \
+	isa6809-direct.s isa6809-direct.cmp \
+	isa6809-extended.s isa6809-extended.cmp \
+	isa6809-immediate.s isa6809-immediate.cmp \
+	isa6809-indexed.s isa6809-indexed.cmp \
+	isa6809-inherent.s isa6809-inherent.cmp \
+	isa6809-relative.s isa6809-relative.cmp
 
 AM_TESTS_ENVIRONMENT =
 
