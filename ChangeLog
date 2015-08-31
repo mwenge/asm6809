@@ -1,6 +1,6 @@
 ## asm6809 changes
 
-### Changes in version 2.5, unreleased
+### Changes in version 2.5, Mon 31 Aug 2015
 
   * More tests for "make check".
   * Fix problem with multiple ELSIF.
