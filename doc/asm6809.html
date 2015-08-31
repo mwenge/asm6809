@@ -70,7 +70,7 @@ table td, table th { border-left: solid thin; border-right: solid thin; border-b
 
 <body>
 
-<h1 man:date='April 2015' man:section='1' man:dist='asm6809-2.4'>asm6809</h1>
+<h1 man:date='August 2015' man:section='1' man:dist='asm6809-2.5'>asm6809</h1>
 
 <h2 id='name'>NAME</h2>
 
@@ -238,12 +238,12 @@ referring to the current position in the code (Program Counter, or PC). The
 next most common use is with the <code>EQU</code> pseudo-op, which assigns
 a particular value to a symbol.
 
-<p>The instruction field contains either an instruction op-codes (mnemonic), a
-pseudo-ops (assembler directive), or a macro name for expansion.
+<p>The instruction field contains either an instruction op-code (mnemonic), a
+pseudo-op (assembler directive), or a macro name for expansion.
 
 <p>Pseudo-ops allow code placement to be varied, formatted data to be included, conditional assembly, macro definition,
 
-<p>Arguments are a comma-separated list, either instruction operands or
+<p>Arguments are a comma-separated list: either instruction operands or
 arguments to a pseudo-op or macro. Permitted arguments are specific to the
 instruction or pseudo-op, but in general they may be:
 
@@ -358,7 +358,7 @@ performed):
 <tbody>
 <tr><td><code>&amp;&amp;</code><td>logical AND
 <tbody>
-<tr><td><code>||</code></code><td>logical OR
+<tr><td><code>||</code><td>logical OR
 <tbody>
 <tr><td><code>?:</code><td>ternary operator
 </table>
@@ -427,6 +427,11 @@ other assemblers. Example:
 <p>The <code>1</code> label occurs twice, but each reference to
 <code>1B</code> refers to the closest one searching backwards.
 
+<p>As local labels can be repeated, their position is used to distinguish
+them. For this reason, all file inclusions and macro expansion must occur
+during the first pass so that the absolute line count at which each local label
+is encountered remains the same between passes.
+
 <h3 id='macros'>Macros</h3>
 
 <p>Start a macro definition by specifying a name for it in the label field, and
@@ -447,7 +452,7 @@ arguments, the braces are not required, so <code>\1</code>, <code>\2</code>,
 …, <code>\9</code> are valid alternatives. For compatibility with the
 TSC Flex assembler, another form is accepted: <code>&amp;{1}</code>,
 <code>&amp;{2}</code>, …, <code>&amp;{<em>n</em>}</code>. Within a
-string, the simpler <code>&amp;1</code>, <code>&amp;2</code>, …,
+string, the shorter <code>&amp;1</code>, <code>&amp;2</code>, …,
 <code>&amp;9</code> is still valid, but as this can be confused with bitwise
 AND, it is not permitted elsewhere.
 
@@ -516,10 +521,10 @@ and <code>ELSIF</code> pseudo-ops evaluated to false (zero).
 
 <dt><code>MACRO</code>
 
-<dd>Start defining a macro with a name specified by the line's label.
-Subsequent lines up to the enclosing <code>ENDM</code> pseudo-op will not
-be assembled until the macro is expanded. Macro definitions may be nested; that
-is, a macro may define another macro.
+<dd>Start defining a macro. The macro's name shall be in the label field.
+Subsequent lines up to the enclosing <code>ENDM</code> pseudo-op will not be
+assembled until the macro is expanded. Macro definitions may be nested; that
+is, using a macro may define another macro.
 
 <dt><code>ENDM</code>
 
@@ -661,7 +666,7 @@ symbol without error.
 
 <dl>
 
-<dt><code>END</code> <var>address</var>
+<dt><code>END</code> [<var>address</var>]
 
 <dd>Signifies the end of input. All further lines are disregarded.
 
@@ -692,11 +697,6 @@ addressing mode to use for an instruction. The <code>SETDP</code> pseudo-op, or
 <code>--setdp</code> option, informs the assembler that the supplied value is
 to be assumed for <code>DP</code>. Set this to a negative number to undefine
 it, and disable automatic use of direct addressing (this is the default).
-
-<p>As local labels can be repeated, their position is used to distinguish
-them. For this reason, all file inclusions and macro expansion must occur
-during the first pass so that the absolute line count at which each local label
-is encountered remains the same between passes.
 
 <h2 id='licence'>LICENCE</h2>
 

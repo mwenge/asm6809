@@ -78,7 +78,7 @@
 .pdfinfo /Title asm6809 2.4
 .pdfinfo /Author Ciaran Anscomb
 .
-.TH "asm6809" "1" "April 2015" "asm6809-2.4"
+.TH "asm6809" "1" "August 2015" "asm6809-2.5"
 .hy 0
 .nh
 .H1 NAME
@@ -176,11 +176,11 @@ Program files are considered line by line. Each line contains up to three fields
 .PP
 Any label must appear at the very beginning of the line. If a label is omitted, whitespace must appear before the operator field. Certain pseudo-ops affect a label\[aq]s meaning, but their usual purpose is to define a symbol referring to the current position in the code (Program Counter, or PC). The next most common use is with the \f(CBEQU\fR pseudo-op, which assigns a particular value to a symbol.
 .PP
-The instruction field contains either an instruction op-codes (mnemonic), a pseudo-ops (assembler directive), or a macro name for expansion.
+The instruction field contains either an instruction op-code (mnemonic), a pseudo-op (assembler directive), or a macro name for expansion.
 .PP
 Pseudo-ops allow code placement to be varied, formatted data to be included, conditional assembly, macro definition,
 .PP
-Arguments are a comma-separated list, either instruction operands or arguments to a pseudo-op or macro. Permitted arguments are specific to the instruction or pseudo-op, but in general they may be:
+Arguments are a comma-separated list: either instruction operands or arguments to a pseudo-op or macro. Permitted arguments are specific to the instruction or pseudo-op, but in general they may be:
 .IP \(bu 2
 An expression.
 .IP \(bu 2
@@ -328,6 +328,8 @@ As an operand, a decimal number followed by \f(CBB\fR or \f(CBF\fR is considered
 .EE
 .PP
 The \f(CB1\fR label occurs twice, but each reference to \f(CB1B\fR refers to the closest one searching backwards.
+.PP
+As local labels can be repeated, their position is used to distinguish them. For this reason, all file inclusions and macro expansion must occur during the first pass so that the absolute line count at which each local label is encountered remains the same between passes.
 .H2 Macros
 .PP
 Start a macro definition by specifying a name for it in the label field, and \f(CBMACRO\fR in the instruction field. Finish the definition with \f(CBENDM\fR in the instruction field.
@@ -336,7 +338,7 @@ Use a macro by specifying its name in the instruction field. Any arguments given
 .PP
 Positional variables can be used within strings, or pasted to form symbol names. In either case, they must be quoted or they will be passed by value, which will result in an error if they do not correspond to valid symbols by themselves.
 .PP
-The positional variables are referred to with \f(CB\\{1}\fR, \f(CB\\{2}\fR, \[...], \f(CB\\{\fIn\fB}\fR. For the first nine arguments, the braces are not required, so \f(CB\\1\fR, \f(CB\\2\fR, \[...], \f(CB\\9\fR are valid alternatives. For compatibility with the TSC Flex assembler, another form is accepted: \f(CB&{1}\fR, \f(CB&{2}\fR, \[...], \f(CB&{\fIn\fB}\fR. Within a string, the simpler \f(CB&1\fR, \f(CB&2\fR, \[...], \f(CB&9\fR is still valid, but as this can be confused with bitwise AND, it is not permitted elsewhere.
+The positional variables are referred to with \f(CB\\{1}\fR, \f(CB\\{2}\fR, \[...], \f(CB\\{\fIn\fB}\fR. For the first nine arguments, the braces are not required, so \f(CB\\1\fR, \f(CB\\2\fR, \[...], \f(CB\\9\fR are valid alternatives. For compatibility with the TSC Flex assembler, another form is accepted: \f(CB&{1}\fR, \f(CB&{2}\fR, \[...], \f(CB&{\fIn\fB}\fR. Within a string, the shorter \f(CB&1\fR, \f(CB&2\fR, \[...], \f(CB&9\fR is still valid, but as this can be confused with bitwise AND, it is not permitted elsewhere.
 .PP
 Here\[aq]s a silly example demonstrating positional variables and symbol pasting. Consider the following macro definition and utilising code:
 .IP
@@ -383,7 +385,7 @@ Terminate an \f(CBIF\fR statement.
 Macro definition:
 .TP
 \f(CBMACRO\fR
-Start defining a macro with a name specified by the line\[aq]s label. Subsequent lines up to the enclosing \f(CBENDM\fR pseudo-op will not be assembled until the macro is expanded. Macro definitions may be nested; that is, a macro may define another macro.
+Start defining a macro. The macro\[aq]s name shall be in the label field. Subsequent lines up to the enclosing \f(CBENDM\fR pseudo-op will not be assembled until the macro is expanded. Macro definitions may be nested; that is, using a macro may define another macro.
 .TP
 \f(CBENDM\fR
 Finish a macro definition started with \f(CBMACRO\fR.
@@ -459,7 +461,7 @@ Similar to \f(CBEQU\fR, this must be used with a label, and defines a symbol wit
 .PP
 Files:
 .TP
-\f(CBEND\fR \fIaddress\fR
+\f(CBEND\fR \[lB]\fIaddress\fR\[rB]
 Signifies the end of input. All further lines are disregarded.
 .IP
 Optionally specifies an EXEC address to be included in the output, where supported by the output format. An EXEC address specified on the command line will override any value specified here.
@@ -472,8 +474,6 @@ Includes the binary data from \fIfilename\fR (which, as with \f(CBINCLUDE\fR mus
 .H2 Direct Page addressing
 .PP
 The 6809 extends the zero page concept from other processors by allowing fast accesses to whichever page is selected by the Direct Page register (\f(CBDP\fR). An assembler is not able to keep track of what the code has set this register to, but the information is useful when deciding which addressing mode to use for an instruction. The \f(CBSETDP\fR pseudo-op, or \f(CB\-\-setdp\fR option, informs the assembler that the supplied value is to be assumed for \f(CBDP\fR. Set this to a negative number to undefine it, and disable automatic use of direct addressing (this is the default).
-.PP
-As local labels can be repeated, their position is used to distinguish them. For this reason, all file inclusions and macro expansion must occur during the first pass so that the absolute line count at which each local label is encountered remains the same between passes.
 .H1 LICENCE
 .PP
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.

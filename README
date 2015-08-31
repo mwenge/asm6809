@@ -123,14 +123,14 @@ USAGE
        Counter,  or  PC).  The next most common use is with the EQU pseudo-op,
        which assigns a particular value to a symbol.
 
-       The  instruction  field  contains  either   an   instruction   op-codes
-       (mnemonic),  a  pseudo-ops  (assembler  directive), or a macro name for
+       The  instruction  field  contains   either   an   instruction   op-code
+       (mnemonic),  a  pseudo-op  (assembler  directive),  or a macro name for
        expansion.
 
        Pseudo-ops allow code placement to be  varied,  formatted  data  to  be
        included, conditional assembly, macro definition,
 
-       Arguments  are  a  comma-separated list, either instruction operands or
+       Arguments  are  a  comma-separated list: either instruction operands or
        arguments to a pseudo-op or macro. Permitted arguments are specific  to
        the instruction or pseudo-op, but in general they may be:
 
@@ -286,28 +286,33 @@ USAGE
        The 1 label occurs twice, but each reference to 1B refers to the  clos-
        est one searching backwards.
 
+       As  local labels can be repeated, their position is used to distinguish
+       them. For this reason, all file inclusions  and  macro  expansion  must
+       occur  during  the  first pass so that the absolute line count at which
+       each local label is encountered remains the same between passes.
+
    Macros
-       Start  a  macro  definition  by  specifying  a name for it in the label
-       field, and MACRO in the instruction field. Finish the  definition  with
+       Start a macro definition by specifying a  name  for  it  in  the  label
+       field,  and  MACRO in the instruction field. Finish the definition with
        ENDM in the instruction field.
 
-       Use  a macro by specifying its name in the instruction field. Any argu-
-       ments given will be available during expansion as  a  positional  vari-
+       Use a macro by specifying its name in the instruction field. Any  argu-
+       ments  given  will  be available during expansion as a positional vari-
        able.
 
        Positional variables can be used within strings, or pasted to form sym-
-       bol names. In either case, they must be quoted or they will  be  passed
-       by  value,  which  will result in an error if they do not correspond to
+       bol  names.  In either case, they must be quoted or they will be passed
+       by value, which will result in an error if they do  not  correspond  to
        valid symbols by themselves.
 
-       The positional variables are referred to with \{1},  \{2},  ...,  \{n}.
-       For  the  first nine arguments, the braces are not required, so \1, \2,
-       ..., \9 are valid alternatives. For compatibility  with  the  TSC  Flex
-       assembler,  another  form  is accepted: &{1}, &{2}, ..., &{n}. Within a
-       string, the simpler &1, &2, ..., &9 is still valid, but as this can  be
+       The  positional  variables  are referred to with \{1}, \{2}, ..., \{n}.
+       For the first nine arguments, the braces are not required, so  \1,  \2,
+       ...,  \9  are  valid  alternatives. For compatibility with the TSC Flex
+       assembler, another form is accepted: &{1}, &{2}, ...,  &{n}.  Within  a
+       string,  the shorter &1, &2, ..., &9 is still valid, but as this can be
        confused with bitwise AND, it is not permitted elsewhere.
 
-       Here's  a  silly  example demonstrating positional variables and symbol
+       Here's a silly example demonstrating positional  variables  and  symbol
        pasting. Consider the following macro definition and utilising code:
 
               go_left         equ     -1
@@ -335,25 +340,25 @@ USAGE
        Conditional assembly:
 
        IF condition
-              Subsequent lines are assembled only if  condition  evaluates  to
+              Subsequent  lines  are  assembled only if condition evaluates to
               true (non-zero).
 
        ELSIF condition
-              Subsequent  lines  are  assembled  only  if all preceding IF and
-              ELSIF pseudo-ops evaluated to false (zero) and condition  evalu-
+              Subsequent lines are assembled only  if  all  preceding  IF  and
+              ELSIF  pseudo-ops evaluated to false (zero) and condition evalu-
               ates to true (non-zero).
 
-       ELSE   Subsequent  lines  are  assembled  only  if all preceding IF and
+       ELSE   Subsequent lines are assembled only  if  all  preceding  IF  and
               ELSIF pseudo-ops evaluated to false (zero).
 
        ENDIF  Terminate an IF statement.
 
        Macro definition:
 
-       MACRO  Start defining a macro with  a  name  specified  by  the  line's
-              label.  Subsequent lines up to the enclosing ENDM pseudo-op will
-              not be assembled until the macro is expanded. Macro  definitions
-              may be nested; that is, a macro may define another macro.
+       MACRO  Start  defining  a macro. The macro's name shall be in the label
+              field. Subsequent lines up to the enclosing ENDM pseudo-op  will
+              not  be assembled until the macro is expanded. Macro definitions
+              may be nested; that is, using a macro may define another macro.
 
        ENDM   Finish a macro definition started with MACRO.
 
@@ -361,24 +366,24 @@ USAGE
 
        FCB value[,value]...
        FCC value[,value]...
-              Form  Constant  Byte. Each value is evaluated either to a number
+              Form Constant Byte. Each value is evaluated either to  a  number
               or a string. Numbers are truncated to 8 bits and stored directly
-              as  bytes.  For  strings,  the  ASCII value of each character is
+              as bytes. For strings, the ASCII  value  of  each  character  is
               stored in sequential bytes.
 
               Historically, FCB handled bytes and FCC (Form Constant Character
-              string)  handled strings. asm6809 treats them as synonymous, but
-              is rather more strict about what is allowed as a  string  delim-
+              string) handled strings. asm6809 treats them as synonymous,  but
+              is  rather  more strict about what is allowed as a string delim-
               iter.
 
        FCN value[,value]...
-              Identical  to  FCC,  but a terminating zero byte is stored after
-              the data. Included to increase compatibility with  other  assem-
+              Identical to FCC, but a terminating zero byte  is  stored  after
+              the  data.  Included to increase compatibility with other assem-
               blers.
 
        FDB value[,value]...
-              Form  Double Byte. Each value is evaluated to a number, which is
-              truncated to 16 bits and stored as two  successive  bytes  (big-
+              Form Double Byte. Each value is evaluated to a number, which  is
+              truncated  to  16  bits and stored as two successive bytes (big-
               endian, of course).
 
        FILL value,count
@@ -389,31 +394,31 @@ USAGE
        ZMB count[,value]
        BSZ count[,value]
               Reserve Zeroed Bytes. Inserts a sequence of count bytes of zero,
-              or  value if specified. The two-argument form is effectively the
+              or value if specified. The two-argument form is effectively  the
               same as FILL with its arguments swapped.
 
-              ZMB and BSZ are alternate  forms  recognised  for  compatibility
+              ZMB  and  BSZ  are  alternate forms recognised for compatibility
               with other assemblers.
 
        Code placement & addressing:
 
        ORG address
-              Sets  the Program Counter--the base address assumed for the next
-              assembled instruction. Unless followed by a PUT pseudo-op,  this
+              Sets the Program Counter--the base address assumed for the  next
+              assembled  instruction. Unless followed by a PUT pseudo-op, this
               will also be the instruction's actual address in memory. A label
               on the same line will define a symbol with a value of the speci-
               fied address.
 
        PUT address
-              Modify  the  put  address--the Program Counter is unaffected, so
-              the assumed address  for  subsequent  instructions  remains  the
-              same,  but the actual data will be located elsewhere. Useful for
-              assembling code that is going to be  copied  into  place  before
+              Modify the put address--the Program Counter  is  unaffected,  so
+              the  assumed  address  for  subsequent  instructions remains the
+              same, but the actual data will be located elsewhere. Useful  for
+              assembling  code  that  is  going to be copied into place before
               executing.
 
        RMB count
-              Reserve  Memory  Bytes.  The  Program  Counter is advanced count
-              bytes. In some output formats this region  may  be  padded  with
+              Reserve Memory Bytes. The  Program  Counter  is  advanced  count
+              bytes.  In  some  output  formats this region may be padded with
               zeroes, in others a new loadable section may be created.
 
        SECTION name
@@ -421,18 +426,18 @@ USAGE
        DATA
        BSS
        RAM
-       AUTO   Switch  to  the named section. The Program Counter will continue
-              from the last value it had while  assembling  this  section,  or
+       AUTO   Switch to the named section. The Program Counter  will  continue
+              from  the  last  value  it had while assembling this section, or
               follow the previous section if had not previously been seen.
 
-              Each  of  CODE,  DATA,  BSS, RAM, and AUTO switches to a section
+              Each of CODE, DATA, BSS, RAM, and AUTO  switches  to  a  section
               named after the pseudo-op. They are recognised for compatibility
               with other assemblers.
 
        SETDP page
-              Set  the  assumed value of the Direct Page (DP) register to page
-              for subsequent instructions. Any non-negative page is  truncated
-              to  8  bits,  or  specify a negative number to disable automatic
+              Set the assumed value of the Direct Page (DP) register  to  page
+              for  subsequent instructions. Any non-negative page is truncated
+              to 8 bits, or specify a negative  number  to  disable  automatic
               direct addressing.
 
               See the section on Direct Page addressing for more information.
@@ -440,54 +445,49 @@ USAGE
        Symbols:
 
        EQU value
-              Short for "equate", this must be used with a label, and  defines
-              a  symbol with the specified value. This may be any single valid
+              Short  for "equate", this must be used with a label, and defines
+              a symbol with the specified value. This may be any single  valid
               argument (e.g., an expression or a string) .
 
        EXPORT name[,name]...
               Each name--either the name of a macro or a symbol--is flagged to
-              be  exported.  Exported macros and symbols will be listed in the
+              be exported. Exported macros and symbols will be listed  in  the
               symbols output file, if specified.
 
        SET value
-              Similar to EQU, this must be used with a label,  and  defines  a
-              symbol  with  the  specified  value. Unlike EQU, you can use SET
-              multiple times to assign different values  to  the  same  symbol
+              Similar  to  EQU,  this must be used with a label, and defines a
+              symbol with the specified value. Unlike EQU,  you  can  use  SET
+              multiple  times  to  assign  different values to the same symbol
               without error.
 
        Files:
 
-       END address
+       END [address]
               Signifies the end of input. All further lines are disregarded.
 
-              Optionally  specifies an EXEC address to be included in the out-
+              Optionally specifies an EXEC address to be included in the  out-
               put, where supported by the output format. An EXEC address spec-
-              ified  on  the  command  line  will override any value specified
+              ified on the command line  will  override  any  value  specified
               here.
 
        INCLUDE filename
               Includes the contents of another file at this point in assembly.
-              The  filename  argument  must  be  a  string, i.e., delimited by
+              The filename argument must  be  a  string,  i.e.,  delimited  by
               quotes or / characters.
 
        INCLUDEBIN filename
-              Includes the binary data from filename (which, as  with  INCLUDE
+              Includes  the  binary data from filename (which, as with INCLUDE
               must be a delimited string) directly.
 
    Direct Page addressing
-       The  6809 extends the zero page concept from other processors by allow-
+       The 6809 extends the zero page concept from other processors by  allow-
        ing fast accesses to whichever page is selected by the Direct Page reg-
        ister (DP). An assembler is not able to keep track of what the code has
        set this register to, but the information is useful when deciding which
-       addressing  mode  to  use  for  an instruction. The SETDP pseudo-op, or
-       --setdp option, informs the assembler that the supplied value is to  be
-       assumed  for DP. Set this to a negative number to undefine it, and dis-
+       addressing mode to use for an  instruction.  The  SETDP  pseudo-op,  or
+       --setdp  option, informs the assembler that the supplied value is to be
+       assumed for DP. Set this to a negative number to undefine it, and  dis-
        able automatic use of direct addressing (this is the default).
-
-       As local labels can be repeated, their position is used to  distinguish
-       them.  For  this  reason,  all file inclusions and macro expansion must
-       occur during the first pass so that the absolute line  count  at  which
-       each local label is encountered remains the same between passes.
 
 LICENCE
        This program is free software: you can redistribute it and/or modify it
@@ -505,4 +505,4 @@ LICENCE
 
 
 
-asm6809-2.4                       April 2015                        asm6809(1)
+asm6809-2.5                       August 2015                       asm6809(1)
