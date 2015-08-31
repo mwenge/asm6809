@@ -51,7 +51,7 @@ static void verror(enum error_type type, const char *fmt, va_list ap) {
 	    error_level == error_type_out_of_range)
 		error_level = error_type_inconsistent;
 	if (fmt) {
-		err = xzalloc(sizeof(*err));
+		err = xmalloc(sizeof(*err));
 		err->type = type;
 		if (prog_ctx_stack) {
 			struct prog_ctx *ctx = prog_ctx_stack->data;
@@ -60,6 +60,9 @@ static void verror(enum error_type type, const char *fmt, va_list ap) {
 			assert(prog != NULL);
 			err->filename = prog->name;
 			err->line_number = ctx->line_number;
+		} else {
+			err->filename = NULL;
+			err->line_number = 0;
 		}
 		err->message = xvasprintf(fmt, ap);
 	}
