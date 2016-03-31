@@ -27,7 +27,7 @@ var { font-style: italic; }
 
 h1 { font-size: 1.5rem; }
 h2 { font-size: 1.1875rem; }
-h3 { font-size: 1rem; } 
+h3 { font-size: 1rem; }
 code,pre { font-size: small; }
 
 body { margin-left: 3rem; padding-left: 0.75rem; padding-right: 0.75rem; }
@@ -70,7 +70,7 @@ table td, table th { border-left: solid thin; border-right: solid thin; border-b
 
 <body>
 
-<h1 man:date='August 2015' man:section='1' man:dist='asm6809-2.5'>asm6809</h1>
+<h1 man:date='March 2016' man:section='1' man:dist='asm6809-2.5'>asm6809</h1>
 
 <h2 id='name'>NAME</h2>
 
@@ -182,7 +182,7 @@ source as necessary (up to a limit), until symbols are resolved and addresses
 are stable. The fastest or smallest representation should always be chosen
 where there is ambiguity.
 
-<p>Output formats are: Raw binary, DragonDOS binary, CoCo RS-DOS (or “DECB”)
+<p>Output formats are: Raw binary, DragonDOS binary, CoCo RS-DOS (“DECB”)
 binary, Motorola SREC, Intel HEX.
 
 <p>Home page:
@@ -207,16 +207,16 @@ line comments with a <code>;</code> character. An asterisk (<code>*</code>)
 can introduce whole line comments.
 
 <p>An unquoted semicolon always introduces a comment. The alternate form of the
-6309 instructions <code>AIM</code>, <code>OIM</code>, etc. listed in
-some documentation that uses a semicolon as a separator is not accepted.
+6309 instructions <code>AIM</code>, <code>OIM</code>, etc. listed in some
+documentation that uses a semicolon as a separator is not accepted.
 
 <p>A symbol may be forward referenced; any time a reference is unresolvable,
 another pass is triggered, up to some defined maximum.
 
 <p>In 6809 indexed addressing, the offset size will default to the fastest
-possible form, e.g., if the offset is an expression that happens to evaluate to
-zero, the “no offset” form will be used. Prepend <code>&lt;&lt;</code> to
-coerce a 5 bit offset, <code>&lt;</code> to coerce 8 bits or
+possible form, e.g. if the offset is an expression that happens to evaluate to
+zero, the <em>no offset</em> form will be used. Prepend <code>&lt;&lt;</code>
+to coerce a 5 bit offset, <code>&lt;</code> to coerce 8 bits or
 <code>&gt;</code> to coerce 16 bits.
 
 <p><strong>asm6809</strong> currently has no support for OS-9 modules or
@@ -307,11 +307,11 @@ relational operators.
 
 <p>The assembler uses multiple passes to resolve expressions. If an expression
 refers to a symbol that cannot currently be resolved, an extra pass is
-triggered. Similarly, if a symbol is assigned a value (e.g., by an
+triggered. Similarly, if a symbol is assigned a value (e.g. by an
 <code>EQU</code> pseudo-op) that differs to its value on the previous pass,
 another is triggered until it becomes stable.
 
-<p>When not directly used for their contents (e.g., by <code>FCC</code>),
+<p>When not directly used for their contents (e.g. by <code>FCC</code>),
 strings can be used in place of integer values. The ASCII value of each
 character is used to represent 8 bits of the integer result up to 32 bits.
 Example:
@@ -392,24 +392,22 @@ comfortable. Without <code>ORG</code> or <code>PUT</code> directives,
 sections will follow each other in memory in the order they are first defined.
 
 <p>Within each section, there may exist multiple spans of discontiguous data.
-Certain output formats are able to represent this, for the others (e.g.,
+Certain output formats are able to represent this, for the others (e.g.
 DragonDOS), the spans are combined first, with the gaps between them padded
 with zero bytes.
 
 <h3 id='local-labels'>Local labels</h3>
 
 <p>Local labels are considered local to the current <em>section</em>. A local
-label is any decimal number used in the label field. An exclamation mark
-(<code>!</code>) is considered the same as decimal zero. Identical numerical
-labels may occur more than once, other labels may not.
+label is any decimal number used in the label field, and the same local label
+may appear mulitple times, unlike other labels.
 
-<p>As an operand, a decimal number followed by <code>B</code> or
-<code>F</code> is considered to be a back or forward reference to the
-previous or next occurrence of that numerical local label in the section.
-Operands of <code>&lt;</code> and <code>&gt;</code> are considered
-equivalent to <code>0B</code> and <code>0F</code> respectively, and can
-therefore be used to refer to the <code>!</code> local label, as in some
-other assemblers. Example:
+<p>As an operand, a decimal number followed by <code>B</code> or <code>F</code>
+is considered to be a back or forward reference to the previous or next
+occurrence of that numerical local label in the section.
+
+<p>In this example, the <code>1</code> label occurs twice, but each use of
+<code>1B</code> refers to the closest one searching backwards:
 
 <pre><samp>
 0000  8E0400    scroll      ldx     #$0400
@@ -424,8 +422,11 @@ other assemblers. Example:
 0017  39                    rts
 </samp></pre>
 
-<p>The <code>1</code> label occurs twice, but each reference to
-<code>1B</code> refers to the closest one searching backwards.
+<p>An exclamation mark (<code>!</code>) in the label field is treated as a
+local label numbered zero. Operands of <code>&lt;</code> and <code>&gt;</code>
+are considered equivalent to <code>0B</code> and <code>0F</code> respectively,
+and can therefore refer to the <code>!</code> local label. This is included for
+compatibility with other assemblers.
 
 <p>As local labels can be repeated, their position is used to distinguish
 them. For this reason, all file inclusions and macro expansion must occur
@@ -643,9 +644,9 @@ more information.
 
 <dt><code>EQU</code> <var>value</var>
 
-<dd>Short for “equate”, this must be used with a label, and defines a symbol
+<dd>Short for “equate”, this must be used with a label and defines a symbol
 with the specified <var>value</var>. This may be any single valid argument
-(e.g., an expression or a string) .
+(e.g. an expression or a string).
 
 <dt><code>EXPORT</code> <var>name</var>[,<var>name</var>]…
 
@@ -655,7 +656,7 @@ file, if specified.
 
 <dt><code>SET</code> <var>value</var>
 
-<dd>Similar to <code>EQU</code>, this must be used with a label, and defines a
+<dd>Similar to <code>EQU</code>, this must be used with a label and defines a
 symbol with the specified <var>value</var>. Unlike <code>EQU</code>, you can
 use <code>SET</code> multiple times to assign different values to the same
 symbol without error.
@@ -677,7 +678,7 @@ will override any value specified here.
 <dt><code>INCLUDE</code> <var>filename</var>
 
 <dd>Includes the contents of another file at this point in assembly. The
-<var>filename</var> argument must be a string, i.e., delimited by quotes or
+<var>filename</var> argument must be a string, i.e. delimited by quotes or
 <code>/</code> characters.
 
 <dt><code>INCLUDEBIN</code> <var>filename</var>
@@ -696,7 +697,7 @@ set this register to, but the information is useful when deciding which
 addressing mode to use for an instruction. The <code>SETDP</code> pseudo-op, or
 <code>--setdp</code> option, informs the assembler that the supplied value is
 to be assumed for <code>DP</code>. Set this to a negative number to undefine
-it, and disable automatic use of direct addressing (this is the default).
+it and disable automatic use of direct addressing (this is the default).
 
 <h2 id='licence'>LICENCE</h2>
 
