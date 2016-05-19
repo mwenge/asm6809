@@ -1,7 +1,7 @@
 /*
 
 Singly linked lists
-Copyright 2009-2015, Ciaran Anscomb
+Copyright 2009-2016, Ciaran Anscomb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License as published by the
@@ -19,7 +19,8 @@ option) any later version.
 
 /* Wrap data in a new list container */
 static struct slist *slist_new(void *data) {
-	struct slist *new = xmalloc(sizeof(*new));
+	struct slist *new = malloc(sizeof(*new));
+	if (!new) return NULL;
 	new->next = NULL;
 	new->data = data;
 	return new;
@@ -134,7 +135,7 @@ struct slist *slist_reverse(struct slist *list) {
 static struct slist *slist_merge(struct slist *left, struct slist *right, slist_cmp_func cmp_func) {
 	struct slist *new = NULL;
 	struct slist **newp = &new;
-	while (left || right) {
+	while (1) {
 		if (left && right) {
 			if (cmp_func(left->data, right->data) <= 0) {
 				*newp = left;
@@ -146,9 +147,11 @@ static struct slist *slist_merge(struct slist *left, struct slist *right, slist_
 		} else if (left) {
 			*newp = left;
 			left = left->next;
-		} else {
+		} else if (right) {
 			*newp = right;
 			right = right->next;
+		} else {
+			break;
 		}
 		newp = &(*newp)->next;
 	}
@@ -189,9 +192,12 @@ struct slist *slist_concat(struct slist *list1, struct slist *list2) {
 		return list1;
 	if (!list1)
 		return list2;
-	while (list1->next)
-		list1 = list1->next;
-	list1->next = list2;
+
+	struct slist *l = list1;
+	while (l->next)
+		l = l->next;
+	l->next = list2;
+
 	return list1;
 }
 
