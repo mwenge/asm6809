@@ -1,6 +1,10 @@
 ## build files
 /*.lis
 /*.out
+/test-isa6309.sh.log
+/test-isa6309.sh.trs
 /test-isa6809.sh.log
 /test-isa6809.sh.trs
+/test-pseudo.sh.log
+/test-pseudo.sh.trs
 /test-suite.log
