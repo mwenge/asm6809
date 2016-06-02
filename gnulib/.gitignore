@@ -1,7 +1,9 @@
-## autoconf built files
+/*.o
+/Makefile
 /alloca.h
 /arg-nonnull.h
 /c++defs.h
+/errno.h
 /getopt.h
 /libgnu.a
 /stddef.h
@@ -12,5 +14,3 @@
 /unistd.h
 /warn-on-use.h
 /wchar.h
-## build files
-/*.o

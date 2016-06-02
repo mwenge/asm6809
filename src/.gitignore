@@ -1,8 +1,7 @@
-## intermediates
+/*.o
+/Makefile
+/asm6809
+/asm6809.exe
 /grammar.c
 /grammar.h
 /lex.c
-## build files
-/*.o
-/asm6809
-/asm6809.exe

@@ -1,6 +1,6 @@
-## build files
 /*.lis
 /*.out
+/Makefile
 /test-isa6309.sh.log
 /test-isa6309.sh.trs
 /test-isa6809.sh.log

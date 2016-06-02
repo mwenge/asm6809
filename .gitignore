@@ -2,8 +2,8 @@
 *.swp
 ## autoconf files
 .deps/
-Makefile
 Makefile.in
+/Makefile
 /aclocal.m4
 /ar-lib
 /autom4te.cache/
