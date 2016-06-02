@@ -75,6 +75,6 @@
 .nr PDFOUTLINE.FOLDLEVEL 3
 .\"
 .pdfview /PageMode /UseOutlines
-.pdfinfo /Title asm6809 2.5
+.pdfinfo /Title asm6809 2.6
 .pdfinfo /Author Ciaran Anscomb
 .
