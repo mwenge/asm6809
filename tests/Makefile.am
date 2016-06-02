@@ -18,7 +18,8 @@ EXTRA_DIST = \
 	isa6809-inherent.s isa6809-inherent.cmp \
 	isa6809-relative.s isa6809-relative.cmp \
 	pseudo-cond.s pseudo-cond.cmp \
-	pseudo-org-put-setdp.s pseudo-org-put-setdp.cmp
+	pseudo-org-put-setdp.s pseudo-org-put-setdp.cmp \
+	pseudo-section.s pseudo-section.cmp
 
 AM_TESTS_ENVIRONMENT =
 
