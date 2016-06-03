@@ -13,6 +13,8 @@ option) any later version.
 #ifndef ASM6809_SYMBOL_H_
 #define ASM6809_SYMBOL_H_
 
+#include <stdint.h>
+
 struct dict;
 struct node;
 
