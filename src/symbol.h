@@ -45,9 +45,9 @@ struct node *symbol_get(const char *key);
 void symbol_free_all(void);
 
 struct dict *symbol_local_table_new(void);
-struct node *symbol_local_backref(struct dict *table, long key, unsigned line_number);
-struct node *symbol_local_fwdref(struct dict *table, long key, unsigned line_number);
-void symbol_local_set(struct dict *table, long key, unsigned line_number, struct node *value,
-		      unsigned pass);
+struct node *symbol_local_backref(struct dict *table, intptr_t key, unsigned line_number);
+struct node *symbol_local_fwdref(struct dict *table, intptr_t key, unsigned line_number);
+void symbol_local_set(struct dict *table, intptr_t key, unsigned line_number,
+		      struct node *value, unsigned pass);
 
 #endif

@@ -174,7 +174,7 @@ static int sym_local_compar_fwdref(const void *a, const void *b) {
 	return 0;
 }
 
-struct node *symbol_local_backref(struct dict *table, long key, unsigned line_number) {
+struct node *symbol_local_backref(struct dict *table, intptr_t key, unsigned line_number) {
 	gl_list_t sym_list = dict_lookup(table, (void *)key);
 	if (sym_list) {
 		sym_found = NULL;
@@ -188,7 +188,7 @@ struct node *symbol_local_backref(struct dict *table, long key, unsigned line_nu
 	return NULL;
 }
 
-struct node *symbol_local_fwdref(struct dict *table, long key, unsigned line_number) {
+struct node *symbol_local_fwdref(struct dict *table, intptr_t key, unsigned line_number) {
 	gl_list_t sym_list = dict_lookup(table, (void *)key);
 	if (sym_list) {
 		sym_found = NULL;
@@ -202,8 +202,8 @@ struct node *symbol_local_fwdref(struct dict *table, long key, unsigned line_num
 	return NULL;
 }
 
-void symbol_local_set(struct dict *table, long key, unsigned line_number, struct node *value,
-		      unsigned pass) {
+void symbol_local_set(struct dict *table, intptr_t key, unsigned line_number,
+		      struct node *value, unsigned pass) {
 	(void)pass;
 	gl_list_t sym_list = dict_lookup(table, (void *)key);
 	gl_list_node_t old_lnode = NULL;
