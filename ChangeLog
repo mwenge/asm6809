@@ -1,8 +1,12 @@
 ## asm6809 changes
 
+### Changes in version 2.7, Sun  1 Jan 2017
+
+  * Permit use of a zero register in 6309 assembly using TFR & EXG.
+
 ### Changes in version 2.6, Fri  3 Jun 2016
 
-  * Fixed problem with missing SECTIONs [Stewart Orchard]
+  * Fixed problem with missing SECTIONs. [Stewart Orchard]
 
 ### Changes in version 2.5, Mon 31 Aug 2015
 
