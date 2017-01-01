@@ -233,15 +233,15 @@ considered a comment. Whole line comments may be introduced with an asterisk
 
 <p>Any label must appear at the very beginning of the line. If a label is
 omitted, whitespace must appear before the operator field. Certain pseudo-ops
-affect a label's meaning, but their usual purpose is to define a symbol
-referring to the current position in the code (Program Counter, or PC). The
-next most common use is with the <code>EQU</code> pseudo-op, which assigns
-a particular value to a symbol.
+may affect a label's meaning, but usually labels define a symbol referring to
+the current position in the code (Program Counter, or PC).
 
 <p>The instruction field contains either an instruction op-code (mnemonic), a
 pseudo-op (assembler directive), or a macro name for expansion.
 
-<p>Pseudo-ops allow code placement to be varied, formatted data to be included, conditional assembly, macro definition,
+<p>Pseudo-ops allow conditional assembly and inline data, can affect code
+placement and symbol values and be used to include further files inline. See
+the section on <a href='#pseudo-ops'>Pseudo-ops</a> for more information.
 
 <p>Arguments are a comma-separated list: either instruction operands or
 arguments to a pseudo-op or macro. Permitted arguments are specific to the

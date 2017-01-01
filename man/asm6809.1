@@ -174,11 +174,11 @@ In 6809 indexed addressing, the offset size will default to the fastest possible
 .PP
 Program files are considered line by line. Each line contains up to three fields, separated by whitespace: label, instruction and arguments. An unquoted semicolon (\f(CB;\fR) indicates that the rest of the line is to be considered a comment. Whole line comments may be introduced with an asterisk (\f(CB*\fR). Motorola-style end of line comments without a \f(CB;\fR are accepted, but see the notes about assembler differences.
 .PP
-Any label must appear at the very beginning of the line. If a label is omitted, whitespace must appear before the operator field. Certain pseudo-ops affect a label\[aq]s meaning, but their usual purpose is to define a symbol referring to the current position in the code (Program Counter, or PC). The next most common use is with the \f(CBEQU\fR pseudo-op, which assigns a particular value to a symbol.
+Any label must appear at the very beginning of the line. If a label is omitted, whitespace must appear before the operator field. Certain pseudo-ops may affect a label\[aq]s meaning, but usually labels define a symbol referring to the current position in the code (Program Counter, or PC).
 .PP
 The instruction field contains either an instruction op-code (mnemonic), a pseudo-op (assembler directive), or a macro name for expansion.
 .PP
-Pseudo-ops allow code placement to be varied, formatted data to be included, conditional assembly, macro definition,
+Pseudo-ops allow conditional assembly and inline data, can affect code placement and symbol values and be used to include further files inline. See the section on Pseudo-ops for more information.
 .PP
 Arguments are a comma-separated list: either instruction operands or arguments to a pseudo-op or macro. Permitted arguments are specific to the instruction or pseudo-op, but in general they may be:
 .IP \(bu 2
