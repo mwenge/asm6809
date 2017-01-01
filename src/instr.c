@@ -16,6 +16,7 @@ option) any later version.
 #include <stdlib.h>
 
 #include "array.h"
+#include "asm6809.h"
 #include "assemble.h"
 #include "error.h"
 #include "eval.h"
@@ -544,13 +545,18 @@ void instr_pair(struct opcode const *op, struct node const *args) {
 			size[i] = reg_tfr_size[arga[i]->data.as_reg];
 		} else if (type[i] == node_type_int) {
 			int v = arga[i]->data.as_int;
-			error(error_type_illegal, "numerical values used in inter-register op");
-			if (v < 0 || v > 15) {
-				error(error_type_out_of_range, "numeric value for register out of range");
+			if (v == 0 && asm6809_options.isa == asm6809_isa_6309) {
+				nibble[i] = 0x0c;
+				size[i] = 16 | 8;
+			} else {
+				error(error_type_illegal, "numerical values used in inter-register op");
+				if (v < 0 || v > 15) {
+					error(error_type_out_of_range, "numeric value for register out of range");
+				}
+				nibble[i] = v & 15;
+				// don't warn about size as well if numeric...
+				size[i] = 16 | 8;
 			}
-			nibble[i] = v & 15;
-			// don't warn about size as well if numeric...
-			size[i] = 16 | 8;
 		} else if (type[i] != node_type_undef) {
 			error(error_type_syntax, "invalid register in inter-register op");
 			return;
