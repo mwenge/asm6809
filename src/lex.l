@@ -2,7 +2,7 @@
 /*
 
 asm6809, a Motorola 6809 cross assembler
-Copyright 2013-2016 Ciaran Anscomb
+Copyright 2013-2017 Ciaran Anscomb
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
