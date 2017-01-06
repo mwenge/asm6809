@@ -1,5 +1,8 @@
 ; test immediate 6309 instructions
 
+	; include all 6809 tests
+	include "isa6809-immediate.s"
+
 	adcd	#$1089
 	adcr	u,x
 	adde	#$8b
@@ -45,3 +48,12 @@
 	tfm	y-,u-
 	tfm	s+,u
 	tfm	y,x+
+
+	exg	0,x
+	exg	y,0
+	exg	0,a
+	exg	b,0
+	tfr	x,0
+	tfr	0,y
+	tfr	a,0
+	tfr	0,b
