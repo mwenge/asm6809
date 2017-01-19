@@ -6,6 +6,8 @@
 	addw	<$9b
 	aim	#$02,<$02
 	andd	<$94
+	aim	#1,<$12
+	aim	#-2,$12
 
 	band	cc,6,0,<$30
 	biand	cc,6,1,<$31
@@ -34,6 +36,8 @@
 	muld	<$9f
 
 	oim	#$01,<$01
+	aim	#1,$12
+	aim	#-2,<$12
 	ord	<$9a
 
 	sbcd	<$92

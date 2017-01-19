@@ -486,7 +486,7 @@ void instr_imm8_mem(struct opcode const *op, struct node const *args) {
 	struct node *newa = node_new_array();
 	newa->data.as_array.nargs = nargs - 1;
 	newa->data.as_array.args = arga + 1;
-	instr_address(op, newa, imm8_val);
+	instr_address(op, newa, (uint8_t)imm8_val);
 	newa->data.as_array.nargs = 0;
 	newa->data.as_array.args = NULL;
 	node_free(newa);
