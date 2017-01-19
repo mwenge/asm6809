@@ -1,12 +1,18 @@
 ## asm6809 changes
 
+### Changes in version 2.8, Fri 20 Jan 2017
+
+  * Fix handling of negative values in AIM, OIM, etc. Reported: Bill
+    Dorsey.
+
 ### Changes in version 2.7, Sun  1 Jan 2017
 
-  * Permit use of a zero register in 6309 assembly using TFR & EXG.
+  * Permit use of a zero register in 6309 assembly using TFR & EXG. Reported:
+    litwr.
 
 ### Changes in version 2.6, Fri  3 Jun 2016
 
-  * Fixed problem with missing SECTIONs. [Stewart Orchard]
+  * Fixed problem with missing SECTIONs. Fixed: Stewart Orchard.
 
 ### Changes in version 2.5, Mon 31 Aug 2015
 
