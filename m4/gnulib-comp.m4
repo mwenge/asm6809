@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2002-2016 Free Software Foundation, Inc.
+# Copyright (C) 2002-2017 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,6 +48,9 @@ AC_DEFUN([gl_EARLY],
   # Code from module bitrotate:
   # Code from module c-ctype:
   # Code from module c-strcase:
+  # Code from module dirname-lgpl:
+  # Code from module dosname:
+  # Code from module double-slash-root:
   # Code from module errno:
   # Code from module error:
   # Code from module exitfail:
@@ -56,11 +59,14 @@ AC_DEFUN([gl_EARLY],
   # Code from module float:
   # Code from module getopt-gnu:
   # Code from module getopt-posix:
+  # Code from module getprogname:
   # Code from module gettext-h:
   # Code from module hash:
   # Code from module include_next:
   # Code from module intprops:
+  # Code from module limits-h:
   # Code from module list:
+  # Code from module malloc-posix:
   # Code from module memchr:
   # Code from module msvc-inval:
   # Code from module msvc-nothrow:
@@ -119,6 +125,8 @@ AC_DEFUN([gl_INIT],
   gl_COMMON
   gl_source_base='gnulib'
   gl_FUNC_ALLOCA
+  gl_DIRNAME_LGPL
+  gl_DOUBLE_SLASH_ROOT
   gl_HEADER_ERRNO_H
   gl_ERROR
   if test $ac_cv_lib_error_at_line = no; then
@@ -145,7 +153,6 @@ AC_DEFUN([gl_INIT],
     GNULIB_GL_UNISTD_H_GETOPT=1
   fi
   AC_SUBST([GNULIB_GL_UNISTD_H_GETOPT])
-  gl_MODULE_INDICATOR_FOR_TESTS([getopt-gnu])
   gl_FUNC_GETOPT_POSIX
   if test $REPLACE_GETOPT = 1; then
     AC_LIBOBJ([getopt])
@@ -155,8 +162,15 @@ AC_DEFUN([gl_INIT],
     GNULIB_GL_UNISTD_H_GETOPT=1
   fi
   AC_SUBST([GNULIB_GL_UNISTD_H_GETOPT])
+  gl_FUNC_GETPROGNAME
   AC_SUBST([LIBINTL])
   AC_SUBST([LTLIBINTL])
+  gl_LIMITS_H
+  gl_FUNC_MALLOC_POSIX
+  if test $REPLACE_MALLOC = 1; then
+    AC_LIBOBJ([malloc])
+  fi
+  gl_STDLIB_MODULE_INDICATOR([malloc-posix])
   gl_FUNC_MEMCHR
   if test $HAVE_MEMCHR = 0 || test $REPLACE_MEMCHR = 1; then
     AC_LIBOBJ([memchr])
@@ -366,6 +380,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/alloca.in.h
   lib/asnprintf.c
   lib/asprintf.c
+  lib/basename-lgpl.c
   lib/bitrotate.c
   lib/bitrotate.h
   lib/c-ctype.c
@@ -373,6 +388,9 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/c-strcase.h
   lib/c-strcasecmp.c
   lib/c-strncasecmp.c
+  lib/dirname-lgpl.c
+  lib/dirname.h
+  lib/dosname.h
   lib/errno.in.h
   lib/error.c
   lib/error.h
@@ -385,6 +403,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/getopt.in.h
   lib/getopt1.c
   lib/getopt_int.h
+  lib/getprogname.c
+  lib/getprogname.h
   lib/gettext.h
   lib/gl_anyavltree_list1.h
   lib/gl_anyavltree_list2.h
@@ -400,6 +420,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/hash.h
   lib/intprops.h
   lib/itold.c
+  lib/limits.in.h
+  lib/malloc.c
   lib/memchr.c
   lib/memchr.valgrind
   lib/msvc-inval.c
@@ -421,6 +443,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/strerror-override.h
   lib/strerror.c
   lib/string.in.h
+  lib/stripslash.c
   lib/strndup.c
   lib/strnlen.c
   lib/sys_types.in.h
@@ -443,6 +466,8 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/00gnulib.m4
   m4/absolute-header.m4
   m4/alloca.m4
+  m4/dirname.m4
+  m4/double-slash-root.m4
   m4/errno_h.m4
   m4/error.m4
   m4/exponentd.m4
@@ -450,11 +475,14 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/extern-inline.m4
   m4/float_h.m4
   m4/getopt.m4
+  m4/getprogname.m4
   m4/gnulib-common.m4
   m4/include_next.m4
   m4/intmax_t.m4
   m4/inttypes_h.m4
+  m4/limits-h.m4
   m4/longlong.m4
+  m4/malloc.m4
   m4/math_h.m4
   m4/memchr.m4
   m4/mmap-anon.m4
