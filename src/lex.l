@@ -43,6 +43,7 @@ void lex_free_all(void);
 %s opcode
 %s arg
 %s argnostr
+%s argnostrnum
 %s string
 
 nzdigit	[1-9]
@@ -54,6 +55,7 @@ ws	[ \t]
 
 decimal	{digit}+
 word	[A-Za-z_][A-Za-z0-9_\.]*
+rword	[A-Za-z0-9_\.]+
 
 %%
 
@@ -111,7 +113,7 @@ ${hexdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
 
 }
 
-<argnostr>{
+<argnostr,argnostrnum>{
 
 \/		{ BEGIN(argnostr); return *yytext; }
 
@@ -120,9 +122,20 @@ ${hexdigit}+	{ yylval.as_int = strtoimax(yytext+1, NULL, 16); return INTEGER; }
 <arg,argnostr>{
 
 {word}		{ BEGIN(argnostr); return id_or_reg(); }
-&\{{decimal}\}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
-\\{digit}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
-\\\{{decimal}\}	{ BEGIN(argnostr); yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
+
+}
+
+<argnostrnum>{
+
+{rword}		{ BEGIN(argnostrnum); yylval.as_string = strndup(yytext, yyleng); return ID; }
+
+}
+
+<arg,argnostr,argnostrnum>{
+
+&\{{decimal}\}	{ BEGIN(argnostrnum); yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
+\\{digit}	{ BEGIN(argnostrnum); yylval.as_string = strndup(yytext+1, yyleng-1); return INTERP; }
+\\\{{decimal}\}	{ BEGIN(argnostrnum); yylval.as_string = strndup(yytext+2, yyleng-3); return INTERP; }
 
 \+\+		{ BEGIN(argnostr); return INC2; }
 \-\-		{ BEGIN(argnostr); return DEC2; }
