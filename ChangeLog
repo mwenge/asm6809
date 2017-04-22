@@ -1,5 +1,9 @@
 ## asm6809 changes
 
+### Changes in version 2.9, Sat 22 Apr 2017
+
+  * Fix pasting digits following interpolated variable.
+
 ### Changes in version 2.8, Fri 20 Jan 2017
 
   * Fix handling of negative values in AIM, OIM, etc. Reported: Bill
