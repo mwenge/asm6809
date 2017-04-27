@@ -198,7 +198,7 @@ struct node *symbol_local_fwdref(struct dict *table, intptr_t key, unsigned line
 			return node_ref(sym_found->node);
 		}
 	}
-	error(error_type_inconsistent, "backref '%ld' not defined", key);
+	error(error_type_inconsistent, "fwdref '%ld' not defined", key);
 	return NULL;
 }
 
