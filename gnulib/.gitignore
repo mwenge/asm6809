@@ -1,7 +1,6 @@
 /*.o
 /Makefile
 /alloca.h
-/c++defs.h
 /errno.h
 /getopt.h
 /libgnu.a
