@@ -71,6 +71,7 @@ static void pseudo_fcc(struct prog_line *);
 static void pseudo_fcn(struct prog_line *);
 static void pseudo_fcs(struct prog_line *);
 static void pseudo_fdb(struct prog_line *);
+static void pseudo_fqb(struct prog_line *);
 static void pseudo_rzb(struct prog_line *);
 static void pseudo_fill(struct prog_line *);
 static void pseudo_rmb(struct prog_line *);
@@ -109,6 +110,7 @@ static struct pseudo_op pseudo_data_ops[] = {
 	{ .name = "fcn", .handler = &pseudo_fcn },
 	{ .name = "fcs", .handler = &pseudo_fcs },
 	{ .name = "fdb", .handler = &pseudo_fdb },
+	{ .name = "fqb", .handler = &pseudo_fqb },
 	{ .name = "rzb", .handler = &pseudo_rzb },
 	{ .name = "fzb", .handler = &pseudo_rzb },
 	{ .name = "zmb", .handler = &pseudo_rzb },  // alias
@@ -769,6 +771,18 @@ static void pseudo_fdb(struct prog_line *line) {
 	for (int i = 0; i < nargs; i++) {
 		long word = have_int_optional(line->args, i, "FDB", 0);
 		section_emit_uint16(word);
+	}
+}
+
+/* FQB.  Embed 32-bit constants. */
+
+static void pseudo_fqb(struct prog_line *line) {
+	int nargs = verify_num_args(line->args, 1, -1, "FQB");
+	if (nargs < 0)
+		return;
+	for (int i = 0; i < nargs; i++) {
+		long word = have_int_optional(line->args, i, "FQB", 0);
+		section_emit_uint32(word);
 	}
 }
 
