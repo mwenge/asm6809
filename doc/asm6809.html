@@ -558,8 +558,12 @@ after the data. Included to increase compatibility with other assemblers.
 <dt><code>FDB</code> <var>value</var>[,<var>value</var>]…
 
 <dd>Form Double Byte. Each <var>value</var> is evaluated to a number, which is
-truncated to 16 bits and stored as two successive bytes (big- endian, of
-course).
+truncated to 16 bits and stored as two successive bytes (big-endian).
+
+<dt><code>FQB</code> <var>value</var>[,<var>value</var>]…
+
+<dd>Form Quad Byte. Each <var>value</var> is evaluated to a number, which is
+truncated to 32 bits and stored as four successive bytes (big-endian).
 
 <dt><code>FILL</code> <var>value</var>,<var>count</var>
 
