@@ -82,7 +82,7 @@ static struct node *simple_parse_int(const char *);
 static void define_symbol(const char *);
 static void helptext(void);
 static void versiontext(void);
-static void tidy_up_and_exit(int status);
+static _Noreturn void tidy_up_and_exit(int status);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -363,7 +363,7 @@ static void versiontext(void) {
 /* Call the various free_all routines to tidy up memory, then exit.  Allows us
  * to see what's been missed with valgrind. */
 
-static void tidy_up_and_exit(int status) {
+static _Noreturn void tidy_up_and_exit(int status) {
 	if (files) {
 		slist_free(files);
 		files = NULL;
