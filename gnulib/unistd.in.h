@@ -12,7 +12,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, see <https://www.gnu.org/licenses/>.  */
 
 #ifndef _@GUARD_PREFIX@_UNISTD_H
 
@@ -134,9 +134,8 @@
 /* The definition of _GL_WARN_ON_USE is copied here.  */
 
 
-/* Get getopt(), optarg, optind, opterr, optopt.
-   But avoid namespace pollution on glibc systems.  */
-#if @GNULIB_UNISTD_H_GETOPT@ && !defined __GLIBC__ && !defined _GL_SYSTEM_GETOPT
+/* Get getopt(), optarg, optind, opterr, optopt.  */
+#if @GNULIB_UNISTD_H_GETOPT@ && !defined _GL_SYSTEM_GETOPT
 # include <getopt-cdefs.h>
 # include <getopt-pfx-core.h>
 #endif
@@ -379,7 +378,7 @@ _GL_WARN_ON_USE (dup2, "dup2 is unportable - "
    Close NEWFD first if it is open.
    Return newfd if successful, otherwise -1 and errno set.
    See the Linux man page at
-   <http://www.kernel.org/doc/man-pages/online/pages/man2/dup3.2.html>.  */
+   <https://www.kernel.org/doc/man-pages/online/pages/man2/dup3.2.html>.  */
 # if @HAVE_DUP3@
 #  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
 #   define dup3 rpl_dup3
@@ -1149,7 +1148,7 @@ _GL_WARN_ON_USE (pipe, "pipe is unportable - "
    Store the read-end as fd[0] and the write-end as fd[1].
    Return 0 upon success, or -1 with errno set upon failure.
    See also the Linux man page at
-   <http://www.kernel.org/doc/man-pages/online/pages/man2/pipe2.2.html>.  */
+   <https://www.kernel.org/doc/man-pages/online/pages/man2/pipe2.2.html>.  */
 # if @HAVE_PIPE2@
 #  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
 #   define pipe2 rpl_pipe2
@@ -1453,6 +1452,36 @@ _GL_CXXALIASWARN (symlinkat);
 # if HAVE_RAW_DECL_SYMLINKAT
 _GL_WARN_ON_USE (symlinkat, "symlinkat is not portable - "
                  "use gnulib module symlinkat for portability");
+# endif
+#endif
+
+
+#if @GNULIB_TRUNCATE@
+/* Change the size of the file designated by FILENAME to become equal to LENGTH.
+   Return 0 if successful, otherwise -1 and errno set.
+   See the POSIX:2008 specification
+   <http://pubs.opengroup.org/onlinepubs/9699919799/functions/truncate.html>.  */
+# if @REPLACE_TRUNCATE@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef truncate
+#   define truncate rpl_truncate
+#  endif
+_GL_FUNCDECL_RPL (truncate, int, (const char *filename, off_t length)
+                                 _GL_ARG_NONNULL ((1)));
+_GL_CXXALIAS_RPL (truncate, int, (const char *filename, off_t length));
+# else
+#  if !@HAVE_TRUNCATE@
+_GL_FUNCDECL_SYS (truncate, int, (const char *filename, off_t length)
+                                 _GL_ARG_NONNULL ((1)));
+#  endif
+_GL_CXXALIAS_SYS (truncate, int, (const char *filename, off_t length));
+# endif
+_GL_CXXALIASWARN (truncate);
+#elif defined GNULIB_POSIXCHECK
+# undef truncate
+# if HAVE_RAW_DECL_TRUNCATE
+_GL_WARN_ON_USE (truncate, "truncate is unportable - "
+                 "use gnulib module truncate for portability");
 # endif
 #endif
 

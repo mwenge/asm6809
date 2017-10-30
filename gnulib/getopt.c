@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public
    License along with the GNU C Library; if not, see
-   <http://www.gnu.org/licenses/>.  */
+   <https://www.gnu.org/licenses/>.  */
 
 #ifndef _LIBC
 # include <config.h>
@@ -45,7 +45,8 @@
 # define _(msgid) gettext (msgid)
 /* When used standalone, flockfile and funlockfile might not be
    available.  */
-# if !defined _POSIX_THREAD_SAFE_FUNCTIONS || defined __MINGW32__
+# if (!defined _POSIX_THREAD_SAFE_FUNCTIONS \
+      || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
 #  define flockfile(fp) /* nop */
 #  define funlockfile(fp) /* nop */
 # endif

@@ -1,11 +1,8 @@
 /*.o
 /Makefile
 /alloca.h
-/errno.h
-/getopt.h
 /libgnu.a
 /limits.h
-/stddef.h
 /stdint.h
 /stdio.h
 /stdlib.h

@@ -13,7 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License along
-   with this program; if not, see <http://www.gnu.org/licenses/>.  */
+   with this program; if not, see <https://www.gnu.org/licenses/>.  */
 
 #include <config.h>
 
@@ -24,7 +24,9 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#include "msvc-inval.h"
+#if HAVE_MSVC_INVALID_PARAMETER_HANDLER
+# include "msvc-inval.h"
+#endif
 
 #undef _get_osfhandle
 
