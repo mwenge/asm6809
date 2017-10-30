@@ -248,6 +248,8 @@ static void print_exported(const char *key, void *value, FILE *f) {
 		if (!n)
 			return;
 		int delim = 0;
+		enum node_attr old_attr = node_attr_of(n);
+		n = node_set_attr(n, node_attr_none);
 		switch (node_type_of(n)) {
 		default:
 			error(error_type_syntax, "can't export symbol type");
@@ -266,6 +268,7 @@ static void print_exported(const char *key, void *value, FILE *f) {
 		node_print(f, n);
 		if (delim) fputc(delim, f);
 		fprintf(f, "\n");
+		n = node_set_attr(n, old_attr);
 		node_free(n);
 	}
 }
