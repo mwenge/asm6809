@@ -75,10 +75,10 @@
 .nr PDFOUTLINE.FOLDLEVEL 3
 .\"
 .pdfview /PageMode /UseOutlines
-.pdfinfo /Title asm6809 2.9
+.pdfinfo /Title asm6809 2.10
 .pdfinfo /Author Ciaran Anscomb
 .
-.TH "asm6809" "1" "April 2017" "asm6809-2.9"
+.TH "asm6809" "1" "October 2017" "asm6809-2.10"
 .hy 0
 .nh
 .H1 NAME
@@ -203,7 +203,7 @@ Expressions are formed of:
 .IP \(bu 2
 A decimal number.
 .IP \(bu 2
-An octal number preceded by \f(CB@\fR.
+An octal number preceded by \f(CB@\fR or with a leading \f(CB0\fR.
 .IP \(bu 2
 A binary number preceded by \f(CB%\fR or \f(CB0b\fR.
 .IP \(bu 2
@@ -405,7 +405,10 @@ Historically, \f(CBFCB\fR handled bytes and \f(CBFCC\fR (Form Constant Character
 Identical to \f(CBFCC\fR, but a terminating zero byte is stored after the data. Included to increase compatibility with other assemblers.
 .TP
 \f(CBFDB\fR \fIvalue\fR\[lB],\fIvalue\fR\[rB]\[...]
-Form Double Byte. Each \fIvalue\fR is evaluated to a number, which is truncated to 16 bits and stored as two successive bytes (big- endian, of course).
+Form Double Byte. Each \fIvalue\fR is evaluated to a number, which is truncated to 16 bits and stored as two successive bytes (big-endian).
+.TP
+\f(CBFQB\fR \fIvalue\fR\[lB],\fIvalue\fR\[rB]\[...]
+Form Quad Byte. Each \fIvalue\fR is evaluated to a number, which is truncated to 32 bits and stored as four successive bytes (big-endian).
 .TP
 \f(CBFILL\fR \fIvalue\fR,\fIcount\fR
 Insert \fIcount\fR bytes of \fIvalue\fR. This is effectively the same as the two-argument form of \f(CBRZB\fR with its arguments swapped.

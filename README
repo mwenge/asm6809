@@ -156,7 +156,7 @@ USAGE
 
        o A decimal number.
 
-       o An octal number preceded by @.
+       o An octal number preceded by @ or with a leading 0.
 
        o A binary number preceded by % or 0b.
 
@@ -385,7 +385,12 @@ USAGE
        FDB value[,value]...
               Form  Double Byte. Each value is evaluated to a number, which is
               truncated to 16 bits and stored as two  successive  bytes  (big-
-              endian, of course).
+              endian).
+
+       FQB value[,value]...
+              Form  Quad  Byte.  Each value is evaluated to a number, which is
+              truncated to 32 bits and stored as four successive  bytes  (big-
+              endian).
 
        FILL value,count
               Insert count bytes of value. This is effectively the same as the
@@ -506,4 +511,4 @@ LICENCE
 
 
 
-asm6809-2.9                       April 2017                        asm6809(1)
+asm6809-2.10                     October 2017                       asm6809(1)

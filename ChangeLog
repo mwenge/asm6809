@@ -1,5 +1,13 @@
 ## asm6809 changes
 
+### Changes in version 2.10, Mon 30 Oct 2017
+
+  * Fix forward reference warning.
+  * Docs: octal numbers can be introduced with leading '0'. Reported: Richard
+    Cavell.
+  * Add FQB pseudo-op, Format Quad Byte.
+  * Fix badly formed symbol table output.
+
 ### Changes in version 2.9, Sat 22 Apr 2017
 
   * Fix pasting digits following interpolated variable.
