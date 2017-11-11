@@ -67,6 +67,7 @@ static void pseudo_org(struct prog_line *);
 static void pseudo_section(struct prog_line *);
 static void pseudo_section_name(struct prog_line *line);
 
+static void pseudo_fcb(struct prog_line *);
 static void pseudo_fcc(struct prog_line *);
 static void pseudo_fcn(struct prog_line *);
 static void pseudo_fcs(struct prog_line *);
@@ -105,8 +106,8 @@ static struct pseudo_op pseudo_label_ops[] = {
 /* Pseudo-ops that emit data */
 
 static struct pseudo_op pseudo_data_ops[] = {
+	{ .name = "fcb", .handler = &pseudo_fcb },
 	{ .name = "fcc", .handler = &pseudo_fcc },
-	{ .name = "fcb", .handler = &pseudo_fcc },  // treat the same
 	{ .name = "fcn", .handler = &pseudo_fcn },
 	{ .name = "fcs", .handler = &pseudo_fcs },
 	{ .name = "fdb", .handler = &pseudo_fdb },
@@ -725,15 +726,27 @@ static void emit_formatted(char const *ins, int argn, struct node *n, _Bool basi
 	}
 }
 
-/* FCC, FCB.  Embed string and byte constants. */
+/* FCB, FCC.  Embed string and byte constants. */
+
+static void pseudo_fcb(struct prog_line *line) {
+	int nargs = verify_num_args(line->args, 1, -1, "FCB");
+	if (nargs < 0)
+		return;
+	struct node **arga = node_array_of(line->args);
+	for (int i = 0; i < nargs; i++) {
+		emit_formatted("FCB", i, arga[i], 0);
+	}
+}
 
 static void pseudo_fcc(struct prog_line *line) {
+	// exactly the same as FCB, just different reporting
 	int nargs = verify_num_args(line->args, 1, -1, "FCC");
 	if (nargs < 0)
 		return;
 	struct node **arga = node_array_of(line->args);
 	for (int i = 0; i < nargs; i++) {
 		emit_formatted("FCC", i, arga[i], 0);
+	}
 	}
 }
 
