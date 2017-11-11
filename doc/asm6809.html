@@ -555,6 +555,12 @@ delimiter.
 <dd>Identical to <code>FCC</code>, but a terminating zero byte is stored
 after the data. Included to increase compatibility with other assemblers.
 
+<dt><code>FCS</code> <var>value</var>[,<var>value</var>]…
+
+<p>Like <code>FCC</code>, but the last byte in each <var>value</var> has its
+top bit set.  This is the format used to represent keywords in the Dragon and
+Tandy Colour Computer BASIC ROMs.
+
 <dt><code>FDB</code> <var>value</var>[,<var>value</var>]…
 
 <dd>Form Double Byte. Each <var>value</var> is evaluated to a number, which is
