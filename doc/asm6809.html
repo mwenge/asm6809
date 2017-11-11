@@ -561,6 +561,16 @@ after the data. Included to increase compatibility with other assemblers.
 top bit set.  This is the format used to represent keywords in the Dragon and
 Tandy Colour Computer BASIC ROMs.
 
+<dt><code>FCV</code> <var>value</var>[,<var>value</var>]…
+
+<p>Like <code>FCC</code>, but ASCII is translated into the values typically
+required for display by the MC6847 VDG as present in the Dragon and Tandy
+Colour Computer.
+
+<dt><code>FCI</code> <var>value</var>[,<var>value</var>]…
+
+<p>Like <code>FCV</code>, but inverts bit 6 for inverse video.
+
 <dt><code>FDB</code> <var>value</var>[,<var>value</var>]…
 
 <dd>Form Double Byte. Each <var>value</var> is evaluated to a number, which is

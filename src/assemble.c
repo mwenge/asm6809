@@ -49,6 +49,13 @@ enum cond_state {
 	cond_state_else
 };
 
+enum translate {
+	translate_none,
+	translate_basic_keyword,
+	translate_vdg,
+	translate_inverse_vdg
+};
+
 static void set_label(struct node *label, struct node *value, _Bool changeable);
 static void args_float_to_int(struct node *args);
 static int verify_num_args(struct node *args, int min, int max, const char *op);
@@ -70,6 +77,8 @@ static void pseudo_section_name(struct prog_line *line);
 static void pseudo_fcb(struct prog_line *);
 static void pseudo_fcc(struct prog_line *);
 static void pseudo_fcn(struct prog_line *);
+static void pseudo_fcv(struct prog_line *);
+static void pseudo_fci(struct prog_line *);
 static void pseudo_fcs(struct prog_line *);
 static void pseudo_fdb(struct prog_line *);
 static void pseudo_fqb(struct prog_line *);
@@ -109,6 +118,8 @@ static struct pseudo_op pseudo_data_ops[] = {
 	{ .name = "fcb", .handler = &pseudo_fcb },
 	{ .name = "fcc", .handler = &pseudo_fcc },
 	{ .name = "fcn", .handler = &pseudo_fcn },
+	{ .name = "fcv", .handler = &pseudo_fcv },
+	{ .name = "fci", .handler = &pseudo_fci },
 	{ .name = "fcs", .handler = &pseudo_fcs },
 	{ .name = "fdb", .handler = &pseudo_fdb },
 	{ .name = "fqb", .handler = &pseudo_fqb },
@@ -695,8 +706,26 @@ static void pseudo_export(struct prog_line *line) {
 	}
 }
 
-static void emit_formatted(char const *ins, int argn, struct node *n, _Bool basic_token) {
-	uint8_t or_last = basic_token ? 0x80 : 0;
+static uint8_t ascii_to_vdg(uint8_t av, _Bool invert) {
+	uint8_t eor = invert ? 0x40 : 0;
+	if (av < 0x20)
+		return av ^ eor;
+	if (av < 0x40)
+		return (av+64) ^ eor;
+	if (av < 0x60)
+		return av ^ eor;
+	if (av == 0x60)
+		return 0x20 ^ eor;
+	if (av < 0x80)
+		return (av-96) ^ eor;
+	return av;
+}
+
+static void emit_formatted(char const *ins, int argn, struct node *n,
+			   enum translate mode) {
+	uint8_t or_last = (mode == translate_basic_keyword) ? 0x80 : 0;
+	_Bool invert = (mode == translate_inverse_vdg);
+	_Bool to_vdg = invert || (mode == translate_vdg);
 	switch (node_type_of(n)) {
 	default:
 		error(error_type_syntax,
@@ -720,6 +749,8 @@ static void emit_formatted(char const *ins, int argn, struct node *n, _Bool basi
 			uint8_t cc = *c;
 			if (!*(c+1))
 				cc |= or_last;
+			if (to_vdg)
+				cc = ascii_to_vdg(cc, invert);
 			section_emit_uint8(cc);
 		}
 		break;
@@ -747,6 +778,29 @@ static void pseudo_fcc(struct prog_line *line) {
 	for (int i = 0; i < nargs; i++) {
 		emit_formatted("FCC", i, arga[i], 0);
 	}
+}
+
+/* FCV.  As FCC, but translates characters to VDG equivalents. */
+
+static void pseudo_fcv(struct prog_line *line) {
+	int nargs = verify_num_args(line->args, 1, -1, "FCV");
+	if (nargs < 0)
+		return;
+	struct node **arga = node_array_of(line->args);
+	for (int i = 0; i < nargs; i++) {
+		emit_formatted("FCV", i, arga[i], translate_vdg);
+	}
+}
+
+/* FCI.  As FCV, but inverse video. */
+
+static void pseudo_fci(struct prog_line *line) {
+	int nargs = verify_num_args(line->args, 1, -1, "FCI");
+	if (nargs < 0)
+		return;
+	struct node **arga = node_array_of(line->args);
+	for (int i = 0; i < nargs; i++) {
+		emit_formatted("FCI", i, arga[i], translate_inverse_vdg);
 	}
 }
 
@@ -758,7 +812,7 @@ static void pseudo_fcn(struct prog_line *line) {
 		return;
 	struct node **arga = node_array_of(line->args);
 	for (int i = 0; i < nargs; i++) {
-		emit_formatted("FCN", i, arga[i], 0);
+		emit_formatted("FCN", i, arga[i], translate_none);
 	}
 	section_emit_uint8(0);
 }
@@ -771,7 +825,7 @@ static void pseudo_fcs(struct prog_line *line) {
 		return;
 	struct node **arga = node_array_of(line->args);
 	for (int i = 0; i < nargs; i++) {
-		emit_formatted("FCS", i, arga[i], 1);
+		emit_formatted("FCS", i, arga[i], translate_basic_keyword);
 	}
 }
 
