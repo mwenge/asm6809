@@ -129,6 +129,7 @@ static struct pseudo_op pseudo_data_ops[] = {
 	{ .name = "bsz", .handler = &pseudo_rzb },  // alias
 	{ .name = "fill", .handler = &pseudo_fill },
 	{ .name = "rmb", .handler = &pseudo_rmb },
+	{ .name = "includebin", .handler = &pseudo_includebin },
 };
 
 /* Other pseudo-ops */
@@ -137,7 +138,6 @@ static struct pseudo_op pseudo_ops[] = {
 	{ .name = "put", .handler = &pseudo_put },
 	{ .name = "setdp", .handler = &pseudo_setdp },
 	{ .name = "include", .handler = &pseudo_include },
-	{ .name = "includebin", .handler = &pseudo_includebin },
 	{ .name = "end", .handler = &pseudo_end },
 	{ .name = "page", .handler = &pseudo_nop },
 	{ .name = "opt", .handler = &pseudo_nop },
