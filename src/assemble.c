@@ -489,7 +489,7 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 		/* Other pseudo-ops */
 		op_handler = dict_lookup(pseudo_dict, n_line.opcode->data.as_string);
 		if (op_handler) {
-			listing_add_line(-1, 0, NULL, l->text);
+			listing_add_line(cur_section->pc, 0, NULL, l->text);
 			op_handler(&n_line);
 			goto next_line;
 		}
@@ -650,7 +650,7 @@ static void pseudo_section(struct prog_line *line) {
 	}
 	section_set(n->data.as_string, asm_pass);
 	node_free(n);
-	listing_add_line(-1, 0, NULL, line->text);
+	listing_add_line(cur_section->pc, 0, NULL, line->text);
 }
 
 /*
@@ -659,6 +659,7 @@ static void pseudo_section(struct prog_line *line) {
 
 static void pseudo_section_name(struct prog_line *line) {
 	section_set(line->opcode->data.as_string, asm_pass);
+	listing_add_line(cur_section->pc, 0, NULL, line->text);
 }
 
 /* PUT.  Following instructions will be located at this address.  Allows
