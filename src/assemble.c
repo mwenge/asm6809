@@ -650,6 +650,7 @@ static void pseudo_section(struct prog_line *line) {
 	}
 	section_set(n->data.as_string, asm_pass);
 	node_free(n);
+	set_label(line->label, node_new_int(cur_section->pc), 0);
 	listing_add_line(cur_section->pc, 0, NULL, line->text);
 }
 
@@ -659,6 +660,7 @@ static void pseudo_section(struct prog_line *line) {
 
 static void pseudo_section_name(struct prog_line *line) {
 	section_set(line->opcode->data.as_string, asm_pass);
+	set_label(line->label, node_new_int(cur_section->pc), 0);
 	listing_add_line(cur_section->pc, 0, NULL, line->text);
 }
 
