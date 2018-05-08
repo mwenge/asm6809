@@ -128,6 +128,9 @@ output filename
 \f(CB\-l\fR, \f(CB\-\-listing\fR \fIfile\fR
 create listing file
 .TP
+\f(CB\-E\fR, \f(CB\-\-exports\fR \fIfile\fR
+create exports table
+.TP
 \f(CB\-s\fR, \f(CB\-\-symbols\fR \fIfile\fR
 create symbol table
 .TP
@@ -149,6 +152,14 @@ If more than one \fISOURCE-FILE\fR is specified, they are assembled as though th
 Text is read in and parsed, then as many passes are made over the parsed source as necessary (up to a limit), until symbols are resolved and addresses are stable. The fastest or smallest representation should always be chosen where there is ambiguity.
 .PP
 Output formats are: Raw binary, DragonDOS binary, CoCo RS-DOS (\[lq]DECB\[rq]) binary, Motorola SREC, Intel HEX.
+.PP
+Additional optional output files are:
+.IP \(bu 2
+A listing file is an annotated copy of the source file with addresses and generated code prepended to each line.
+.IP \(bu 2
+An exports file contains a list of all macro definitions and symbols flagged for export with the \f(CBEXPORT\fR pseudo-op. Suitable for inclusion in subsequent source files.
+.IP \(bu 2
+A symbols file contains a list of \fIall\fR non-local symbols. Suitable for inclusion in subsequent source files, but beware multiple definitions errors if two source files include a common set of symbols.
 .PP
 Home page: 
 .UU "<" "http://www.6809.org.uk/asm6809/" ">"
@@ -404,6 +415,18 @@ Historically, \f(CBFCB\fR handled bytes and \f(CBFCC\fR (Form Constant Character
 \f(CBFCN\fR \fIvalue\fR\[lB],\fIvalue\fR\[rB]\[...]
 Identical to \f(CBFCC\fR, but a terminating zero byte is stored after the data. Included to increase compatibility with other assemblers.
 .TP
+\f(CBFCS\fR \fIvalue\fR\[lB],\fIvalue\fR\[rB]\[...]
+.PP
+Like \f(CBFCC\fR, but the last byte in each \fIvalue\fR has its top bit set. This is the format used to represent keywords in the Dragon and Tandy Colour Computer BASIC ROMs.
+.TP
+\f(CBFCV\fR \fIvalue\fR\[lB],\fIvalue\fR\[rB]\[...]
+.PP
+Like \f(CBFCC\fR, but ASCII is translated into the values typically required for display by the MC6847 VDG as present in the Dragon and Tandy Colour Computer.
+.TP
+\f(CBFCI\fR \fIvalue\fR\[lB],\fIvalue\fR\[rB]\[...]
+.PP
+Like \f(CBFCV\fR, but inverts bit 6 for inverse video.
+.TP
 \f(CBFDB\fR \fIvalue\fR\[lB],\fIvalue\fR\[rB]\[...]
 Form Double Byte. Each \fIvalue\fR is evaluated to a number, which is truncated to 16 bits and stored as two successive bytes (big-endian).
 .TP
@@ -459,7 +482,7 @@ Symbols:
 Short for \[lq]equate\[rq], this must be used with a label and defines a symbol with the specified \fIvalue\fR. This may be any single valid argument (e.g. an expression or a string).
 .TP
 \f(CBEXPORT\fR \fIname\fR\[lB],\fIname\fR\[rB]\[...]
-Each \fIname\fR\[em]either the name of a macro or a symbol\[em]is flagged to be exported. Exported macros and symbols will be listed in the symbols output file, if specified.
+Each \fIname\fR\[em]either the name of a macro or a symbol\[em]is flagged to be exported. Exported macros and symbols will be listed in the exports output file, if specified.
 .TP
 \f(CBSET\fR \fIvalue\fR
 Similar to \f(CBEQU\fR, this must be used with a label and defines a symbol with the specified \fIvalue\fR. Unlike \f(CBEQU\fR, you can use \f(CBSET\fR multiple times to assign different values to the same symbol without error.

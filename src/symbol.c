@@ -1,7 +1,7 @@
 /*
 
 asm6809, a Motorola 6809 cross assembler
-Copyright 2013-2017 Ciaran Anscomb
+Copyright 2013-2018 Ciaran Anscomb
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -20,6 +20,7 @@ option) any later version.
 #include "dict.h"
 #include "gl_avltree_list.h"
 #include "gl_xlist.h"
+#include "slist.h"
 #include "xalloc.h"
 
 #include "assemble.h"
@@ -105,6 +106,17 @@ struct node *symbol_get(const char *key) {
 		}
 	}
 	return n;
+}
+
+static void add_to_list(const char *key, struct node *value, struct slist **l) {
+	(void)value;
+	*l = slist_prepend(*l, (void *)key);
+}
+
+struct slist *symbol_get_list(void) {
+	struct slist *l = NULL;
+	dict_foreach(symbols, (dict_iter_func)add_to_list, &l);
+	return l;
 }
 
 void symbol_free_all(void) {

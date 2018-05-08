@@ -1,7 +1,7 @@
 /*
 
 asm6809, a Motorola 6809 cross assembler
-Copyright 2013-2017 Ciaran Anscomb
+Copyright 2013-2018 Ciaran Anscomb
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -222,25 +222,7 @@ void prog_free_exports(void) {
 	}
 }
 
-static void print_exported(const char *key, void *value, FILE *f) {
-	(void)value;
-	struct prog *macro = prog_macro_by_name(key);
-	if (macro) {
-		fprintf(f, "%s\tmacro\n", key);
-		for (struct slist *l = macro->lines; l; l = l->next) {
-			struct prog_line *line = l->data;
-			if (!line)
-				continue;
-			node_print(f, line->label);
-			fprintf(f, "\t");
-			node_print(f, line->opcode);
-			fprintf(f, "\t");
-			node_print_array(f, line->args);
-			fprintf(f, "\n");
-		}
-		fprintf(f, "\tendm\n");
-		return;
-	}
+static void print_symbol(const char *key, FILE *f) {
 	struct node *sym = symbol_get(key);
 	if (sym) {
 		struct node *n = eval_node(sym);
@@ -273,8 +255,36 @@ static void print_exported(const char *key, void *value, FILE *f) {
 	}
 }
 
+static void print_exported(const char *key, void *value, FILE *f) {
+	(void)value;
+	struct prog *macro = prog_macro_by_name(key);
+	if (macro) {
+		fprintf(f, "%s\tmacro\n", key);
+		for (struct slist *l = macro->lines; l; l = l->next) {
+			struct prog_line *line = l->data;
+			if (!line)
+				continue;
+			node_print(f, line->label);
+			fprintf(f, "\t");
+			node_print(f, line->opcode);
+			fprintf(f, "\t");
+			node_print_array(f, line->args);
+			fprintf(f, "\n");
+		}
+		fprintf(f, "\tendm\n");
+		return;
+	}
+	print_symbol(key, f);
+}
+
 void prog_print_exports(FILE *f) {
 	if (!exports)
 		return;
 	dict_foreach(exports, (dict_iter_func)print_exported, f);
+}
+
+void prog_print_symbols(FILE *f) {
+	struct slist *symbols = symbol_get_list();
+	slist_foreach(symbols, (slist_iter_func)print_symbol, f);
+	slist_free(symbols);
 }

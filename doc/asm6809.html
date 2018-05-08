@@ -146,6 +146,10 @@ encountered in the Dragon and Tandy Colour Computer.
 
 <dd>create listing file
 
+<dt><code>-E</code>, <code>--exports</code> <var>file</var>
+
+<dd>create exports table
+
 <dt><code>-s</code>, <code>--symbols</code> <var>file</var>
 
 <dd>create symbol table
@@ -184,6 +188,23 @@ where there is ambiguity.
 
 <p>Output formats are: Raw binary, DragonDOS binary, CoCo RS-DOS (“DECB”)
 binary, Motorola SREC, Intel HEX.
+
+<p>Additional optional output files are:
+
+<ul>
+
+<li>A listing file is an annotated copy of the source file with addresses and
+generated code prepended to each line.
+
+<li>An exports file contains a list of all macro definitions and symbols
+flagged for export with the <code>EXPORT</code> pseudo-op.  Suitable for
+inclusion in subsequent source files.
+
+<li>A symbols file contains a list of <em>all</em> non-local symbols.  Suitable
+for inclusion in subsequent source files, but beware multiple definitions
+errors if two source files include a common set of symbols.
+
+</ul>
 
 <p>Home page:
 &lt;<a href='http://www.6809.org.uk/asm6809/'>http://www.6809.org.uk/asm6809/</a>&gt;
@@ -671,7 +692,7 @@ with the specified <var>value</var>. This may be any single valid argument
 <dt><code>EXPORT</code> <var>name</var>[,<var>name</var>]…
 
 <dd>Each <var>name</var>—either the name of a macro or a symbol—is flagged to
-be exported. Exported macros and symbols will be listed in the symbols output
+be exported. Exported macros and symbols will be listed in the exports output
 file, if specified.
 
 <dt><code>SET</code> <var>value</var>

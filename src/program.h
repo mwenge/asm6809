@@ -88,4 +88,6 @@ void prog_export(const char *name);
 void prog_free_exports(void);
 void prog_print_exports(FILE *f);
 
+void prog_print_symbols(FILE *f);
+
 #endif

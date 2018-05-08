@@ -1,7 +1,7 @@
 /*
 
 asm6809, a Motorola 6809 cross assembler
-Copyright 2013-2017 Ciaran Anscomb
+Copyright 2013-2018 Ciaran Anscomb
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -17,6 +17,7 @@ option) any later version.
 
 struct dict;
 struct node;
+struct slist;
 
 /*
  * When processing conditional assembly pseudo-ops, it is necessary to ignore
@@ -43,6 +44,12 @@ _Bool symbol_force_set(const char *key, struct node *value, _Bool changeable, un
 
 struct node *symbol_try_get(const char *key);
 struct node *symbol_get(const char *key);
+
+/*
+ * Return list of all symbol names.  Data of type 'const char *', do not free.
+ */
+
+struct slist *symbol_get_list(void);
 
 void symbol_free_all(void);
 

@@ -46,6 +46,7 @@ struct asm6809_options asm6809_options;
 static int output_format = OUTPUT_BINARY;
 static char *exec_option = NULL;
 static char *output_filename = NULL;
+static char *exports_filename = NULL;
 static char *symbol_filename = NULL;
 static char *listing_filename = NULL;
 static int isa = asm6809_isa_6809;
@@ -66,6 +67,7 @@ static struct option long_options[] = {
 	{ "setdp", required_argument, &setdp, 0 },
 	{ "output", required_argument, NULL, 'o' },
 	{ "listing", required_argument, NULL, 'l' },
+	{ "exports", required_argument, NULL, 'E' },
 	{ "symbols", required_argument, NULL, 's' },
 	{ "quiet", no_argument, NULL, 'q' },
 	{ "verbose", no_argument, NULL, 'v' },
@@ -89,7 +91,7 @@ static _Noreturn void tidy_up_and_exit(int status);
 int main(int argc, char **argv) {
 
 	int c;
-	while ((c = getopt_long(argc, argv, "BDCSHe:893d:o:l:s:qv",
+	while ((c = getopt_long(argc, argv, "BDCSHe:893d:o:l:E:s:qv",
 				long_options, NULL)) != -1) {
 		switch (c) {
 		case 0:
@@ -126,6 +128,9 @@ int main(int argc, char **argv) {
 			break;
 		case 'l':
 			listing_filename = optarg;
+			break;
+		case 'E':
+			exports_filename = optarg;
 			break;
 		case 's':
 			symbol_filename = optarg;
@@ -254,11 +259,22 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	/* Generate exports file */
+	if (exports_filename) {
+		FILE *expf = fopen(exports_filename, "wb");
+		if (expf) {
+			prog_print_exports(expf);
+			fclose(expf);
+		} else {
+			error(error_type_fatal, "%s: %s", exports_filename, strerror(errno));
+		}
+	}
+
 	/* Generate symbols file */
 	if (symbol_filename) {
 		FILE *symf = fopen(symbol_filename, "wb");
 		if (symf) {
-			prog_print_exports(symf);
+			prog_print_symbols(symf);
 			fclose(symf);
 		} else {
 			error(error_type_fatal, "%s: %s", symbol_filename, strerror(errno));
@@ -337,6 +353,7 @@ static void helptext(void) {
 "\n"
 "  -o, --output=FILE    set output filename\n"
 "  -l, --listing=FILE   create listing file\n"
+"  -E, --exports=FILE   create exports table\n"
 "  -s, --symbols=FILE   create symbol table\n"
 "\n"
 "  -q, --quiet     don't warn about illegal (but working) code\n"
@@ -353,7 +370,7 @@ static void helptext(void) {
 static void versiontext(void) {
 	puts(
 "asm6809 " PACKAGE_VERSION "\n"
-"Copyright (C) 2017 Ciaran Anscomb\n"
+"Copyright (C) 2018 Ciaran Anscomb\n"
 "License: GNU GPL version 3 or later <http://www.gnu.org/licenses/gpl-3.0.html>.\n"
 "This is free software: you are free to change and redistribute it.\n"
 "There is NO WARRANTY, to the extent permitted by law."
