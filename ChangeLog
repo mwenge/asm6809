@@ -1,5 +1,14 @@
 ## asm6809 changes
 
+### Changes in version 2.11, Fri 27 Jul 2018
+
+  * New FCV pseudo-op (ASCII strings converted for VDG display).
+  * New FCI pseudo-op (same, but inverse video).
+  * Assign labels when changing SECTION.
+  * Behaviour change: -E now generates exports table (flagged symbols and
+    macros), -s generates full non-local symbol table.
+  * New ALIGN pseudo-op.  Align to number of bytes.
+
 ### Changes in version 2.10, Mon 30 Oct 2017
 
   * Fix forward reference warning.
