@@ -1,6 +1,6 @@
 /* A correct <float.h>.
 
-   Copyright (C) 2007-2017 Free Software Foundation, Inc.
+   Copyright (C) 2007-2018 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@
 
 /* On FreeBSD/x86 6.4, the 'long double' type really has only 53 bits of
    precision in the compiler but 64 bits of precision at runtime.  See
-   <https://lists.gnu.org/archive/html/bug-gnulib/2008-07/msg00063.html>.  */
+   <https://lists.gnu.org/r/bug-gnulib/2008-07/msg00063.html>.  */
 #if defined __i386__ && (defined __FreeBSD__ || defined __DragonFly__)
 /* Number of mantissa units, in base FLT_RADIX.  */
 # undef LDBL_MANT_DIG

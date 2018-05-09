@@ -1,5 +1,5 @@
-# malloc.m4 serial 15
-dnl Copyright (C) 2007, 2009-2017 Free Software Foundation, Inc.
+# malloc.m4 serial 17
+dnl Copyright (C) 2007, 2009-2018 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -32,7 +32,7 @@ AC_DEFUN([_AC_FUNC_MALLOC_IF],
        [ac_cv_func_malloc_0_nonnull=no],
        [case "$host_os" in
           # Guess yes on platforms where we know the result.
-          *-gnu* | freebsd* | netbsd* | openbsd* \
+          *-gnu* | gnu* | freebsd* | netbsd* | openbsd* \
           | hpux* | solaris* | cygwin* | mingw*)
             ac_cv_func_malloc_0_nonnull=yes ;;
           # If we don't know, assume the worst.
@@ -91,7 +91,7 @@ AC_DEFUN([gl_CHECK_MALLOC_POSIX],
       AC_COMPILE_IFELSE(
         [AC_LANG_PROGRAM(
            [[]],
-           [[#if (defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__
+           [[#if defined _WIN32 && ! defined __CYGWIN__
              choke me
              #endif
             ]])],

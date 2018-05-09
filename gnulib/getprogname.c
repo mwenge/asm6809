@@ -1,5 +1,5 @@
 /* Program name management.
-   Copyright (C) 2016-2017 Free Software Foundation, Inc.
+   Copyright (C) 2016-2018 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ getprogname (void)
   return p && p[0] ? p : "?";
 # elif _AIX                                                 /* AIX */
   /* Idea by Bastien ROUCARIÈS,
-     https://lists.gnu.org/archive/html/bug-gnulib/2010-12/msg00095.html
+     https://lists.gnu.org/r/bug-gnulib/2010-12/msg00095.html
      Reference: https://www.ibm.com/support/knowledgecenter/en/ssw_aix_61/com.ibm.aix.basetrf1/getprocs.htm
   */
   static char *p;
@@ -164,7 +164,7 @@ getprogname (void)
       if (ioctl_ok)
         {
           char *name = buf.pr_fname;
-          char *namesize = sizeof buf.pr_fname;
+          size_t namesize = sizeof buf.pr_fname;
           char *namenul = memchr (name, '\0', namesize);
           size_t namelen = namenul ? namenul - name : namesize;
           char *namecopy = malloc (namelen + 1);
@@ -182,3 +182,10 @@ getprogname (void)
 }
 
 #endif
+
+/*
+ * Hey Emacs!
+ * Local Variables:
+ * coding: utf-8
+ * End:
+ */
