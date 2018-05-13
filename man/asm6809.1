@@ -447,6 +447,9 @@ Reserve Zeroed Bytes. Inserts a sequence of \fIcount\fR bytes of zero, or \fIval
 .PP
 Code placement & addressing:
 .TP
+\f(CBALIGN\fR \fIalignment\fR\[lB],\fIvalue\fR\[rB]\[...]
+Align to memory next \fIalignment\fR bytes. Pads with \fIvalue\fR. If \fIvalue\fR is not specified, this behaves like \f(CBRMB\fR instead.
+.TP
 \f(CBORG\fR \fIaddress\fR
 Sets the Program Counter\[em]the base address assumed for the next assembled instruction. Unless followed by a \f(CBPUT\fR pseudo-op, this will also be the instruction\[aq]s actual address in memory. A label on the same line will define a symbol with a value of the specified address.
 .TP

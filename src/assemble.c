@@ -85,6 +85,7 @@ static void pseudo_fqb(struct prog_line *);
 static void pseudo_rzb(struct prog_line *);
 static void pseudo_fill(struct prog_line *);
 static void pseudo_rmb(struct prog_line *);
+static void pseudo_align(struct prog_line *line);
 
 static void pseudo_put(struct prog_line *);
 static void pseudo_setdp(struct prog_line *);
@@ -129,6 +130,7 @@ static struct pseudo_op pseudo_data_ops[] = {
 	{ .name = "bsz", .handler = &pseudo_rzb },  // alias
 	{ .name = "fill", .handler = &pseudo_fill },
 	{ .name = "rmb", .handler = &pseudo_rmb },
+	{ .name = "align", .handler = &pseudo_align },
 	{ .name = "includebin", .handler = &pseudo_includebin },
 };
 
@@ -896,6 +898,27 @@ static void pseudo_rmb(struct prog_line *line) {
 		return;
 	}
 	section_skip(count);
+}
+
+/* ALIGN.  Pad to aligned address. */
+
+static void pseudo_align(struct prog_line *line) {
+	int nargs = verify_num_args(line->args, 1, 2, "ALIGN");
+	if (nargs < 0)
+		return;
+	long align = have_int_required(line->args, 0, "ALIGN", 0);
+	long fill = have_int_optional(line->args, 1, "ALIGN", 0);
+	if (align < 1) {
+		error(error_type_out_of_range, "invalid argument to ALIGN");
+		return;
+	}
+	long count = (align - (cur_section->pc % align)) % align;
+	if (nargs < 2) {
+		section_skip(count);
+	} else {
+		for (long i = 0; i < count; i++)
+			section_emit_uint8(fill);
+	}
 }
 
 /* INCLUDE.  Nested inclusion of source files. */

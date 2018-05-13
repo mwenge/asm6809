@@ -626,6 +626,12 @@ recognised for compatibility with other assemblers.
 
 <dl>
 
+<dt><code>ALIGN</code> <var>alignment</var>[,<var>value</var>]…
+
+<dd>Align to memory next <var>alignment</var> bytes.  Pads with
+<var>value</var>.  If <var>value</var> is not specified, this behaves like
+<code>RMB</code> instead.
+
 <dt><code>ORG</code> <var>address</var>
 
 <dd>Sets the Program Counter—the base address assumed for the next assembled
