@@ -246,7 +246,7 @@ static void instr_indexed2(_Bool indirect, struct node const *arg0, struct node 
 	enum node_attr arg1_attr = node_attr_of(arg1);
 
 	if (arg0_type == node_type_undef || arg1_type == node_type_undef) {
-		section_emit_pad(3);
+		section_emit_pad(1);
 		return;
 	}
 
@@ -390,7 +390,6 @@ void instr_indexed(struct opcode const *op, struct node const *args, int imm8_va
 		int addr = 0;
 		switch (node_type_of(arga[0])) {
 		case node_type_undef:
-			section_emit_pad(3);
 			break;
 		case node_type_int:
 			addr = arga[0]->data.as_int;
