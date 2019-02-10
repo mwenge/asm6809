@@ -158,7 +158,7 @@ void output_motorola_srec(const char *filename) {
 		unsigned base = 0;
 		while (size > 0) {
 			unsigned nbytes = (size > 32) ? 32 : size;
-			unsigned sum = nbytes + put + (put >> 8);
+			unsigned sum = nbytes + 3 + (put >> 8) + (put & 0xff);
 			fprintf(f, "S1%02X%04X", nbytes + 3, put);
 			for (unsigned i = 0; i < nbytes; i++) {
 				fprintf(f, "%02X", (unsigned)span->data[base + i]);
@@ -175,7 +175,9 @@ void output_motorola_srec(const char *filename) {
 	if (exec_addr >= 0) {
 		unsigned sum = exec_addr + (exec_addr >> 8) + 3;
 		fprintf(f, "S903%04X%02X\n", exec_addr, ~sum & 0xff);
-	}
+	} else {
+		fprintf(f, "S9030000FC\n");
+        }
 
 	section_free(sect);
 	fclose(f);
