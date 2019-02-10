@@ -75,10 +75,10 @@
 .nr PDFOUTLINE.FOLDLEVEL 3
 .\"
 .pdfview /PageMode /UseOutlines
-.pdfinfo /Title asm6809 2.11
+.pdfinfo /Title asm6809 2.12
 .pdfinfo /Author Ciaran Anscomb
 .
-.TH "asm6809" "1" "May 2018" "asm6809-2.11"
+.TH "asm6809" "1" "February 2019" "asm6809-2.12"
 .hy 0
 .nh
 .H1 NAME
@@ -121,6 +121,9 @@ define a symbol
 .TP
 \f(CB\-\-setdp\fR \fIvalue\fR
 initial value assumed for DP \[lB]undefined\[rB]
+.TP
+\f(CB\-P\fR, \f(CB\-\-max\-passes\fR \fIn\fR
+maximum number of passes to allow symbol values to stabilise \[lB]12\[rB]
 .TP
 \f(CB\-o\fR, \f(CB\-\-output\fR \fIfile\fR
 output filename

@@ -44,6 +44,10 @@ OPTIONS
        --setdp value
               initial value assumed for DP [undefined]
 
+       -P, --max-passes n
+              maximum  number  of  passes  to allow symbol values to stabilise
+              [12]
+
        -o, --output file
               output filename
 
@@ -71,12 +75,12 @@ OPTIONS
        they were all in one file.
 
 USAGE
-       Text is read in and parsed, then as  many  passes  are  made  over  the
-       parsed  source as necessary (up to a limit), until symbols are resolved
+       Text  is  read  in  and  parsed,  then as many passes are made over the
+       parsed source as necessary (up to a limit), until symbols are  resolved
        and addresses are stable. The fastest or smallest representation should
        always be chosen where there is ambiguity.
 
-       Output  formats are: Raw binary, DragonDOS binary, CoCo RS-DOS ("DECB")
+       Output formats are: Raw binary, DragonDOS binary, CoCo RS-DOS  ("DECB")
        binary, Motorola SREC, Intel HEX.
 
        Additional optional output files are:
@@ -84,8 +88,8 @@ USAGE
        o A listing file is an annotated copy of the source file with addresses
          and generated code prepended to each line.
 
-       o An  exports file contains a list of all macro definitions and symbols
-         flagged for export with the EXPORT pseudo-op. Suitable for  inclusion
+       o An exports file contains a list of all macro definitions and  symbols
+         flagged  for export with the EXPORT pseudo-op. Suitable for inclusion
          in subsequent source files.
 
        o A symbols file contains a list of all non-local symbols. Suitable for
@@ -97,64 +101,64 @@ USAGE
    Differences to other assemblers
        Motorola syntax allows a comment to follow any operands, separated from
        them only by whitespace. To an extent, this assembler accepts that, but
-       be  aware that as spaces are allowed within expressions, if the comment
+       be aware that as spaces are allowed within expressions, if the  comment
        looks like it is continuing an expression it will generate bad code (or
        raise an error if the result is syntactically incorrect). Example:
 
               0000  8605                  lda     #5
               0002  C60A                  ldb     #5 * 2  twice first number
 
-       A  strict  Motorola assembler would generate bytes C6 05 for the second
-       line, as the "* 2" would be ignored. For consistency,  it  is  best  to
-       introduce  end of line comments with a ; character. An asterisk (*) can
+       A strict Motorola assembler would generate bytes C6 05 for  the  second
+       line, as the "* 2" would be ignored. For consistency, it is best to in-
+       troduce end of line comments with a ; character. An  asterisk  (*)  can
        introduce whole line comments.
 
-       An unquoted semicolon always introduces a comment. The  alternate  form
-       of  the  6309  instructions AIM, OIM, etc. listed in some documentation
+       An  unquoted  semicolon always introduces a comment. The alternate form
+       of the 6309 instructions AIM, OIM, etc. listed  in  some  documentation
        that uses a semicolon as a separator is not accepted.
 
-       A symbol may be forward referenced; any time a reference  is  unresolv-
+       A  symbol  may be forward referenced; any time a reference is unresolv-
        able, another pass is triggered, up to some defined maximum.
 
        In 6809 indexed addressing, the offset size will default to the fastest
-       possible form, e.g. if the offset is  an  expression  that  happens  to
+       possible  form,  e.g.  if  the  offset is an expression that happens to
        evaluate to zero, the no offset form will be used. Prepend << to coerce
        a 5 bit offset, < to coerce 8 bits or > to coerce 16 bits.
 
-       asm6809 currently has no support for OS-9 modules  or  multiple  object
+       asm6809  currently  has  no support for OS-9 modules or multiple object
        linking.
 
    Program syntax
-       Program  files  are  considered  line by line. Each line contains up to
-       three fields, separated by whitespace:  label,  instruction  and  argu-
+       Program files are considered line by line. Each  line  contains  up  to
+       three  fields,  separated  by  whitespace: label, instruction and argu-
        ments. An unquoted semicolon (;) indicates that the rest of the line is
-       to be considered a comment. Whole line comments may be introduced  with
-       an  asterisk  (*).  Motorola-style end of line comments without a ; are
+       to  be considered a comment. Whole line comments may be introduced with
+       an asterisk (*). Motorola-style end of line comments without  a  ;  are
        accepted, but see the notes about assembler differences.
 
-       Any label must appear at the very beginning of the line. If a label  is
-       omitted,  whitespace  must  appear  before  the operator field. Certain
-       pseudo-ops may affect a label's meaning, but usually  labels  define  a
-       symbol  referring to the current position in the code (Program Counter,
+       Any  label must appear at the very beginning of the line. If a label is
+       omitted, whitespace must appear  before  the  operator  field.  Certain
+       pseudo-ops  may  affect  a label's meaning, but usually labels define a
+       symbol referring to the current position in the code (Program  Counter,
        or PC).
 
-       The  instruction  field  contains   either   an   instruction   op-code
-       (mnemonic),  a  pseudo-op  (assembler  directive),  or a macro name for
-       expansion.
+       The  instruction  field  contains  either  an instruction op-code (mne-
+       monic), a pseudo-op (assembler directive), or a macro name  for  expan-
+       sion.
 
-       Pseudo-ops allow conditional assembly and inline data, can affect  code
-       placement  and  symbol  values  and  be  used  to include further files
-       inline. See the section on Pseudo-ops for more information.
+       Pseudo-ops  allow conditional assembly and inline data, can affect code
+       placement and symbol values and be used to include  further  files  in-
+       line. See the section on Pseudo-ops for more information.
 
-       Arguments are a comma-separated list: either  instruction  operands  or
-       arguments  to a pseudo-op or macro. Permitted arguments are specific to
+       Arguments  are  a  comma-separated list: either instruction operands or
+       arguments to a pseudo-op or macro. Permitted arguments are specific  to
        the instruction or pseudo-op, but in general they may be:
 
        o An expression.
 
        o A register name, with optional pre-decrement or post-increment.
 
-       o A nested list surrounded by [ and ]. This is generally only  used  to
+       o A  nested  list surrounded by [ and ]. This is generally only used to
          indicate indirect indexed addressing.
 
        In addition, any argument may be preceded by:
@@ -178,10 +182,10 @@ USAGE
 
        o A hexadecimal number preceded by $ or 0x.
 
-       o A  floating point number: decimal digits surrounding exactly one full
+       o A floating point number: decimal digits surrounding exactly one  full
          stop (.).
 
-       o A single quote followed by any ASCII character  (yielding  the  ASCII
+       o A  single  quote  followed by any ASCII character (yielding the ASCII
          value of that character).
 
        o A symbol name, local forward reference or local back reference.
@@ -190,26 +194,26 @@ USAGE
 
        o A string delimited either by double quotes or /.
 
-       o A  combination  of any of the above with arithmetic, bitwise, logical
+       o A combination of any of the above with arithmetic,  bitwise,  logical
          or relational operators.
 
        o Parenthesis to specify precedence.
 
-       The assembler uses  multiple  passes  to  resolve  expressions.  If  an
-       expression  refers  to  a  symbol that cannot currently be resolved, an
-       extra pass is triggered. Similarly, if a symbol  is  assigned  a  value
-       (e.g.  by  an  EQU pseudo-op) that differs to its value on the previous
-       pass, another is triggered until it becomes stable.
+       The  assembler  uses  multiple passes to resolve expressions. If an ex-
+       pression refers to a symbol that cannot currently be resolved, an extra
+       pass  is triggered. Similarly, if a symbol is assigned a value (e.g. by
+       an EQU pseudo-op) that differs to its value on the previous  pass,  an-
+       other is triggered until it becomes stable.
 
        When not directly used for their contents (e.g. by FCC), strings can be
-       used  in  place of integer values. The ASCII value of each character is
+       used in place of integer values. The ASCII value of each  character  is
        used to represent 8 bits of the integer result up to 32 bits. Example:
 
               0000  CC443A                ldd     #"D:"
 
    Operators
-       The following operators are available, listed in  descending  order  of
-       precedence  (where  operators share a precedence, left-to-right evalua-
+       The  following  operators  are available, listed in descending order of
+       precedence (where operators share a precedence,  left-to-right  evalua-
        tion is performed):
                          |
                Operator  | Description
@@ -249,30 +253,30 @@ USAGE
        Division always returns a floating point result. Other arithmetic oper-
        ators return integers if both operands are integers, otherwise floating
        point. Bitwise operators and modulo all cast their operands to integers
-       and  return an integer. Relational and logical operators result in 0 if
-       false, 1 if true. Integer calculations are performed  using  the  plat-
+       and return an integer. Relational and logical operators result in 0  if
+       false,  1  if  true. Integer calculations are performed using the plat-
        form's int64_t type, floating point uses double.
 
    Conditional assembly
        The pseudo-ops IF, ELSIF, ELSE and ENDIF guide conditional assembly. IF
-       and ELSIF take one argument, which is evaluated as an integer.  If  the
-       result  is non-zero, the following code will be assembled, else it will
-       be skipped. Undefined symbols encountered while evaluating  the  condi-
+       and  ELSIF  take one argument, which is evaluated as an integer. If the
+       result is non-zero, the following code will be assembled, else it  will
+       be  skipped.  Undefined symbols encountered while evaluating the condi-
        tion are interpreted as zero (false) rather than raising an error.
 
-       Conditional  assembly pseudo-ops are permitted within macro definitions
-       and will be evaluated at the time of  expansion,  therefore  positional
+       Conditional assembly pseudo-ops are permitted within macro  definitions
+       and  will  be  evaluated at the time of expansion, therefore positional
        variables can be used to affect macro expansion.
 
    Sections
        Code can be placed into named sections with the SECTION pseudo-op. This
-       can make breaking source into multiple input  files  more  comfortable.
-       Without  ORG or PUT directives, sections will follow each other in mem-
+       can  make  breaking  source into multiple input files more comfortable.
+       Without ORG or PUT directives, sections will follow each other in  mem-
        ory in the order they are first defined.
 
-       Within each section, there may exist multiple  spans  of  discontiguous
+       Within  each  section,  there may exist multiple spans of discontiguous
        data. Certain output formats are able to represent this, for the others
-       (e.g. DragonDOS), the spans are combined first, with the  gaps  between
+       (e.g.  DragonDOS),  the spans are combined first, with the gaps between
        them padded with zero bytes.
 
    Local labels
@@ -280,8 +284,8 @@ USAGE
        is any decimal number used in the label field, and the same local label
        may appear mulitple times, unlike other labels.
 
-       As  an operand, a decimal number followed by B or F is considered to be
-       a back or forward reference to the previous or next occurrence of  that
+       As an operand, a decimal number followed by B or F is considered to  be
+       a  back or forward reference to the previous or next occurrence of that
        numerical local label in the section.
 
        In this example, the 1 label occurs twice, but each use of 1B refers to
@@ -298,38 +302,38 @@ USAGE
               0015  25F9                  blo     1B
               0017  39                    rts
 
-       An exclamation mark (!) in the label field is treated as a local  label
-       numbered  zero. Operands of < and > are considered equivalent to 0B and
-       0F respectively, and can therefore refer to the ! local label. This  is
+       An  exclamation mark (!) in the label field is treated as a local label
+       numbered zero. Operands of < and > are considered equivalent to 0B  and
+       0F  respectively, and can therefore refer to the ! local label. This is
        included for compatibility with other assemblers.
 
-       As  local labels can be repeated, their position is used to distinguish
-       them. For this reason, all file inclusions  and  macro  expansion  must
-       occur  during  the  first pass so that the absolute line count at which
-       each local label is encountered remains the same between passes.
+       As local labels can be repeated, their position is used to  distinguish
+       them. For this reason, all file inclusions and macro expansion must oc-
+       cur during the first pass so that the absolute line count at which each
+       local label is encountered remains the same between passes.
 
    Macros
-       Start a macro definition by specifying a  name  for  it  in  the  label
-       field,  and  MACRO in the instruction field. Finish the definition with
+       Start  a  macro  definition  by  specifying  a name for it in the label
+       field, and MACRO in the instruction field. Finish the  definition  with
        ENDM in the instruction field.
 
-       Use a macro by specifying its name in the instruction field. Any  argu-
-       ments  given  will  be available during expansion as a positional vari-
+       Use  a macro by specifying its name in the instruction field. Any argu-
+       ments given will be available during expansion as  a  positional  vari-
        able.
 
        Positional variables can be used within strings, or pasted to form sym-
-       bol  names.  In either case, they must be quoted or they will be passed
-       by value, which will result in an error if they do  not  correspond  to
+       bol names. In either case, they must be quoted or they will  be  passed
+       by  value,  which  will result in an error if they do not correspond to
        valid symbols by themselves.
 
-       The  positional  variables  are referred to with \{1}, \{2}, ..., \{n}.
-       For the first nine arguments, the braces are not required, so  \1,  \2,
-       ...,  \9  are  valid  alternatives. For compatibility with the TSC Flex
-       assembler, another form is accepted: &{1}, &{2}, ...,  &{n}.  Within  a
-       string,  the shorter &1, &2, ..., &9 is still valid, but as this can be
+       The positional variables are referred to with \{1},  \{2},  ...,  \{n}.
+       For  the  first nine arguments, the braces are not required, so \1, \2,
+       ..., \9 are valid alternatives. For compatibility with the TSC Flex as-
+       sembler,  another  form  is  accepted:  &{1}, &{2}, ..., &{n}. Within a
+       string, the shorter &1, &2, ..., &9 is still valid, but as this can  be
        confused with bitwise AND, it is not permitted elsewhere.
 
-       Here's a silly example demonstrating positional  variables  and  symbol
+       Here's  a  silly  example demonstrating positional variables and symbol
        pasting. Consider the following macro definition and utilising code:
 
               go_left         equ     -1
@@ -357,24 +361,24 @@ USAGE
        Conditional assembly:
 
        IF condition
-              Subsequent  lines  are  assembled only if condition evaluates to
+              Subsequent lines are assembled only if  condition  evaluates  to
               true (non-zero).
 
        ELSIF condition
-              Subsequent lines are assembled only  if  all  preceding  IF  and
-              ELSIF  pseudo-ops evaluated to false (zero) and condition evalu-
-              ates to true (non-zero).
+              Subsequent  lines are assembled only if all preceding IF and EL-
+              SIF pseudo-ops evaluated to false (zero) and condition evaluates
+              to true (non-zero).
 
-       ELSE   Subsequent lines are assembled only  if  all  preceding  IF  and
-              ELSIF pseudo-ops evaluated to false (zero).
+       ELSE   Subsequent  lines are assembled only if all preceding IF and EL-
+              SIF pseudo-ops evaluated to false (zero).
 
        ENDIF  Terminate an IF statement.
 
        Macro definition:
 
-       MACRO  Start  defining  a macro. The macro's name shall be in the label
-              field. Subsequent lines up to the enclosing ENDM pseudo-op  will
-              not  be assembled until the macro is expanded. Macro definitions
+       MACRO  Start defining a macro. The macro's name shall be in  the  label
+              field.  Subsequent lines up to the enclosing ENDM pseudo-op will
+              not be assembled until the macro is expanded. Macro  definitions
               may be nested; that is, using a macro may define another macro.
 
        ENDM   Finish a macro definition started with MACRO.
@@ -383,30 +387,30 @@ USAGE
 
        FCB value[,value]...
        FCC value[,value]...
-              Form Constant Byte. Each value is evaluated either to  a  number
+              Form  Constant  Byte. Each value is evaluated either to a number
               or a string. Numbers are truncated to 8 bits and stored directly
-              as bytes. For strings, the ASCII  value  of  each  character  is
+              as  bytes.  For  strings,  the  ASCII value of each character is
               stored in sequential bytes.
 
               Historically, FCB handled bytes and FCC (Form Constant Character
-              string) handled strings. asm6809 treats them as synonymous,  but
-              is  rather  more strict about what is allowed as a string delim-
+              string)  handled strings. asm6809 treats them as synonymous, but
+              is rather more strict about what is allowed as a  string  delim-
               iter.
 
        FCN value[,value]...
-              Identical to FCC, but a terminating zero byte  is  stored  after
-              the  data.  Included to increase compatibility with other assem-
+              Identical  to  FCC,  but a terminating zero byte is stored after
+              the data. Included to increase compatibility with  other  assem-
               blers.
 
        FCS value[,value]...
 
-       Like FCC, but the last byte in each value has its top bit set. This  is
-       the  format  used  to represent keywords in the Dragon and Tandy Colour
+       Like  FCC, but the last byte in each value has its top bit set. This is
+       the format used to represent keywords in the Dragon  and  Tandy  Colour
        Computer BASIC ROMs.
 
        FCV value[,value]...
 
-       Like FCC, but ASCII is translated into the  values  typically  required
+       Like  FCC,  but  ASCII is translated into the values typically required
        for display by the MC6847 VDG as present in the Dragon and Tandy Colour
        Computer.
 
@@ -415,13 +419,13 @@ USAGE
        Like FCV, but inverts bit 6 for inverse video.
 
        FDB value[,value]...
-              Form Double Byte. Each value is evaluated to a number, which  is
-              truncated  to  16  bits and stored as two successive bytes (big-
-              endian).
+              Form  Double Byte. Each value is evaluated to a number, which is
+              truncated to 16 bits and stored as two successive bytes (big-en-
+              dian).
 
        FQB value[,value]...
-              Form Quad Byte. Each value is evaluated to a  number,  which  is
-              truncated  to  32 bits and stored as four successive bytes (big-
+              Form  Quad  Byte.  Each value is evaluated to a number, which is
+              truncated to 32 bits and stored as four successive  bytes  (big-
               endian).
 
        FILL value,count
@@ -432,13 +436,17 @@ USAGE
        ZMB count[,value]
        BSZ count[,value]
               Reserve Zeroed Bytes. Inserts a sequence of count bytes of zero,
-              or value if specified. The two-argument form is effectively  the
+              or  value if specified. The two-argument form is effectively the
               same as FILL with its arguments swapped.
 
-              ZMB  and  BSZ  are  alternate forms recognised for compatibility
+              ZMB and BSZ are alternate  forms  recognised  for  compatibility
               with other assemblers.
 
        Code placement & addressing:
+
+       ALIGN alignment[,value]...
+              Align  to memory next alignment bytes. Pads with value. If value
+              is not specified, this behaves like RMB instead.
 
        ORG address
               Sets the Program Counter--the base address assumed for the  next
@@ -451,13 +459,13 @@ USAGE
               Modify the put address--the Program Counter  is  unaffected,  so
               the  assumed  address  for  subsequent  instructions remains the
               same, but the actual data will be located elsewhere. Useful  for
-              assembling  code  that  is  going to be copied into place before
-              executing.
+              assembling code that is going to be copied into place before ex-
+              ecuting.
 
        RMB count
               Reserve Memory Bytes. The  Program  Counter  is  advanced  count
-              bytes.  In  some  output  formats this region may be padded with
-              zeroes, in others a new loadable section may be created.
+              bytes. In some output formats this region may be padded with ze-
+              roes, in others a new loadable section may be created.
 
        SECTION name
        CODE
@@ -475,8 +483,8 @@ USAGE
        SETDP page
               Set the assumed value of the Direct Page (DP) register  to  page
               for  subsequent instructions. Any non-negative page is truncated
-              to 8 bits, or specify a negative  number  to  disable  automatic
-              direct addressing.
+              to 8 bits, or specify a negative number to disable automatic di-
+              rect addressing.
 
               See the section on Direct Page addressing for more information.
 
@@ -543,4 +551,4 @@ LICENCE
 
 
 
-asm6809-2.11                       May 2018                         asm6809(1)
+asm6809-2.12                     February 2019                      asm6809(1)

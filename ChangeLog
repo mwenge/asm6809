@@ -1,5 +1,11 @@
 ## asm6809 changes
 
+### Changes in version 2.12, Sun 10 Feb 2019
+
+  * Fix occasional 16-bit PCR where 8-bit would do in indexed addressing.
+  * New --max-passes option.
+  * Fix checksum in Motorola S record output [by Jeff Tranter].
+
 ### Changes in version 2.11, Fri 27 Jul 2018
 
   * New FCV pseudo-op (ASCII strings converted for VDG display).
