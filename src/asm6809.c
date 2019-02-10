@@ -43,6 +43,7 @@ struct asm6809_options asm6809_options;
 #define OUTPUT_MOTOROLA_SREC (3)
 #define OUTPUT_INTEL_HEX (4)
 
+static int max_passes = 12;
 static int output_format = OUTPUT_BINARY;
 static char *exec_option = NULL;
 static char *output_filename = NULL;
@@ -65,6 +66,7 @@ static struct option long_options[] = {
 	{ "6309", no_argument, &isa, asm6809_isa_6309 },
 	{ "define", required_argument, NULL, 'd' },
 	{ "setdp", required_argument, &setdp, 0 },
+	{ "max-passes", required_argument, NULL, 'P' },
 	{ "output", required_argument, NULL, 'o' },
 	{ "listing", required_argument, NULL, 'l' },
 	{ "exports", required_argument, NULL, 'E' },
@@ -78,8 +80,6 @@ static struct option long_options[] = {
 
 static struct slist *files = NULL;
 
-#define MAX_PASSES (10)
-
 static struct node *simple_parse_int(const char *);
 static void define_symbol(const char *);
 static void helptext(void);
@@ -91,7 +91,7 @@ static _Noreturn void tidy_up_and_exit(int status);
 int main(int argc, char **argv) {
 
 	int c;
-	while ((c = getopt_long(argc, argv, "BDCSHe:893d:o:l:E:s:qv",
+	while ((c = getopt_long(argc, argv, "BDCSHe:893d:P:o:l:E:s:qv",
 				long_options, NULL)) != -1) {
 		switch (c) {
 		case 0:
@@ -122,6 +122,17 @@ int main(int argc, char **argv) {
 			break;
 		case 'd':
 			define_symbol(optarg);
+			break;
+		case 'P':
+			{
+				long v = strtol(optarg, NULL, 0);
+				if (errno != 0 || v < 2 || v > 255) {
+					error(error_type_fatal, "invalid value for max-passes");
+					error_print_list();
+					tidy_up_and_exit(EXIT_FAILURE);
+				}
+				max_passes = v;
+			}
 			break;
 		case 'o':
 			output_filename = optarg;
@@ -180,7 +191,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* Attempt to assemble files until consistent */
-	for (unsigned pass = 0; pass < MAX_PASSES; pass++) {
+	for (unsigned pass = 0; pass < max_passes; pass++) {
 		error_clear_all();
 		listing_free_all();
 		section_set("CODE", pass);
@@ -228,7 +239,7 @@ int main(int argc, char **argv) {
 			}
 			n = node_new_int(v);
 		}
-		symbol_force_set(".exec", n, 0, MAX_PASSES);
+		symbol_force_set(".exec", n, 0, max_passes);
 	}
 
 	// XXX At the moment listing generation must precede output, as
