@@ -164,6 +164,7 @@ static struct {
 	{ idx_type_xyus, node_attr_none,     off_type_reg_b, 0x85, idx_indirect_ok },
 	{ idx_type_xyus, node_attr_none,     off_type_reg_d, 0x8b, idx_indirect_ok },
 	{ idx_type_xyus, node_attr_postinc,  off_type_none,  0x80, idx_indirect_illegal },
+	{ idx_type_xyus, node_attr_postinc,  off_type_zero,  0x80, idx_indirect_illegal },
 	{ idx_type_xyus, node_attr_postinc2, off_type_none,  0x81, idx_indirect_ok },
 	{ idx_type_xyus, node_attr_predec,   off_type_none,  0x82, idx_indirect_illegal },
 	{ idx_type_xyus, node_attr_predec2,  off_type_none,  0x83, idx_indirect_ok },
