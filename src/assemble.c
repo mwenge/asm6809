@@ -140,11 +140,13 @@ static struct pseudo_op pseudo_ops[] = {
 	{ .name = "put", .handler = &pseudo_put },
 	{ .name = "setdp", .handler = &pseudo_setdp },
 	{ .name = "include", .handler = &pseudo_include },
+	{ .name = "LIB", .handler = &pseudo_include },
 	{ .name = "end", .handler = &pseudo_end },
 	{ .name = "page", .handler = &pseudo_nop },
 	{ .name = "opt", .handler = &pseudo_nop },
 	{ .name = "spc", .handler = &pseudo_nop },
 	{ .name = "ttl", .handler = &pseudo_nop },
+	{ .name = "sttl", .handler = &pseudo_nop },
 	{ .name = "nam", .handler = &pseudo_nop },
 	{ .name = "name", .handler = &pseudo_nop },
 };
@@ -356,6 +358,13 @@ void assemble_prog(struct prog *prog, unsigned pass) {
 			goto next_line;
 		}
 
+		/* Skip any directives that we treat as NOPs. */
+		if (n_line.opcode && 0 == c_strcasecmp("opt", n_line.opcode->data.as_string)
+			|| n_line.opcode && 0 == c_strcasecmp("sttl", n_line.opcode->data.as_string)
+			|| n_line.opcode && 0 == c_strcasecmp("ttl", n_line.opcode->data.as_string)) {
+			listing_add_line(-1, 0, NULL, l->text);
+			goto next_line;
+		}
 		/* Conditional assembly */
 
 		if (n_line.opcode && 0 == c_strcasecmp("if", n_line.opcode->data.as_string)) {
